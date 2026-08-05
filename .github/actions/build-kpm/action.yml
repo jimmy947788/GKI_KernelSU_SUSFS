@@ -77,8 +77,9 @@ runs:
       run: |
         set -euo pipefail
         REPO_PATH="${{ inputs.repo_path }}"
-        cmake -S "$REPO_PATH/tools" -B "$REPO_PATH/tools/build-host" -DCMAKE_BUILD_TYPE=Release
-        cmake --build "$REPO_PATH/tools/build-host" -j"$(nproc)"
+        make -C "$REPO_PATH/tools" -j"$(nproc)"
+        mkdir -p "$REPO_PATH/tools/build-host"
+        cp -f "$REPO_PATH/tools/kptools" "$REPO_PATH/tools/build-host/kptools"
 
     - name: Export KPM payload paths
       id: export
