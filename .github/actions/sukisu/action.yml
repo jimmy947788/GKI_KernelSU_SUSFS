@@ -1,0 +1,50 @@
+name: Setup SukiSU Ultra
+description: Integrate SukiSU Ultra into the kernel source tree
+inputs:
+  ksu_branch:
+    description: 'SukiSU branch, tag, or commit (empty = default ref for selected feature set)'
+    required: false
+    default: ""
+  feature_set:
+    description: 'Selected feature set'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Download and integrate SukiSU Ultra
+      shell: bash
+      working-directory: ${{ github.workspace }}/kernel
+      run: |
+        set -euo pipefail
+
+        SUKISU_INPUT="${{ inputs.ksu_branch }}"
+        if [ -z "$SUKISU_INPUT" ]; then
+          if [[ "${{ inputs.feature_set }}" == "FULL" || "${{ inputs.feature_set }}" == *"SUSFS"* ]]; then
+            SUKISU_INPUT="susfs-main"
+          else
+            SUKISU_INPUT="main"
+          fi
+        fi
+
+        echo "Using SukiSU Ultra ref: $SUKISU_INPUT"
+        curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s "$SUKISU_INPUT"
+
+        if [ ! -d "KernelSU/kernel" ]; then
+          echo "ERROR: SukiSU Ultra integration did not create KernelSU/kernel"
+          exit 1
+        fi
+
+        cd KernelSU
+        SUKISU_COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo unknown)
+        SUKISU_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo unknown)
+        echo "KSU_COMMIT=$SUKISU_COMMIT" >> "$GITHUB_ENV"
+        echo "KSU_GIT_TAG=$SUKISU_TAG" >> "$GITHUB_ENV"
+
+    - name: Enable SukiSU kernel configs
+      uses: ./.github/actions/set-kernel-config
+      with:
+        config_list: |
+          CONFIG_KSU=y
+          CONFIG_KPM=y
+          CONFIG_KPROBES=y

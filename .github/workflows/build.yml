@@ -98,6 +98,9 @@ jobs:
       with:
         config_list: |
           CONFIG_KALLSYMS=y
+          CONFIG_KALLSYMS_ALL=y
+          CONFIG_KPM=y
+          CONFIG_KPROBES=y
 
     - name: Build FUSE-BPF Userspace Daemon (Issue #211)
       if: ${{ contains(inputs.version, 'lts') && inputs.version == 'android16-6.12' }}
@@ -153,8 +156,15 @@ jobs:
         sublevel: ${{ steps.extract.outputs.sublevel }}
         os_patch_level: ${{ inputs.os_patch_level }}
 
+    - name: Setup SukiSU Ultra
+      if: ${{ inputs.use_kpm == 'true' && (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') }}
+      uses: ./.github/actions/sukisu
+      with:
+        ksu_branch: ${{ inputs.ksu_branch }}
+        feature_set: ${{ inputs.feature_set }}
+
     - name: Setup KernelSU-Next
-      if: contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL'
+      if: ${{ inputs.use_kpm != 'true' && (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') }}
       uses: ./.github/actions/kernelsu
       with:
         ksu_branch: ${{ inputs.ksu_branch }}

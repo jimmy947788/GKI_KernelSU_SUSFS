@@ -99,6 +99,16 @@ Quick recommendation:
 - Start with `...-AnyKernel3-normal.zip` first.
 - Only move to bypass zip if normal boot fails due to version checks or compatibility restrictions.
 
+### Important note for SukiSU / KPM mode
+
+If you change the workflow to enable or adjust SukiSU / KPM integration, previously built kernel zip files do not gain those features automatically.
+
+- You must rebuild the kernel after changing SukiSU / KPM workflow logic.
+- You must re-download the newly generated artifact.
+- You must re-flash the newly generated zip.
+
+Old zip files built before the SukiSU / KPM integration change will still behave like the old build and may boot successfully while the SukiSU app still reports that root is unavailable.
+
 ### GitHub Actions `feature_set` options
 
 In the `Build Kernels` workflow, `feature_set` controls optional patch groups.
@@ -110,6 +120,28 @@ Token meaning:
 - `BBG`: Enable Baseband Guard patches
 - `NET`: Enable networking patch set
 - `DS`: Enable DroidSpaces-OSS patches
+
+What BBG / NET / DS actually do:
+
+- `BBG` (Baseband Guard)
+	- Installs and enables the Baseband Guard security module (`CONFIG_BBG=y`).
+	- Adds `baseband_guard` to the active LSM chain in kernel security config.
+	- Intended for security hardening, not for performance tuning.
+
+- `NET` (Networking patch set)
+	- Enables extended networking features such as ipset/netfilter options, WireGuard, CIFS, and advanced qdisc settings.
+	- Applies BBRv3-related patches on supported versions.
+	- Intended for networking capability/performance use cases.
+
+- `DS` (DroidSpaces-OSS)
+	- Applies DroidSpaces-OSS compatibility patches.
+	- Enables namespace/IPC-related configs (for example PID/IPC/USER namespaces and SYSVIPC-related options).
+	- Intended for DroidSpaces-style isolation/container workflows.
+
+Recommended usage order (stability-first):
+
+- Start with `KSUN+SUSFS` only.
+- Add `BBG`/`NET`/`DS` one by one after confirming boot stability.
 
 Available options in the action menu:
 
