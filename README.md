@@ -128,6 +128,16 @@ If you change the workflow to enable or adjust SukiSU / KPM integration, previou
 - You must re-download the newly generated artifact.
 - You must re-flash the newly generated zip.
 
+Current behavior when `use_kpm=true`:
+
+- The workflow clones `SukiSU_KernelPatch_patch`.
+- It builds `kpimg` and host-side `kptools` during CI.
+- It patches the final kernel `Image` before packaging the flashable zip.
+
+Practical note:
+
+- `use_kpm=true` is heavier than built-in mode because it also downloads/builds the KernelPatch toolchain pieces.
+
 Old zip files built before the SukiSU / KPM integration change will still behave like the old build and may boot successfully while the SukiSU app still reports that root is unavailable.
 
 ### GitHub Actions `feature_set` options

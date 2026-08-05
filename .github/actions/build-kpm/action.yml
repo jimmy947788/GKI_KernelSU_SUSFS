@@ -1,0 +1,87 @@
+name: Build SukiSU KPM Payloads
+description: Build kpimg and host-side kptools for SukiSU KPM image patching
+inputs:
+  repo_path:
+    description: Path to the cloned SukiSU KernelPatch repository
+    required: true
+outputs:
+  kpimg_path:
+    description: Path to the built kpimg payload
+    value: ${{ steps.export.outputs.kpimg_path }}
+  kptools_path:
+    description: Path to the built host-side kptools binary
+    value: ${{ steps.export.outputs.kptools_path }}
+
+runs:
+  using: composite
+  steps:
+    - name: Install KPM build dependencies
+      shell: bash
+      run: |
+        set -euo pipefail
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq cmake build-essential zlib1g-dev unzip xxd
+
+    - name: Download Android NDK
+      shell: bash
+      run: |
+        set -euo pipefail
+        NDK_ROOT="$HOME/android-ndk-r28c"
+        NDK_ZIP="$HOME/.cache/android-ndk-r28c-linux.zip"
+        NDK_URL="https://dl.google.com/android/repository/android-ndk-r28c-linux.zip"
+
+        mkdir -p "$HOME/.cache"
+
+        if [ ! -d "$NDK_ROOT" ]; then
+          curl -LfsS --retry 5 --retry-delay 5 --retry-all-errors "$NDK_URL" -o "$NDK_ZIP"
+          rm -rf "$NDK_ROOT"
+          unzip -q "$NDK_ZIP" -d "$HOME"
+        fi
+
+        if [ ! -x "$NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android35-clang" ]; then
+          echo "ERROR: Android NDK toolchain not found at $NDK_ROOT"
+          exit 1
+        fi
+
+        echo "ANDROID_NDK_HOME=$NDK_ROOT" >> "$GITHUB_ENV"
+        echo "NDK_HOME=$NDK_ROOT" >> "$GITHUB_ENV"
+
+    - name: Build kpimg
+      shell: bash
+      run: |
+        set -euo pipefail
+        REPO_PATH="${{ inputs.repo_path }}"
+        export ANDROID=1
+        export ANDROID_NDK_HOME="${ANDROID_NDK_HOME}"
+        make -C "$REPO_PATH/kernel" clean
+        make -C "$REPO_PATH/kernel" -j"$(nproc)"
+
+    - name: Build host kptools
+      shell: bash
+      run: |
+        set -euo pipefail
+        REPO_PATH="${{ inputs.repo_path }}"
+        cmake -S "$REPO_PATH/tools" -B "$REPO_PATH/tools/build-host" -DCMAKE_BUILD_TYPE=Release
+        cmake --build "$REPO_PATH/tools/build-host" -j"$(nproc)"
+
+    - name: Export KPM payload paths
+      id: export
+      shell: bash
+      run: |
+        set -euo pipefail
+        REPO_PATH="${{ inputs.repo_path }}"
+        KPIMG_PATH="$REPO_PATH/kernel/kpimg"
+        KPTOOLS_PATH="$REPO_PATH/tools/build-host/kptools"
+
+        if [ ! -f "$KPIMG_PATH" ]; then
+          echo "ERROR: kpimg was not built at $KPIMG_PATH"
+          exit 1
+        fi
+
+        if [ ! -x "$KPTOOLS_PATH" ]; then
+          echo "ERROR: kptools was not built at $KPTOOLS_PATH"
+          exit 1
+        fi
+
+        echo "kpimg_path=$KPIMG_PATH" >> "$GITHUB_OUTPUT"
+        echo "kptools_path=$KPTOOLS_PATH" >> "$GITHUB_OUTPUT"

@@ -180,6 +180,13 @@ jobs:
       with:
         ksu_branch: ${{ inputs.ksu_branch }}
 
+    - name: Build SukiSU KPM payloads
+      id: kpm-build
+      if: ${{ inputs.use_kpm == 'true' && (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') }}
+      uses: ./.github/actions/build-kpm
+      with:
+        repo_path: ${{ github.workspace }}/SukiSU_KernelPatch_patch
+
     - name: SUSFS
       if: contains(inputs.feature_set, 'SUSFS') || inputs.feature_set == 'FULL'
       uses: ./.github/actions/susfs
@@ -383,6 +390,21 @@ jobs:
         version: ${{ inputs.version }}
         bypass: false
 
+    - name: Patch Normal Kernel with SukiSU KPM
+      if: ${{ inputs.use_kpm == 'true' && (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        IMAGE_PATH="${{ github.workspace }}/AnyKernel3/Image"
+        PATCHED_IMAGE_PATH="${IMAGE_PATH}.kpm"
+        KPIMG_PATH="${{ steps.kpm-build.outputs.kpimg_path }}"
+        KPTOOLS_PATH="${{ steps.kpm-build.outputs.kptools_path }}"
+
+        "$KPTOOLS_PATH" -p -i "$IMAGE_PATH" -k "$KPIMG_PATH" -o "$PATCHED_IMAGE_PATH"
+        mv -f "$PATCHED_IMAGE_PATH" "$IMAGE_PATH"
+        "$KPTOOLS_PATH" -l -i "$IMAGE_PATH"
+
     - name: Get Cache Stats
       uses: ./.github/actions/cache-stats
       with:
@@ -419,6 +441,21 @@ jobs:
       with:
         bypass: true
         version: ${{ inputs.version }}
+
+    - name: Patch Bypass Kernel with SukiSU KPM
+      if: ${{ inputs.quick_mode != 'true' && inputs.use_kpm == 'true' && (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        IMAGE_PATH="${{ github.workspace }}/AnyKernel3/Bypass-Image"
+        PATCHED_IMAGE_PATH="${IMAGE_PATH}.kpm"
+        KPIMG_PATH="${{ steps.kpm-build.outputs.kpimg_path }}"
+        KPTOOLS_PATH="${{ steps.kpm-build.outputs.kptools_path }}"
+
+        "$KPTOOLS_PATH" -p -i "$IMAGE_PATH" -k "$KPIMG_PATH" -o "$PATCHED_IMAGE_PATH"
+        mv -f "$PATCHED_IMAGE_PATH" "$IMAGE_PATH"
+        "$KPTOOLS_PATH" -l -i "$IMAGE_PATH"
 
     - name: Package Flashable AnyKernel3 Archives
       shell: bash

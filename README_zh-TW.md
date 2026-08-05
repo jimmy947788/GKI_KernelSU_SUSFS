@@ -131,6 +131,18 @@ Actions 選單中各選項意義：
 - `feature_set` 不會控制所有 build 步驟。
 - 某些核心相容與打包步驟仍會執行（例如：kernel fixes、ntsync、ptrace、unicode fix、btf、封裝流程）。
 
+### SukiSU / KPM 補充說明
+
+當 `use_kpm=true` 時，現在的 workflow 不只是 clone KPM 倉庫，還會：
+
+- 下載 `SukiSU_KernelPatch_patch`
+- 在 CI 內建出 `kpimg` 與主機端 `kptools`
+- 在封裝前先把最終 kernel `Image` patch 成 KPM 版本
+
+實務注意：
+
+- `use_kpm=true` 會比 built-in 模式更重，因為還需要下載並建置 KernelPatch 相關工具鏈與產物。
+
 ### GitHub Actions `quick_mode`（快速編譯）
 
 `Build Kernels` workflow 新增 `quick_mode` 輸入，用於縮短單次驗證 build 的時間。
