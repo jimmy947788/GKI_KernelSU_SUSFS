@@ -203,6 +203,23 @@ Recommended usage:
 - Use `quick_mode=true` for smoke tests and iteration.
 - Switch back to `quick_mode=false` for final release builds.
 
+### GitHub Actions `runner_label` (self-hosted support)
+
+`runner_label` lets you choose where the kernel build job runs:
+
+- `ubuntu-latest`: GitHub-hosted runner (default)
+- `self-hosted`: your own machine/runner
+
+Why use self-hosted:
+
+- You can keep source trees and caches across runs.
+- You can fully use your local CPU resources (for example, 12C/24T).
+- Rebuild/iteration is usually much faster after the first run.
+
+Note:
+
+- In this workflow, disk cleanup and swap setup steps are only applied when `runner_label=ubuntu-latest`.
+
 ### Complete input example (fast path)
 
 Below is a full example for `Build Kernels` workflow inputs focused on a single, fast run:
@@ -213,6 +230,7 @@ kernel_build_version: android13-5.10
 os_patch_level_filter: "2023-09"
 feature_set: KSUN+SUSFS
 use_kpm: "false"
+runner_label: "ubuntu-latest"
 quick_mode: "true"
 ksu_branch: ""
 susfs_commit_android12-5-10: ""
@@ -229,6 +247,10 @@ Notes for this example:
 - Empty `ksu_branch` means latest default branch tip.
 - Empty `susfs_commit_*` means latest branch tip for each target.
 - Only `android13-5.10` + `2023-09` is built.
+
+If you already have a self-hosted runner, set:
+
+- `runner_label: "self-hosted"`
 
 ---
 

@@ -151,6 +151,23 @@ Actions 選單中各選項意義：
 - 平常驗證或除錯先用 `quick_mode=true`。
 - 正式發版再改回 `quick_mode=false`。
 
+### GitHub Actions `runner_label`（支援 self-hosted）
+
+`runner_label` 可指定核心編譯 job 要跑在哪種 runner：
+
+- `ubuntu-latest`：GitHub 公用 runner（預設）
+- `self-hosted`：你自己的主機 runner
+
+為什麼建議 self-hosted：
+
+- 可保留 source tree 與快取，不用每次從零開始。
+- 可完整使用本機 CPU 資源（例如 12C/24T）。
+- 第一次後的重編譯通常會快很多。
+
+注意：
+
+- 目前 workflow 只有在 `runner_label=ubuntu-latest` 時，才會執行磁碟清理與 swap 建立步驟。
+
 ### 完整輸入範例（快速路徑）
 
 以下是 `Build Kernels` workflow 的完整輸入範例，適合單一版本快速驗證：
@@ -161,6 +178,7 @@ kernel_build_version: android13-5.10
 os_patch_level_filter: "2023-09"
 feature_set: KSUN+SUSFS
 use_kpm: "false"
+runner_label: "ubuntu-latest"
 quick_mode: "true"
 ksu_branch: ""
 susfs_commit_android12-5-10: ""
@@ -177,6 +195,10 @@ susfs_commit_android16-6-12: ""
 - `ksu_branch` 留空代表使用預設最新分支。
 - `susfs_commit_*` 留空代表使用各分支最新 commit。
 - 只會編譯 `android13-5.10` + `2023-09` 這一組。
+
+若你已經配置好 self-hosted runner，可改成：
+
+- `runner_label: "self-hosted"`
 
 ---
 

@@ -31,6 +31,10 @@ on:
         required: false
         type: string
         default: "false"
+      runner_label:
+        required: false
+        type: string
+        default: "ubuntu-latest"
       quick_mode:
         required: false
         type: string
@@ -47,7 +51,7 @@ on:
 jobs:
   build-gki:
     name: "${{ inputs.kernel_version }}.${{ inputs.sublevel }}-${{ inputs.android_version }}-${{ inputs.os_patch_level }} (${{ inputs.variant }})"
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner_label }}
     timeout-minutes: 120
 
     steps:
@@ -59,7 +63,7 @@ jobs:
       uses: ./.github/actions/disk-cleanup
 
     - name: Free Disk Space
-      if: ${{ inputs.quick_mode != 'true' }}
+      if: ${{ inputs.quick_mode != 'true' && inputs.runner_label == 'ubuntu-latest' }}
       uses: endersonmenezes/free-disk-space@v3  # Use @main for latest, @v3 for stable
       with:
         remove_android: true
@@ -74,7 +78,7 @@ jobs:
         testing: false
 
     - name: Setup more Swap (for LTO)
-      if: ${{ inputs.quick_mode != 'true' }}
+      if: ${{ inputs.quick_mode != 'true' && inputs.runner_label == 'ubuntu-latest' }}
       uses: thejerrybao/setup-swap-space@v1   # or pierotofy/set-swap-space
       with:
         swap-size-gb: 16          # 10-24 GB is common for heavy LTO
