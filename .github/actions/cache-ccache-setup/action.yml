@@ -40,7 +40,7 @@ runs:
         fi
         echo "✅ ccache verified: $(/usr/bin/ccache --version | head -1)"
 
-        export CCACHE_DIR="/home/runner/.ccache"
+        export CCACHE_DIR="$HOME/.ccache"
         echo "CCACHE_DIR=$CCACHE_DIR" >> $GITHUB_ENV
         mkdir -p "$CCACHE_DIR"
 

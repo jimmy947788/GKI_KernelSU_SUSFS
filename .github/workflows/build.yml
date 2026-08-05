@@ -53,6 +53,8 @@ jobs:
     name: "${{ inputs.kernel_version }}.${{ inputs.sublevel }}-${{ inputs.android_version }}-${{ inputs.os_patch_level }} (${{ inputs.variant }})"
     runs-on: ${{ inputs.runner_label }}
     timeout-minutes: 120
+    env:
+      CACHE_ROOT: ${{ github.workspace }}/..
 
     steps:
     - name: Checkout Repository
@@ -318,7 +320,7 @@ jobs:
       if: false && (inputs.version == 'android12-5.10' || inputs.version == 'android13-5.10' || inputs.version == 'android13-5.15')
       uses: ./.github/actions/cache-restore
       with:
-        cache_path: /home/runner/.ccache
+        cache_path: ${{ env.CACHE_ROOT }}/.ccache
         cache_key: ${{ inputs.android_version }}-${{ inputs.kernel_version }}.${{ steps.extract.outputs.sublevel }}-${{ inputs.os_patch_level }}
         cache_bucket: ccache-cache
         restore_keys: |
@@ -330,7 +332,7 @@ jobs:
       if: false && (inputs.version == 'android14-5.15' || inputs.version == 'android14-6.1' || inputs.version == 'android15-6.6' || inputs.version == 'android16-6.12')
       uses: ./.github/actions/cache-restore
       with:
-        cache_path: /home/runner/.cache/bazel
+        cache_path: ${{ env.CACHE_ROOT }}/.cache/bazel
         cache_key: ${{ inputs.android_version }}-${{ inputs.kernel_version }}.${{ steps.extract.outputs.sublevel }}-${{ inputs.os_patch_level }}
         cache_bucket: bazel-cache
         restore_keys: |
@@ -339,7 +341,7 @@ jobs:
     - name: Cache ccache (GitHub Native)
       uses: actions/cache@v6
       with:
-        path: /home/runner/.ccache
+        path: ${{ env.CACHE_ROOT }}/.ccache
         key: ccache-${{ inputs.android_version }}-${{ inputs.kernel_version }}.${{ steps.extract.outputs.sublevel }}-${{ inputs.os_patch_level }}
         restore-keys: |
           ccache-${{ inputs.android_version }}-${{ inputs.kernel_version }}.${{ steps.extract.outputs.sublevel }}-
@@ -349,7 +351,7 @@ jobs:
     - name: Cache bazel-cache (GitHub Native)
       uses: actions/cache@v6
       with:
-        path: /home/runner/.cache/bazel
+        path: ${{ env.CACHE_ROOT }}/.cache/bazel
         key: bazel-${{ inputs.android_version }}-${{ inputs.kernel_version }}.${{ steps.extract.outputs.sublevel }}-${{ inputs.os_patch_level }}
         restore-keys: |
           bazel-${{ inputs.android_version }}-${{ inputs.kernel_version }}.${{ steps.extract.outputs.sublevel }}-
@@ -391,7 +393,7 @@ jobs:
       uses: ./.github/actions/cache-save
       if: false && (inputs.version == 'android12-5.10' || inputs.version == 'android13-5.10' || inputs.version == 'android13-5.15')
       with:
-        cache_path: /home/runner/.ccache
+        cache_path: ${{ env.CACHE_ROOT }}/.ccache
         cache_key: ${{ inputs.android_version }}-${{ inputs.kernel_version }}.${{ steps.extract.outputs.sublevel }}-${{ inputs.os_patch_level }}
         cache_bucket: "ccache-cache"
         compression_level: 9
@@ -402,7 +404,7 @@ jobs:
       uses: ./.github/actions/cache-save
       if: false && (inputs.version == 'android14-5.15' || inputs.version == 'android14-6.1' || inputs.version == 'android15-6.6' || inputs.version == 'android16-6.12')
       with:
-        cache_path: /home/runner/.cache/bazel
+        cache_path: ${{ env.CACHE_ROOT }}/.cache/bazel
         cache_key: ${{ inputs.android_version }}-${{ inputs.kernel_version }}.${{ steps.extract.outputs.sublevel }}-${{ inputs.os_patch_level }}
         cache_bucket: "bazel-cache"
         compression_level: 9
@@ -473,10 +475,10 @@ jobs:
         
         # Get kernel version from Image if available
         KERNEL_VER_STR=""
-        if [ -f "/home/runner/out/dist/Image" ]; then
-          KERNEL_VER_STR=$(strings "/home/runner/out/dist/Image" | grep -m1 "^Linux version " | sed 's/Linux version //' || echo "")
-        elif [ -f "/home/runner/out/Image" ]; then
-          KERNEL_VER_STR=$(strings "/home/runner/out/Image" | grep -m1 "^Linux version " | sed 's/Linux version //' || echo "")
+        if [ -f "$HOME/out/dist/Image" ]; then
+          KERNEL_VER_STR=$(strings "$HOME/out/dist/Image" | grep -m1 "^Linux version " | sed 's/Linux version //' || echo "")
+        elif [ -f "$HOME/out/Image" ]; then
+          KERNEL_VER_STR=$(strings "$HOME/out/Image" | grep -m1 "^Linux version " | sed 's/Linux version //' || echo "")
         fi
         
         # Get KSU version from env (set by kernelsu action)

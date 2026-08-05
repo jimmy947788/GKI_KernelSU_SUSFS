@@ -54,8 +54,8 @@ runs:
           ccache -z || true
           echo "====================="
 
-          if [ -d /home/runner/.ccache ] && find /home/runner/.ccache -type f -print -quit 2>/dev/null | grep -q .; then
-            find /home/runner/.ccache -type f -exec touch -t $(date -d "1 day ago" +%Y%m%d%H%M) {} +
+          if [ -d "$HOME/.ccache" ] && find "$HOME/.ccache" -type f -print -quit 2>/dev/null | grep -q .; then
+            find "$HOME/.ccache" -type f -exec touch -t $(date -d "1 day ago" +%Y%m%d%H%M) {} +
             echo "✅ ccache atime updated"
           fi
         fi

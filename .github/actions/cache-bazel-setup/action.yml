@@ -18,6 +18,6 @@ runs:
       working-directory: ${{ github.workspace }}
       run: |
         set -euo pipefail
-        export BAZEL_CACHE_DIR="/home/runner/.cache/bazel"
+        export BAZEL_CACHE_DIR="$HOME/.cache/bazel"
         mkdir -p "$BAZEL_CACHE_DIR"
         echo "BAZEL_CACHE_DIR: $BAZEL_CACHE_DIR"

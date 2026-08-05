@@ -46,7 +46,7 @@ runs:
         echo "==============="
         echo "=== .ccache ==="
         echo "==============="
-        summarize_dir /home/runner/.ccache 10 5 || true
+        summarize_dir "$HOME/.ccache" 10 5 || true
 
     - name: Show Bazel Cache folder Stats
       shell: bash
@@ -57,4 +57,4 @@ runs:
         echo "===================="
         echo "=== .cache/bazel ==="
         echo "===================="
-        summarize_dir /home/runner/.cache/bazel 10 5 || true
+        summarize_dir "$HOME/.cache/bazel" 10 5 || true
