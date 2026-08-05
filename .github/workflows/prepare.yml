@@ -7,6 +7,11 @@ on:
         description: "Path to the JSON config file"
         required: true
         type: string
+      os_patch_level_filter:
+        description: "Optional OS patch level filter (e.g. 2023-09). Empty = include all dates"
+        required: false
+        type: string
+        default: ""
       feature_set:
         description: "Feature Set"
         required: false
@@ -46,16 +51,19 @@ jobs:
           fi
 
           CONFIG_JSON=$(cat "${{ inputs.config_file }}" | jq -c .)
+          PATCH_FILTER="${{ inputs.os_patch_level_filter }}"
 
           # Build { "include": [ {android_version:..., kernel_version:..., sublevel:..., os_patch_level:..., variant: ...}, ... ] }
           # Always include Normal, and add any explicit per-item variant from the config.
           FINAL=$(jq -cn \
-            --argjson cfg "$CONFIG_JSON" '
+            --argjson cfg "$CONFIG_JSON" \
+            --arg patch_filter "$PATCH_FILTER" '
             ($cfg.version | split("-")) as $version_parts
             | {
               include: (
                 [
                   $cfg.include[] as $item
+                  | select(($patch_filter == "") or ($item.date == $patch_filter))
                   | {
                       version: $cfg.version,
                       android_version: $version_parts[0],
@@ -67,6 +75,7 @@ jobs:
                 ]
                 + [
                   $cfg.include[] as $item
+                  | select(($patch_filter == "") or ($item.date == $patch_filter))
                   | select($item.variant != null)
                   | {
                       version: $cfg.version,
@@ -80,6 +89,11 @@ jobs:
                 | unique_by([.android_version, .kernel_version, .sublevel, .os_patch_level, .variant])
               )
             }')
+
+          if [ "$(echo "$FINAL" | jq '.include | length')" -eq 0 ]; then
+            echo "Error: no matrix entries matched os_patch_level_filter='${PATCH_FILTER}' for config '${{ inputs.config_file }}'"
+            exit 1
+          fi
 
           echo "matrix=$FINAL" >> "$GITHUB_OUTPUT"
 

@@ -28,6 +28,11 @@ on:
           - android15-6.6
           - android16-6.12
         default: All
+      os_patch_level_filter:
+        description: "Optional OS patch level filter (e.g. 2023-09). Empty = build all dates"
+        type: string
+        required: false
+        default: ""
       feature_set:
         description: "Feature Set"
         type: choice
@@ -131,6 +136,7 @@ jobs:
     uses: ./.github/workflows/prepare.yml
     with:
       config_file: .github/config/android12-5.10.json
+      os_patch_level_filter: ${{ inputs.os_patch_level_filter }}
       feature_set: ${{ inputs.feature_set || 'FULL' }}
       use_kpm: ${{ inputs.use_kpm || 'false' }}
       ksu_branch: ${{ inputs.ksu_branch }}
@@ -143,6 +149,7 @@ jobs:
     uses: ./.github/workflows/prepare.yml
     with:
       config_file: .github/config/android13-5.10.json
+      os_patch_level_filter: ${{ inputs.os_patch_level_filter }}
       feature_set: ${{ inputs.feature_set || 'FULL' }}
       use_kpm: ${{ inputs.use_kpm || 'false' }}
       ksu_branch: ${{ inputs.ksu_branch }}
@@ -155,6 +162,7 @@ jobs:
     uses: ./.github/workflows/prepare.yml
     with:
       config_file: .github/config/android13-5.15.json
+      os_patch_level_filter: ${{ inputs.os_patch_level_filter }}
       feature_set: ${{ inputs.feature_set || 'FULL' }}
       use_kpm: ${{ inputs.use_kpm || 'false' }}
       ksu_branch: ${{ inputs.ksu_branch }}
@@ -167,6 +175,7 @@ jobs:
     uses: ./.github/workflows/prepare.yml
     with:
       config_file: .github/config/android14-5.15.json
+      os_patch_level_filter: ${{ inputs.os_patch_level_filter }}
       feature_set: ${{ inputs.feature_set || 'FULL' }}
       use_kpm: ${{ inputs.use_kpm || 'false' }}
       ksu_branch: ${{ inputs.ksu_branch }}
@@ -179,6 +188,7 @@ jobs:
     uses: ./.github/workflows/prepare.yml
     with:
       config_file: .github/config/android14-6.1.json
+      os_patch_level_filter: ${{ inputs.os_patch_level_filter }}
       feature_set: ${{ inputs.feature_set || 'FULL' }}
       use_kpm: ${{ inputs.use_kpm || 'false' }}
       ksu_branch: ${{ inputs.ksu_branch }}
@@ -191,6 +201,7 @@ jobs:
     uses: ./.github/workflows/prepare.yml
     with:
       config_file: .github/config/android15-6.6.json
+      os_patch_level_filter: ${{ inputs.os_patch_level_filter }}
       feature_set: ${{ inputs.feature_set || 'FULL' }}
       use_kpm: ${{ inputs.use_kpm || 'false' }}
       ksu_branch: ${{ inputs.ksu_branch }}
@@ -203,6 +214,7 @@ jobs:
     uses: ./.github/workflows/prepare.yml
     with:
       config_file: .github/config/android16-6.12.json
+      os_patch_level_filter: ${{ inputs.os_patch_level_filter }}
       feature_set: ${{ inputs.feature_set || 'FULL' }}
       use_kpm: ${{ inputs.use_kpm || 'false' }}
       ksu_branch: ${{ inputs.ksu_branch }}
