@@ -21,6 +21,11 @@ on:
         required: false
         type: string
         default: "false"
+      quick_mode:
+        description: "Quick mode: skip heavy pre-steps and bypass build"
+        required: false
+        type: string
+        default: "false"
       ksu_branch:
         description: "KernelSU branch or commit (empty = latest dev)"
         required: false
@@ -112,6 +117,7 @@ jobs:
       variant: ${{ matrix.variant }}
       feature_set: ${{ inputs.feature_set }}
       use_kpm: ${{ inputs.use_kpm }}
+      quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit }}
     secrets: inherit

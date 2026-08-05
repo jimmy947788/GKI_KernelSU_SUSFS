@@ -31,6 +31,10 @@ on:
         required: false
         type: string
         default: "false"
+      quick_mode:
+        required: false
+        type: string
+        default: "false"
       ksu_branch:
         required: false
         type: string
@@ -55,7 +59,7 @@ jobs:
       uses: ./.github/actions/disk-cleanup
 
     - name: Free Disk Space
-      if: true
+      if: ${{ inputs.quick_mode != 'true' }}
       uses: endersonmenezes/free-disk-space@v3  # Use @main for latest, @v3 for stable
       with:
         remove_android: true
@@ -70,6 +74,7 @@ jobs:
         testing: false
 
     - name: Setup more Swap (for LTO)
+      if: ${{ inputs.quick_mode != 'true' }}
       uses: thejerrybao/setup-swap-space@v1   # or pierotofy/set-swap-space
       with:
         swap-size-gb: 16          # 10-24 GB is common for heavy LTO
@@ -400,6 +405,7 @@ jobs:
         github_token: ${{ secrets.MY_GITHUB_TOKEN }}
 
     - name: Build Bypass Kernel
+      if: ${{ inputs.quick_mode != 'true' }}
       env:
         SOURCE_DATE_EPOCH: ${{ env.SOURCE_DATE_EPOCH }}
         KBUILD_BUILD_TIMESTAMP: ${{ env.KBUILD_BUILD_TIMESTAMP }}
@@ -416,23 +422,37 @@ jobs:
         PACKAGE_BASE="${{ steps.extract.outputs.file_name }}-AnyKernel3"
         NORMAL_STAGE="/tmp/${PACKAGE_BASE}-normal"
         BYPASS_STAGE="/tmp/${PACKAGE_BASE}-bypass"
+        BUILD_BYPASS="true"
+
+        if [[ "${{ inputs.quick_mode }}" == "true" ]]; then
+          BUILD_BYPASS="false"
+        fi
 
         rm -rf "$NORMAL_STAGE" "$BYPASS_STAGE"
         cp -a "${{ github.workspace }}/AnyKernel3" "$NORMAL_STAGE"
-        cp -a "${{ github.workspace }}/AnyKernel3" "$BYPASS_STAGE"
 
         rm -f "$NORMAL_STAGE/Bypass-Image"
 
-        if [ -f "$BYPASS_STAGE/Bypass-Image" ]; then
-          rm -f "$BYPASS_STAGE/Image"
-          mv "$BYPASS_STAGE/Bypass-Image" "$BYPASS_STAGE/Image"
+        if [[ "$BUILD_BYPASS" == "true" ]]; then
+          cp -a "${{ github.workspace }}/AnyKernel3" "$BYPASS_STAGE"
+          if [ -f "$BYPASS_STAGE/Bypass-Image" ]; then
+            rm -f "$BYPASS_STAGE/Image"
+            mv "$BYPASS_STAGE/Bypass-Image" "$BYPASS_STAGE/Image"
+          fi
         fi
 
         (cd "$NORMAL_STAGE" && zip -r -9 "${{ github.workspace }}/${PACKAGE_BASE}-normal.zip" .)
-        (cd "$BYPASS_STAGE" && zip -r -9 "${{ github.workspace }}/${PACKAGE_BASE}-bypass.zip" .)
+
+        if [[ "$BUILD_BYPASS" == "true" ]]; then
+          (cd "$BYPASS_STAGE" && zip -r -9 "${{ github.workspace }}/${PACKAGE_BASE}-bypass.zip" .)
+        fi
 
         echo "Created flashable archives:"
-        ls -lh "${{ github.workspace }}/${PACKAGE_BASE}-normal.zip" "${{ github.workspace }}/${PACKAGE_BASE}-bypass.zip"
+        if [[ "$BUILD_BYPASS" == "true" ]]; then
+          ls -lh "${{ github.workspace }}/${PACKAGE_BASE}-normal.zip" "${{ github.workspace }}/${PACKAGE_BASE}-bypass.zip"
+        else
+          ls -lh "${{ github.workspace }}/${PACKAGE_BASE}-normal.zip"
+        fi
 
     - name: 📋 Consolidated Build Summary
       if: ${{ always() }}

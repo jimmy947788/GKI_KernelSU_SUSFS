@@ -183,6 +183,53 @@ Notes:
 - `feature_set` does not control all steps in the pipeline.
 - Core compatibility/build steps still run (for example: kernel fixes, ntsync, ptrace, unicode fix, btf, packaging).
 
+### GitHub Actions `quick_mode` (faster single build)
+
+`quick_mode` is a workflow input in `Build Kernels` to reduce turnaround time when you only need a quick validation build.
+
+When `quick_mode=true`:
+
+- Skip free-disk cleanup step.
+- Skip swap setup step.
+- Skip bypass kernel compilation (builds normal kernel only).
+- `Flashable-Zips` artifact includes only `...-AnyKernel3-normal.zip`.
+
+When `quick_mode=false` (default):
+
+- Runs the full flow, including normal + bypass build and both flashable zips.
+
+Recommended usage:
+
+- Use `quick_mode=true` for smoke tests and iteration.
+- Switch back to `quick_mode=false` for final release builds.
+
+### Complete input example (fast path)
+
+Below is a full example for `Build Kernels` workflow inputs focused on a single, fast run:
+
+```yaml
+release_type: Action
+kernel_build_version: android13-5.10
+os_patch_level_filter: "2023-09"
+feature_set: KSUN+SUSFS
+use_kpm: "false"
+quick_mode: "true"
+ksu_branch: ""
+susfs_commit_android12-5-10: ""
+susfs_commit_android13-5-10: ""
+susfs_commit_android13-5-15: ""
+susfs_commit_android14-5-15: ""
+susfs_commit_android14-6-1: ""
+susfs_commit_android15-6-6: ""
+susfs_commit_android16-6-12: ""
+```
+
+Notes for this example:
+
+- Empty `ksu_branch` means latest default branch tip.
+- Empty `susfs_commit_*` means latest branch tip for each target.
+- Only `android13-5.10` + `2023-09` is built.
+
 ---
 
 ## ✨ Features

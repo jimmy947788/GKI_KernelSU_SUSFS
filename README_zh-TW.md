@@ -131,6 +131,53 @@ Actions 選單中各選項意義：
 - `feature_set` 不會控制所有 build 步驟。
 - 某些核心相容與打包步驟仍會執行（例如：kernel fixes、ntsync、ptrace、unicode fix、btf、封裝流程）。
 
+### GitHub Actions `quick_mode`（快速編譯）
+
+`Build Kernels` workflow 新增 `quick_mode` 輸入，用於縮短單次驗證 build 的時間。
+
+當 `quick_mode=true`：
+
+- 跳過磁碟清理步驟（Free Disk Space）。
+- 跳過 swap 建立步驟（Setup more Swap）。
+- 跳過 bypass 核心編譯（只編 normal 核心）。
+- `Flashable-Zips` 產物只會包含 `...-AnyKernel3-normal.zip`。
+
+當 `quick_mode=false`（預設）：
+
+- 走完整流程，包含 normal + bypass 兩次編譯與兩個 flashable zip。
+
+建議使用方式：
+
+- 平常驗證或除錯先用 `quick_mode=true`。
+- 正式發版再改回 `quick_mode=false`。
+
+### 完整輸入範例（快速路徑）
+
+以下是 `Build Kernels` workflow 的完整輸入範例，適合單一版本快速驗證：
+
+```yaml
+release_type: Action
+kernel_build_version: android13-5.10
+os_patch_level_filter: "2023-09"
+feature_set: KSUN+SUSFS
+use_kpm: "false"
+quick_mode: "true"
+ksu_branch: ""
+susfs_commit_android12-5-10: ""
+susfs_commit_android13-5-10: ""
+susfs_commit_android13-5-15: ""
+susfs_commit_android14-5-15: ""
+susfs_commit_android14-6-1: ""
+susfs_commit_android15-6-6: ""
+susfs_commit_android16-6-12: ""
+```
+
+此範例補充：
+
+- `ksu_branch` 留空代表使用預設最新分支。
+- `susfs_commit_*` 留空代表使用各分支最新 commit。
+- 只會編譯 `android13-5.10` + `2023-09` 這一組。
+
 ---
 
 ## ✨ 主要功能

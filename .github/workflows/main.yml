@@ -56,6 +56,13 @@ on:
           - "false"
           - "true"
         default: "false"
+      quick_mode:
+        description: "Quick mode: skip disk cleanup/swap and bypass build for faster turnaround"
+        type: choice
+        options:
+          - "false"
+          - "true"
+        default: "false"
       ksu_branch:
         description: "KernelSU branch or commit (empty = latest dev-susfs branch tip)"
         type: string
@@ -139,6 +146,7 @@ jobs:
       os_patch_level_filter: ${{ inputs.os_patch_level_filter }}
       feature_set: ${{ inputs.feature_set || 'FULL' }}
       use_kpm: ${{ inputs.use_kpm || 'false' }}
+      quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android12-5-10 }}
     secrets: inherit
@@ -152,6 +160,7 @@ jobs:
       os_patch_level_filter: ${{ inputs.os_patch_level_filter }}
       feature_set: ${{ inputs.feature_set || 'FULL' }}
       use_kpm: ${{ inputs.use_kpm || 'false' }}
+      quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android13-5-10 }}
     secrets: inherit
@@ -165,6 +174,7 @@ jobs:
       os_patch_level_filter: ${{ inputs.os_patch_level_filter }}
       feature_set: ${{ inputs.feature_set || 'FULL' }}
       use_kpm: ${{ inputs.use_kpm || 'false' }}
+      quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android13-5-15 }}
     secrets: inherit
@@ -178,6 +188,7 @@ jobs:
       os_patch_level_filter: ${{ inputs.os_patch_level_filter }}
       feature_set: ${{ inputs.feature_set || 'FULL' }}
       use_kpm: ${{ inputs.use_kpm || 'false' }}
+      quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android14-5-15 }}
     secrets: inherit
@@ -191,6 +202,7 @@ jobs:
       os_patch_level_filter: ${{ inputs.os_patch_level_filter }}
       feature_set: ${{ inputs.feature_set || 'FULL' }}
       use_kpm: ${{ inputs.use_kpm || 'false' }}
+      quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android14-6-1 }}
     secrets: inherit
@@ -204,6 +216,7 @@ jobs:
       os_patch_level_filter: ${{ inputs.os_patch_level_filter }}
       feature_set: ${{ inputs.feature_set || 'FULL' }}
       use_kpm: ${{ inputs.use_kpm || 'false' }}
+      quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android15-6-6 }}
     secrets: inherit
@@ -217,6 +230,7 @@ jobs:
       os_patch_level_filter: ${{ inputs.os_patch_level_filter }}
       feature_set: ${{ inputs.feature_set || 'FULL' }}
       use_kpm: ${{ inputs.use_kpm || 'false' }}
+      quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android16-6-12 }}
     secrets: inherit
