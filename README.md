@@ -7,6 +7,11 @@
 
 </div>
 
+## 🌐 Language
+
+- English: [README.md](README.md)
+- 繁體中文: [README_zh-TW.md](README_zh-TW.md)
+
 ## ⚠️ Your warranty is no longer valid!
 
 I am **not responsible** for bricked devices, damaged hardware, or any issues that arise from using this kernel.
@@ -44,6 +49,86 @@ By flashing this kernel, **YOU** are choosing to make these modifications. If so
 For GKI installation, please follow the official guide:
 
 📖 **[KernelSU Installation Guide](https://kernelsu.org/guide/installation.html)**
+
+---
+
+## 🧭 OS Patch Level Mapping (Important)
+
+The `date` field in each build matrix config (for example, `.github/config/android13-5.10.json`) is not only a label.
+It is passed into the kernel source fetch step as `os_patch_level` and used to select the upstream branch:
+
+- `common-android13-5.10-2023-09`
+- `common-android13-5.10-2025-07`
+
+This is why you can see multiple builds with the same sublevel (such as `5.10.107`) but different dates.
+Each date points to a different monthly kernel branch.
+
+### Why this matters
+
+If your device firmware/vendor stack is from one patch level, flashing a kernel built from a much newer or older patch level can cause boot failure.
+
+### Practical guidance
+
+- Match build date to your ROM patch level first.
+- For Pixel 6 Pro on Android 13 `raven-tq3a.230901.001`, start with `android13-5.10` + `2023-09`.
+- Test normal build first, then try bypass/KPM only after a known-good boot.
+
+### Build artifacts: `Flashable-Zips` vs `AnyKernel3`
+
+After a successful workflow run, you will usually see two artifact groups with the same kernel prefix:
+
+- `...-AnyKernel3`
+- `...-Flashable-Zips`
+
+What each one means:
+
+- `AnyKernel3`
+	- Raw AnyKernel3 working directory contents.
+	- Intended for advanced users who want to inspect or modify packaging files before flashing.
+	- May include both `Image` and `Bypass-Image` files depending on build steps.
+
+- `Flashable-Zips`
+	- Pre-packed, ready-to-flash zip outputs.
+	- Contains two final packages:
+		- `...-AnyKernel3-normal.zip` (standard kernel image)
+		- `...-AnyKernel3-bypass.zip` (bypass kernel image)
+	- Recommended for normal usage when you just want to download and flash.
+
+Quick recommendation:
+
+- Start with `...-AnyKernel3-normal.zip` first.
+- Only move to bypass zip if normal boot fails due to version checks or compatibility restrictions.
+
+### GitHub Actions `feature_set` options
+
+In the `Build Kernels` workflow, `feature_set` controls optional patch groups.
+
+Token meaning:
+
+- `KSUN`: Enable KernelSU-Next setup
+- `SUSFS`: Enable SUSFS setup/patches
+- `BBG`: Enable Baseband Guard patches
+- `NET`: Enable networking patch set
+- `DS`: Enable DroidSpaces-OSS patches
+
+Available options in the action menu:
+
+- `KSUN+SUSFS+BBG+NET+DS`: Enable all five optional groups
+- `KSUN+SUSFS+BBG`: Enable KernelSU + SUSFS + Baseband Guard
+- `KSUN+SUSFS+NET`: Enable KernelSU + SUSFS + networking
+- `KSUN+SUSFS+DS`: Enable KernelSU + SUSFS + DroidSpaces
+- `KSUN+SUSFS`: Enable KernelSU + SUSFS
+- `KSUN+BBG`: Enable KernelSU + Baseband Guard
+- `KSUN+NET`: Enable KernelSU + networking
+- `KSUN+DS`: Enable KernelSU + DroidSpaces
+- `KSUN`: Enable KernelSU only
+- `NONE`: Disable all five optional groups above
+- `FULL`: Alias for enabling all optional groups (same effective behavior as `KSUN+SUSFS+BBG+NET+DS`)
+
+Notes:
+
+- `feature_set` does not control all steps in the pipeline.
+- Core compatibility/build steps still run (for example: kernel fixes, ntsync, ptrace, unicode fix, btf, packaging).
 
 ---
 
