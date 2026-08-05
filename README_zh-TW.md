@@ -157,6 +157,7 @@ Actions 選單中各選項意義：
 
 - `ubuntu-latest`：GitHub 公用 runner（預設）
 - `self-hosted`：你自己的主機 runner
+- `gki-local`：範例自訂標籤，適合專門拿來編 kernel 的本機 runner
 
 為什麼建議 self-hosted：
 
@@ -167,6 +168,7 @@ Actions 選單中各選項意義：
 注意：
 
 - 目前 workflow 只有在 `runner_label=ubuntu-latest` 時，才會執行磁碟清理與 swap 建立步驟。
+- 這個 repo 目前已把 `runner_label` 預設值設為 `gki-local`，方便你已經配置好本機 runner 時直接使用。
 
 ### 完整輸入範例（快速路徑）
 
@@ -178,7 +180,7 @@ kernel_build_version: android13-5.10
 os_patch_level_filter: "2023-09"
 feature_set: KSUN+SUSFS
 use_kpm: "false"
-runner_label: "ubuntu-latest"
+runner_label: "gki-local"
 quick_mode: "true"
 ksu_branch: ""
 susfs_commit_android12-5-10: ""
@@ -198,7 +200,7 @@ susfs_commit_android16-6-12: ""
 
 若你已經配置好 self-hosted runner，可改成：
 
-- `runner_label: "self-hosted"`
+- `runner_label: "gki-local"` 代表用你專門配置的本機標籤，若你只有通用標籤則可填 `runner_label: "self-hosted"`。
 
 ---
 

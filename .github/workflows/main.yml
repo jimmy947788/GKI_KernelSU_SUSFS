@@ -60,7 +60,7 @@ on:
         description: "Runner label for kernel build job (e.g. ubuntu-latest or self-hosted)"
         type: string
         required: false
-        default: "ubuntu-latest"
+        default: "gki-local"
       quick_mode:
         description: "Quick mode: skip disk cleanup/swap and bypass build for faster turnaround"
         type: choice

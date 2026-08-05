@@ -209,6 +209,7 @@ Recommended usage:
 
 - `ubuntu-latest`: GitHub-hosted runner (default)
 - `self-hosted`: your own machine/runner
+- `gki-local`: example custom label for a dedicated local kernel builder
 
 Why use self-hosted:
 
@@ -219,6 +220,7 @@ Why use self-hosted:
 Note:
 
 - In this workflow, disk cleanup and swap setup steps are only applied when `runner_label=ubuntu-latest`.
+- This repository now defaults `runner_label` to `gki-local` for convenience if you already registered that label on your self-hosted runner.
 
 ### Complete input example (fast path)
 
@@ -230,7 +232,7 @@ kernel_build_version: android13-5.10
 os_patch_level_filter: "2023-09"
 feature_set: KSUN+SUSFS
 use_kpm: "false"
-runner_label: "ubuntu-latest"
+runner_label: "gki-local"
 quick_mode: "true"
 ksu_branch: ""
 susfs_commit_android12-5-10: ""
@@ -250,7 +252,7 @@ Notes for this example:
 
 If you already have a self-hosted runner, set:
 
-- `runner_label: "self-hosted"`
+- `runner_label: "gki-local"` for a dedicated local runner label, or `runner_label: "self-hosted"` if you only use the generic label.
 
 ---
 
