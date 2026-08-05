@@ -27,6 +27,10 @@ on:
       feature_set:
         required: true
         type: string
+      use_kpm:
+        required: false
+        type: string
+        default: "false"
       ksu_branch:
         required: false
         type: string
@@ -83,6 +87,17 @@ jobs:
         android_version: ${{ inputs.android_version }}
         kernel_version: ${{ inputs.kernel_version }}
         os_patch_level: ${{ inputs.os_patch_level }}
+
+    - name: Prepare KPM Patch Stage
+      if: ${{ inputs.use_kpm == 'true' }}
+      uses: ./.github/actions/kpm-setup
+
+    - name: Enable KPM Kernel Configs
+      if: ${{ inputs.use_kpm == 'true' }}
+      uses: ./.github/actions/set-kernel-config
+      with:
+        config_list: |
+          CONFIG_KALLSYMS=y
 
     - name: Build FUSE-BPF Userspace Daemon (Issue #211)
       if: ${{ contains(inputs.version, 'lts') && inputs.version == 'android16-6.12' }}
@@ -383,6 +398,32 @@ jobs:
         bypass: true
         version: ${{ inputs.version }}
 
+    - name: Package Flashable AnyKernel3 Archives
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        PACKAGE_BASE="${{ steps.extract.outputs.file_name }}-AnyKernel3"
+        NORMAL_STAGE="/tmp/${PACKAGE_BASE}-normal"
+        BYPASS_STAGE="/tmp/${PACKAGE_BASE}-bypass"
+
+        rm -rf "$NORMAL_STAGE" "$BYPASS_STAGE"
+        cp -a "${{ github.workspace }}/AnyKernel3" "$NORMAL_STAGE"
+        cp -a "${{ github.workspace }}/AnyKernel3" "$BYPASS_STAGE"
+
+        rm -f "$NORMAL_STAGE/Bypass-Image"
+
+        if [ -f "$BYPASS_STAGE/Bypass-Image" ]; then
+          rm -f "$BYPASS_STAGE/Image"
+          mv "$BYPASS_STAGE/Bypass-Image" "$BYPASS_STAGE/Image"
+        fi
+
+        (cd "$NORMAL_STAGE" && zip -r -9 "${{ github.workspace }}/${PACKAGE_BASE}-normal.zip" .)
+        (cd "$BYPASS_STAGE" && zip -r -9 "${{ github.workspace }}/${PACKAGE_BASE}-bypass.zip" .)
+
+        echo "Created flashable archives:"
+        ls -lh "${{ github.workspace }}/${PACKAGE_BASE}-normal.zip" "${{ github.workspace }}/${PACKAGE_BASE}-bypass.zip"
+
     - name: 📋 Consolidated Build Summary
       if: ${{ always() }}
       shell: bash
@@ -462,5 +503,15 @@ jobs:
       with:
         name: ${{ steps.extract.outputs.file_name }}-AnyKernel3
         path: ${{ github.workspace }}/AnyKernel3/**
+        if-no-files-found: ignore
+        compression-level: 9
+
+    - name: Upload Flashable Archives
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ steps.extract.outputs.file_name }}-Flashable-Zips
+        path: |
+          ${{ github.workspace }}/${{ steps.extract.outputs.file_name }}-AnyKernel3-normal.zip
+          ${{ github.workspace }}/${{ steps.extract.outputs.file_name }}-AnyKernel3-bypass.zip
         if-no-files-found: ignore
         compression-level: 9

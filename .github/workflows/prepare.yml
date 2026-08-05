@@ -11,6 +11,11 @@ on:
         description: "Feature Set"
         required: false
         type: string
+      use_kpm:
+        description: "Enable KPM patch repository"
+        required: false
+        type: string
+        default: "false"
       ksu_branch:
         description: "KernelSU branch or commit (empty = latest dev)"
         required: false
@@ -92,6 +97,7 @@ jobs:
       os_patch_level: ${{ matrix.os_patch_level }}
       variant: ${{ matrix.variant }}
       feature_set: ${{ inputs.feature_set }}
+      use_kpm: ${{ inputs.use_kpm }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit }}
     secrets: inherit

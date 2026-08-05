@@ -44,6 +44,13 @@ on:
           - NONE
           - FULL
         default: FULL
+      use_kpm:
+        description: "Enable KPM patch repository"
+        type: choice
+        options:
+          - "false"
+          - "true"
+        default: "false"
       ksu_branch:
         description: "KernelSU branch or commit (empty = latest dev-susfs branch tip)"
         type: string
@@ -125,6 +132,7 @@ jobs:
     with:
       config_file: .github/config/android12-5.10.json
       feature_set: ${{ inputs.feature_set || 'FULL' }}
+      use_kpm: ${{ inputs.use_kpm || 'false' }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android12-5-10 }}
     secrets: inherit
@@ -136,6 +144,7 @@ jobs:
     with:
       config_file: .github/config/android13-5.10.json
       feature_set: ${{ inputs.feature_set || 'FULL' }}
+      use_kpm: ${{ inputs.use_kpm || 'false' }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android13-5-10 }}
     secrets: inherit
@@ -147,6 +156,7 @@ jobs:
     with:
       config_file: .github/config/android13-5.15.json
       feature_set: ${{ inputs.feature_set || 'FULL' }}
+      use_kpm: ${{ inputs.use_kpm || 'false' }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android13-5-15 }}
     secrets: inherit
@@ -158,6 +168,7 @@ jobs:
     with:
       config_file: .github/config/android14-5.15.json
       feature_set: ${{ inputs.feature_set || 'FULL' }}
+      use_kpm: ${{ inputs.use_kpm || 'false' }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android14-5-15 }}
     secrets: inherit
@@ -169,6 +180,7 @@ jobs:
     with:
       config_file: .github/config/android14-6.1.json
       feature_set: ${{ inputs.feature_set || 'FULL' }}
+      use_kpm: ${{ inputs.use_kpm || 'false' }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android14-6-1 }}
     secrets: inherit
@@ -180,6 +192,7 @@ jobs:
     with:
       config_file: .github/config/android15-6.6.json
       feature_set: ${{ inputs.feature_set || 'FULL' }}
+      use_kpm: ${{ inputs.use_kpm || 'false' }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android15-6-6 }}
     secrets: inherit
@@ -191,6 +204,7 @@ jobs:
     with:
       config_file: .github/config/android16-6.12.json
       feature_set: ${{ inputs.feature_set || 'FULL' }}
+      use_kpm: ${{ inputs.use_kpm || 'false' }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android16-6-12 }}
     secrets: inherit

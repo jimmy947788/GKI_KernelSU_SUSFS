@@ -1,0 +1,28 @@
+name: 'Prepare SukiSU KPM Repository'
+description: 'Clone the SukiSU KernelPatch repository needed for KPM support'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Clone SukiSU KernelPatch
+      shell: bash
+      working-directory: ${{ github.workspace }}
+      run: |
+        set -euo pipefail
+
+        PATCH_REPO="${{ github.workspace }}/SukiSU_KernelPatch_patch"
+
+        if [ -d "$PATCH_REPO" ]; then
+          echo "SukiSU KernelPatch repository already exists, refreshing clone"
+          rm -rf "$PATCH_REPO"
+        fi
+
+        git clone https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch.git "$PATCH_REPO"
+
+        if [ ! -d "$PATCH_REPO/.git" ]; then
+          echo "ERROR: expected SukiSU KernelPatch checkout at $PATCH_REPO"
+          exit 1
+        fi
+
+        echo "SukiSU KPM repository available at $PATCH_REPO"
+        echo "SUKISU_KPM_REPO=$PATCH_REPO" >> "$GITHUB_ENV"
