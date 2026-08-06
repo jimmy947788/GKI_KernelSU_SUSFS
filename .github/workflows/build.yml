@@ -406,11 +406,14 @@ jobs:
         mv -f "$PATCHED_IMAGE_PATH" "$IMAGE_PATH"
         "$KPTOOLS_PATH" -l -i "$IMAGE_PATH"
 
-    - name: Repack Android 12 certified boot with KPM kernel
-      id: repack-a12-kpm
-      if: ${{ inputs.use_kpm == 'true' && inputs.android_version == 'android12' && inputs.kernel_version == '5.10' && (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') }}
+    - name: Repack certified boot with KPM kernel
+      id: repack-kpm
+      continue-on-error: true
+      if: ${{ inputs.use_kpm == 'true' && (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') }}
       uses: ./.github/actions/repack-certified-boot-a12
       with:
+        android_version: ${{ inputs.android_version }}
+        kernel_version: ${{ inputs.kernel_version }}
         image_path: ${{ github.workspace }}/AnyKernel3/Image
         sublevel: ${{ steps.extract.outputs.sublevel }}
         os_patch_level: ${{ inputs.os_patch_level }}
@@ -600,11 +603,11 @@ jobs:
         if-no-files-found: ignore
         compression-level: 9
 
-    - name: Upload Android 12 certified boot artifacts
-      if: ${{ steps.repack-a12-kpm.outcome == 'success' }}
+    - name: Upload certified boot artifacts
+      if: ${{ steps.repack-kpm.outcome == 'success' }}
       uses: actions/upload-artifact@v7
       with:
         name: ${{ steps.extract.outputs.file_name }}-Certified-Boot
-        path: ${{ steps.repack-a12-kpm.outputs.output_dir }}/*.gz
+        path: ${{ steps.repack-kpm.outputs.output_dir }}/*.gz
         if-no-files-found: ignore
         compression-level: 9

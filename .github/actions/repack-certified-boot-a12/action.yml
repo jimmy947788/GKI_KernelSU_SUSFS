@@ -1,6 +1,12 @@
-name: Repack Android 12 Certified Boot
-description: Repack a certified Android 12 GKI boot image with the built kernel image
+name: Repack Certified Boot Image
+description: Repack a certified GKI boot image with the built kernel image
 inputs:
+  android_version:
+    description: Android version token, for example android12 or android13
+    required: true
+  kernel_version:
+    description: Kernel version token, for example 5.10 or 6.1
+    required: true
   image_path:
     description: Path to the kernel Image to pack into boot.img
     required: true
@@ -31,9 +37,9 @@ inputs:
     required: false
     default: "67108864"
   os_version:
-    description: OS version passed to mkbootimg
+    description: OS version passed to mkbootimg (empty = derive from android_version)
     required: false
-    default: "12.0.0"
+    default: ""
 outputs:
   output_dir:
     description: Directory containing generated compressed boot images
@@ -77,6 +83,8 @@ runs:
       run: |
         set -euo pipefail
 
+        ANDROID_VERSION="${{ inputs.android_version }}"
+        KERNEL_VERSION="${{ inputs.kernel_version }}"
         IMAGE_PATH="${{ inputs.image_path }}"
         IMAGE_LZ4_PATH="${{ inputs.image_lz4_path }}"
         SUBLEVEL="${{ inputs.sublevel }}"
@@ -89,13 +97,27 @@ runs:
         TOOLS_DIR="$RUNNER_TEMP/mkbootimg-tools"
         OUTPUT_ROOT="${{ github.workspace }}/certified-boot"
 
+        if [[ -z "$ANDROID_VERSION" || -z "$KERNEL_VERSION" ]]; then
+          echo "android_version and kernel_version are required" >&2
+          exit 1
+        fi
+
         if [[ ! -f "$IMAGE_PATH" ]]; then
           echo "Missing kernel Image at $IMAGE_PATH" >&2
           exit 1
         fi
 
+        if [[ -z "$OS_VERSION" ]]; then
+          if [[ "$ANDROID_VERSION" =~ ^android([0-9]+)$ ]]; then
+            OS_VERSION="${BASH_REMATCH[1]}.0.0"
+          else
+            echo "Could not derive os_version from android_version=$ANDROID_VERSION" >&2
+            exit 1
+          fi
+        fi
+
         if [[ -z "$ARTIFACT_PREFIX" ]]; then
-          ARTIFACT_PREFIX="android12-5.10.${SUBLEVEL}_${PATCH_LEVEL}_${REVISION}"
+          ARTIFACT_PREFIX="${KERNEL_VERSION}.${SUBLEVEL}-${ANDROID_VERSION}-${PATCH_LEVEL}"
         fi
 
         AVBTOOL_PATH="${{ github.workspace }}/kernel_patches/kernel-build-tools/linux-x86/bin/avbtool"
@@ -116,7 +138,7 @@ runs:
           for candidate in \
             "$IMAGE_LZ4_PATH" \
             "$HOME/out/dist/Image.lz4" \
-            "${{ github.workspace }}/kernel/out/android12-5.10/dist/Image.lz4"; do
+            "${{ github.workspace }}/kernel/out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/Image.lz4"; do
             if [[ -n "$candidate" && -f "$candidate" ]]; then
               printf '%s\n' "$candidate"
               return 0
@@ -133,7 +155,7 @@ runs:
         download_zip() {
           local patch_level="$1"
           local revision="$2"
-          local zip_name="gki-certified-boot-android12-5.10-${patch_level}_${revision}.zip"
+          local zip_name="gki-certified-boot-${ANDROID_VERSION}-${KERNEL_VERSION}-${patch_level}_${revision}.zip"
           local url="https://dl.google.com/android/gki/${zip_name}"
           local http_code
 
