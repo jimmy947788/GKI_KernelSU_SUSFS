@@ -73,6 +73,42 @@ If your device firmware/vendor stack is from one patch level, flashing a kernel 
 - For Pixel 6 Pro on Android 13 `raven-tq3a.230901.001`, start with `android13-5.10` + `2023-09`.
 - Test normal build first, then try bypass/KPM only after a known-good boot.
 
+### Pixel 6 Pro (`raven`) fixed examples
+
+If your phone fingerprint is `google/raven/raven:13/TQ3A.230901.001/...`, use `android13-5.10` with `2023-09`.
+
+SukiSU Ultra + SUSFS, no KPM:
+
+```yaml
+release_type: Action
+kernel_build_version: android13-5.10
+os_patch_level_filter: "2023-09"
+feature_set: KSUN+SUSFS
+use_kpm: "false"
+runner_label: "gki-local"
+quick_mode: "true"
+ksu_branch: ""
+```
+
+SukiSU Ultra + SUSFS + KPM:
+
+```yaml
+release_type: Action
+kernel_build_version: android13-5.10
+os_patch_level_filter: "2023-09"
+feature_set: KSUN+SUSFS
+use_kpm: "true"
+runner_label: "gki-local"
+quick_mode: "true"
+ksu_branch: ""
+```
+
+How to read the SukiSU app result:
+
+- `use_kpm=false`: the SukiSU Ultra app should detect built-in mode.
+- `use_kpm=true`: the workflow still integrates SukiSU Ultra, then additionally patches the final kernel image with KPM.
+- A manager/driver version mismatch warning does not automatically mean root failed; it only means the app version is not exactly the same as the in-kernel driver version.
+
 ### Valid values for `os_patch_level_filter` (Action input)
 
 Use one of the dates below in the Action input `os_patch_level_filter`.
@@ -137,6 +173,11 @@ Current behavior when `use_kpm=true`:
 Practical note:
 
 - `use_kpm=true` is heavier than built-in mode because it also downloads/builds the KernelPatch toolchain pieces.
+
+Current `KSUN+SUSFS` behavior:
+
+- `use_kpm=false`: uses SukiSU Ultra without KPM patching, so the SukiSU Ultra manager can detect built-in mode.
+- `use_kpm=true`: uses SukiSU Ultra and additionally applies the KPM image patch step.
 
 Old zip files built before the SukiSU / KPM integration change will still behave like the old build and may boot successfully while the SukiSU app still reports that root is unavailable.
 

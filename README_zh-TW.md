@@ -74,6 +74,42 @@ GKI 安裝方式請參考官方文件：
 - Pixel 6 Pro（Android 13，`raven-tq3a.230901.001`）建議先從 `android13-5.10` + `2023-09` 開始。
 - 先測 normal 版可開機，再逐步嘗試 bypass/KPM。
 
+### Pixel 6 Pro（`raven`）固定範例
+
+如果你的手機 fingerprint 是 `google/raven/raven:13/TQ3A.230901.001/...`，就用 `android13-5.10` 搭配 `2023-09`。
+
+SukiSU Ultra + SUSFS，無 KPM：
+
+```yaml
+release_type: Action
+kernel_build_version: android13-5.10
+os_patch_level_filter: "2023-09"
+feature_set: KSUN+SUSFS
+use_kpm: "false"
+runner_label: "gki-local"
+quick_mode: "true"
+ksu_branch: ""
+```
+
+SukiSU Ultra + SUSFS + KPM：
+
+```yaml
+release_type: Action
+kernel_build_version: android13-5.10
+os_patch_level_filter: "2023-09"
+feature_set: KSUN+SUSFS
+use_kpm: "true"
+runner_label: "gki-local"
+quick_mode: "true"
+ksu_branch: ""
+```
+
+SukiSU app 畫面判讀方式：
+
+- `use_kpm=false`：SukiSU Ultra app 應該會判斷成 built-in 模式。
+- `use_kpm=true`：workflow 一樣會整合 SukiSU Ultra，但還會在封裝前額外把最終 kernel image patch 成 KPM 版。
+- 若出現 manager/driver version mismatch，不代表沒有 root，只代表 app 版本和 kernel 內 driver 版本不完全一致。
+
 ### 編譯產物：`Flashable-Zips` 與 `AnyKernel3` 差異
 
 每次 workflow 成功後，通常會看到兩組同前綴產物：
@@ -142,6 +178,11 @@ Actions 選單中各選項意義：
 實務注意：
 
 - `use_kpm=true` 會比 built-in 模式更重，因為還需要下載並建置 KernelPatch 相關工具鏈與產物。
+
+目前 `KSUN+SUSFS` 的行為：
+
+- `use_kpm=false`：走 SukiSU Ultra，但不做 KPM patch，SukiSU Ultra manager 可判斷 built-in 模式。
+- `use_kpm=true`：走 SukiSU Ultra，並額外對最終 kernel image 套用 KPM patch。
 
 ### GitHub Actions `quick_mode`（快速編譯）
 
