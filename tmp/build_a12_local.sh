@@ -4,32 +4,36 @@ set -euo pipefail
 usage() {
     cat <<'EOF'
 Usage:
-  build_a12_local.sh --sublevel 236 --patch-level 2025-05 [options]
+  build_a12_local.sh --android-version android13 --kernel-version 5.10 --sublevel 186 --patch-level 2023-09 [options]
 
 Required:
-  --sublevel N             Kernel sublevel, for example 236
-  --patch-level YYYY-MM    Android OS patch level, for example 2025-05
+  --android-version NAME   Android version token, for example android12/android13/android14
+  --kernel-version VER     Kernel version token, for example 5.10/5.15/6.1
+  --sublevel N             Kernel sublevel, for example 186
+  --patch-level YYYY-MM    Android OS patch level, for example 2023-09
 
 Optional:
   --revision R             GKI revision suffix, default: r1
   --dist-dir PATH          Kernel dist dir containing Image, default:
-                           <repo>/android12-5.10-<sublevel>/out/android12-5.10/dist
+                           <repo>/<android>-<kernel>-<sublevel>/out/<android>-<kernel>/dist
   --workspace PATH         Output workspace, default: <repo>/tmp/output
-  --fallback-patch-level   Explicit fallback patch level if the target GKI zip is unavailable
+  --fallback-patch-level   Explicit fallback patch level if target GKI zip is unavailable
   --boot-size BYTES        Boot partition size, default: 67108864
-  --os-version VER         OS version passed to mkbootimg, default: 12.0.0
+  --os-version VER         OS version for mkbootimg (empty = derive from android_version)
 
 Environment overrides:
   AVBTOOL MKBOOTIMG UNPACK_BOOTIMG GZIP AVB_KEY
 
-This script repacks a certified Android 12 GKI boot image with a locally built
-kernel Image/Image.lz4. It does not build the kernel itself.
+This script repacks a certified GKI boot image with a locally built kernel Image/Image.lz4.
+It does not build the kernel itself.
 EOF
 }
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd -- "$SCRIPT_DIR/.." && pwd)
 
+ANDROID_VERSION=""
+KERNEL_VERSION=""
 SUBLEVEL=""
 PATCH_LEVEL=""
 REVISION="r1"
@@ -37,10 +41,18 @@ DIST_DIR=""
 WORKSPACE="$REPO_ROOT/tmp/output"
 FALLBACK_PATCH_LEVEL=""
 BOOT_SIZE=$((64 * 1024 * 1024))
-OS_VERSION="12.0.0"
+OS_VERSION=""
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
+        --android-version)
+            ANDROID_VERSION="$2"
+            shift 2
+            ;;
+        --kernel-version)
+            KERNEL_VERSION="$2"
+            shift 2
+            ;;
         --sublevel)
             SUBLEVEL="$2"
             shift 2
@@ -85,13 +97,22 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-if [[ -z "$SUBLEVEL" || -z "$PATCH_LEVEL" ]]; then
+if [[ -z "$ANDROID_VERSION" || -z "$KERNEL_VERSION" || -z "$SUBLEVEL" || -z "$PATCH_LEVEL" ]]; then
     usage >&2
     exit 2
 fi
 
+if [[ -z "$OS_VERSION" ]]; then
+    if [[ "$ANDROID_VERSION" =~ ^android([0-9]+)$ ]]; then
+        OS_VERSION="${BASH_REMATCH[1]}.0.0"
+    else
+        echo "Could not derive os_version from android_version=$ANDROID_VERSION" >&2
+        exit 1
+    fi
+fi
+
 if [[ -z "$DIST_DIR" ]]; then
-    DIST_DIR="$REPO_ROOT/android12-5.10-$SUBLEVEL/out/android12-5.10/dist"
+    DIST_DIR="$REPO_ROOT/${ANDROID_VERSION}-${KERNEL_VERSION}-${SUBLEVEL}/out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist"
 fi
 
 find_tool() {
@@ -157,10 +178,8 @@ if [[ ! -f "$DIST_DIR/Image" ]]; then
     exit 1
 fi
 
-TARGET_NAME="android12-5.10.${SUBLEVEL}_${PATCH_LEVEL}_${REVISION}"
+TARGET_NAME="${KERNEL_VERSION}.${SUBLEVEL}-${ANDROID_VERSION}-${PATCH_LEVEL}"
 BUILD_DIR="$WORKSPACE/$TARGET_NAME"
-ZIP_NAME="gki-certified-boot-android12-5.10-${PATCH_LEVEL}_${REVISION}.zip"
-GKI_URL="https://dl.google.com/android/gki/${ZIP_NAME}"
 
 mkdir -p "$BUILD_DIR"
 cd "$BUILD_DIR"
@@ -170,7 +189,7 @@ mkdir -p extracted
 download_zip() {
     local patch_level="$1"
     local revision="$2"
-    local zip_name="gki-certified-boot-android12-5.10-${patch_level}_${revision}.zip"
+    local zip_name="gki-certified-boot-${ANDROID_VERSION}-${KERNEL_VERSION}-${patch_level}_${revision}.zip"
     local url="https://dl.google.com/android/gki/${zip_name}"
 
     echo "[+] Checking $url"
@@ -193,9 +212,9 @@ if ! download_zip "$PATCH_LEVEL" "$REVISION"; then
             exit 1
         }
         PATCH_LEVEL="$FALLBACK_PATCH_LEVEL"
-        TARGET_NAME="android12-5.10.${SUBLEVEL}_${PATCH_LEVEL}_${REVISION}"
+        TARGET_NAME="${KERNEL_VERSION}.${SUBLEVEL}-${ANDROID_VERSION}-${PATCH_LEVEL}"
     else
-        echo "Target GKI zip not found: $GKI_URL" >&2
+        echo "Target GKI zip not found for ${ANDROID_VERSION}-${KERNEL_VERSION}-${PATCH_LEVEL}_${REVISION}" >&2
         echo "Refusing to silently fall back to a different patch level." >&2
         exit 1
     fi
