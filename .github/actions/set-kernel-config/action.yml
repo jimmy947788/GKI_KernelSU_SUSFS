@@ -9,22 +9,22 @@ inputs:
 runs:
   using: composite
   steps:
-  - name: Patch gki_defconfig
+  - name: Patch kernel configs
     shell: bash
     working-directory: ${{ github.workspace }}/kernel/common
     run: |
       set -euo pipefail
 
-      DEFCONFIG="arch/arm64/configs/gki_defconfig"
       CONFIG_LIST="${{ inputs.config_list }}"
-
-      if [ ! -f "$DEFCONFIG" ]; then
-        echo "ERROR: gki_defconfig not found"
-        exit 1
-      fi
+      TARGET_FILES=(
+        "arch/arm64/configs/gki_defconfig"
+        "arch/arm64/configs/gki.fragment"
+        ".config"
+      )
 
       apply_line() {
-        local line="$1"
+        local target="$1"
+        local line="$2"
         line="$(echo "$line" | xargs)"
 
         # skip empty/comments
@@ -42,16 +42,25 @@ runs:
         echo "Processing: $key=$value"
 
         # if config exists anywhere in file → replace it
-        if grep -q "^$key=" "$DEFCONFIG"; then
-          sed -i "s|^$key=.*|$key=$value|g" "$DEFCONFIG"
-        elif grep -q "^# $key is not set" "$DEFCONFIG"; then
-          sed -i "s|^# $key is not set|$key=$value|g" "$DEFCONFIG"
+        if grep -q "^$key=" "$target"; then
+          sed -i "s|^$key=.*|$key=$value|g" "$target"
+        elif grep -q "^# $key is not set" "$target"; then
+          sed -i "s|^# $key is not set|$key=$value|g" "$target"
         else
-          # not present → append
-          echo "$key=$value" >> "$DEFCONFIG"
+          echo "$key=$value" >> "$target"
         fi
       }
 
-      while IFS= read -r line || [ -n "$line" ]; do
-        apply_line "$line"
-      done <<< "$CONFIG_LIST"
+      for target in "${TARGET_FILES[@]}"; do
+        if [ -f "$target" ]; then
+          echo "Patching $target"
+          while IFS= read -r line || [ -n "$line" ]; do
+            apply_line "$target" "$line"
+          done <<< "$CONFIG_LIST"
+        fi
+      done
+
+      if [ ! -f "arch/arm64/configs/gki_defconfig" ] && [ ! -f "arch/arm64/configs/gki.fragment" ] && [ ! -f ".config" ]; then
+        echo "ERROR: no supported kernel config file was found"
+        exit 1
+      fi

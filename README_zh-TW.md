@@ -62,6 +62,34 @@ GKI 安裝方式請參考官方文件：
 
 ![KPM 與 SUSFS 皆已啟用](docs/images/kpm-susfs-enabled.png)
 
+### 疑難排解：WebUI 顯示全 0、按鈕沒反應、自動隱藏為空
+
+若你看到 `SUS 路徑 / SUS 映射 / SUS 掛載 / 嘗試卸載` 全部都是 `0`，通常代表「SUSFS 使用者空間規則沒有載入」或「WebUI 腳本未拿到 root 執行權限」，不一定是 kernel 沒編進去。
+
+先用下面指令確認 kernel 端是否存在 SUSFS：
+
+```bash
+adb shell su -c 'zcat /proc/config.gz 2>/dev/null | grep -E "CONFIG_KSU|CONFIG_KSU_SUSFS"'
+adb shell su -c 'grep -i susfs /proc/kallsyms | head -n 20'
+```
+
+再確認模組端是否完整安裝：
+
+```bash
+adb shell su -c 'ls -al /data/adb/modules'
+adb shell su -c 'ls -al /data/adb/modules | grep -i susfs'
+adb shell su -c 'ls -al /data/adb/susfs 2>/dev/null'
+```
+
+如果 kernel 端有 SUSFS 符號、但 WebUI 仍全 0，請依序做：
+
+1. 在 SukiSU/KernelSU 管理器中，確認 WebUI 對應應用有 root 權限（允許且不彈窗）。
+2. 重新安裝最新版 `SUSFS-FOR-KERNELSU` 模組（需符合 WebUI 顯示的最低版本要求，例如 `v1.5.3+-r28`）。
+3. 同時安裝並啟用 `Zygisk Next` 與 `KPatch-Next Module`，安裝後完整重開機。
+4. 進入模組頁面執行一次動作（例如重建/套用規則）再回 WebUI 檢查計數。
+
+補充：`自動隱藏設定` 的內容來自 SUSFS 模組與其規則檔，不是 kernel 內建固定清單。若該區塊是空白，優先排查模組初始化與權限，而不是只重編 kernel。
+
 ---
 
 ## 🧭 OS Patch Level 對應說明（重要）

@@ -249,6 +249,47 @@ jobs:
     - name: Setup Misc Configs
       uses: ./.github/actions/misc
 
+    - name: Verify SUSFS config in source config files
+      if: contains(inputs.feature_set, 'SUSFS') || inputs.feature_set == 'FULL'
+      shell: bash
+      working-directory: ${{ github.workspace }}/kernel/common
+      run: |
+        set -euo pipefail
+
+        required_cfgs=(
+          CONFIG_KSU_SUSFS
+          CONFIG_KSU_SUSFS_SUS_PATH
+          CONFIG_KSU_SUSFS_SUS_MOUNT
+          CONFIG_KSU_SUSFS_SUS_MAP
+          CONFIG_KSU_SUSFS_SPOOF_UNAME
+        )
+
+        candidates=(
+          "arch/arm64/configs/gki_defconfig"
+          "arch/arm64/configs/gki.fragment"
+          ".config"
+        )
+
+        found_any=0
+        for cfg_file in "${candidates[@]}"; do
+          [ -f "$cfg_file" ] || continue
+          found_any=1
+          echo "Checking SUSFS configs in $cfg_file"
+          for cfg in "${required_cfgs[@]}"; do
+            if ! grep -q "^${cfg}=y$" "$cfg_file"; then
+              echo "ERROR: ${cfg} is not present in ${cfg_file}"
+              exit 1
+            fi
+          done
+        done
+
+        if [ "$found_any" -ne 1 ]; then
+          echo "ERROR: no source config file found to verify SUSFS options"
+          exit 1
+        fi
+
+        echo "SUSFS config verified in source config files"
+
     - name: Enable BTF
       uses: ./.github/actions/btf
       with:
@@ -394,6 +435,62 @@ jobs:
       with:
         version: ${{ inputs.version }}
         bypass: false
+
+    - name: Verify SUSFS symbols in built artifacts
+      if: contains(inputs.feature_set, 'SUSFS') || inputs.feature_set == 'FULL'
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        map_candidates=(
+          "$HOME/out/dist/System.map"
+          "$HOME/out/System.map"
+          "${{ github.workspace }}/kernel/bazel-bin/common/kernel_aarch64/System.map"
+        )
+
+        map_found=0
+        map_has_susfs=0
+        for map_file in "${map_candidates[@]}"; do
+          if [ -f "$map_file" ]; then
+            map_found=1
+            echo "Found System.map: $map_file"
+            if grep -qi 'susfs' "$map_file"; then
+              map_has_susfs=1
+              echo "SUSFS symbols found in $map_file"
+              break
+            fi
+          fi
+        done
+
+        if [ "$map_has_susfs" -eq 1 ]; then
+          exit 0
+        fi
+
+        image_candidates=(
+          "${{ github.workspace }}/AnyKernel3/Image"
+          "$HOME/out/dist/Image"
+          "${{ github.workspace }}/kernel/bazel-bin/common/kernel_aarch64/Image"
+        )
+
+        image_checked=0
+        for image_file in "${image_candidates[@]}"; do
+          if [ -f "$image_file" ]; then
+            image_checked=1
+            echo "Fallback check on Image: $image_file"
+            if strings "$image_file" | grep -qi 'susfs'; then
+              echo "SUSFS marker found in $image_file"
+              exit 0
+            fi
+          fi
+        done
+
+        if [ "$map_found" -eq 0 ] && [ "$image_checked" -eq 0 ]; then
+          echo "ERROR: could not find System.map or Image to verify SUSFS integration"
+          exit 1
+        fi
+
+        echo "ERROR: SUSFS was requested but no SUSFS symbols/markers were found in built artifacts"
+        exit 1
 
     - name: Get Cache Stats
       uses: ./.github/actions/cache-stats
