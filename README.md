@@ -50,6 +50,18 @@ For GKI installation, please follow the official guide:
 
 📖 **[KernelSU Installation Guide](https://kernelsu.org/guide/installation.html)**
 
+### Recommended Modules (KPM + SUSFS)
+
+Install these three modules in SukiSU/KernelSU manager:
+
+- [Zygisk Next](https://github.com/Dr-TSNG/ZygiskNext)
+- [KPatch-Next Module](https://github.com/KernelSU-Next/KPatch-Next-Module)
+- [SUSFS-FOR-KERNELSU](https://github.com/sidex15/susfs4ksu-module)
+
+### Verified Working State (KPM + SUSFS)
+
+![KPM and SUSFS both enabled](docs/images/kpm-susfs-enabled.png)
+
 ---
 
 ## 🧭 OS Patch Level Mapping (Important)

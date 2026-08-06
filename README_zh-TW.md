@@ -50,6 +50,18 @@ GKI 安裝方式請參考官方文件：
 
 📖 **[KernelSU 安裝指南](https://kernelsu.org/guide/installation.html)**
 
+### 建議安裝模組（KPM + SUSFS）
+
+請在 SukiSU/KernelSU 管理器安裝以下三個模組：
+
+- [Zygisk Next](https://github.com/Dr-TSNG/ZygiskNext)
+- [KPatch-Next Module](https://github.com/KernelSU-Next/KPatch-Next-Module)
+- [SUSFS-FOR-KERNELSU](https://github.com/sidex15/susfs4ksu-module)
+
+### 驗證成功畫面（KPM + SUSFS）
+
+![KPM 與 SUSFS 皆已啟用](docs/images/kpm-susfs-enabled.png)
+
 ---
 
 ## 🧭 OS Patch Level 對應說明（重要）
