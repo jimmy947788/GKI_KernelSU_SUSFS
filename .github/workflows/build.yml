@@ -47,6 +47,26 @@ on:
         required: false
         type: string
         default: ""
+      gki_revision:
+        required: false
+        type: string
+        default: "r1"
+      fallback_patch_level:
+        required: false
+        type: string
+        default: ""
+      repack_boot_size:
+        required: false
+        type: string
+        default: "67108864"
+      repack_os_version:
+        required: false
+        type: string
+        default: ""
+      repack_image_lz4_path:
+        required: false
+        type: string
+        default: ""
 
 jobs:
   build-gki:
@@ -415,9 +435,14 @@ jobs:
         android_version: ${{ inputs.android_version }}
         kernel_version: ${{ inputs.kernel_version }}
         image_path: ${{ github.workspace }}/AnyKernel3/Image
+        image_lz4_path: ${{ inputs.repack_image_lz4_path }}
         sublevel: ${{ steps.extract.outputs.sublevel }}
         os_patch_level: ${{ inputs.os_patch_level }}
         artifact_prefix: ${{ steps.extract.outputs.file_name }}
+        gki_revision: ${{ inputs.gki_revision }}
+        fallback_patch_level: ${{ inputs.fallback_patch_level }}
+        boot_size: ${{ inputs.repack_boot_size }}
+        os_version: ${{ inputs.repack_os_version }}
 
     - name: Get Cache Stats
       uses: ./.github/actions/cache-stats
