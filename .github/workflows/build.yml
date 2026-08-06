@@ -442,55 +442,87 @@ jobs:
       run: |
         set -euo pipefail
 
-        map_candidates=(
-          "$HOME/out/dist/System.map"
-          "$HOME/out/System.map"
-          "${{ github.workspace }}/kernel/bazel-bin/common/kernel_aarch64/System.map"
-        )
-
-        map_found=0
-        map_has_susfs=0
-        for map_file in "${map_candidates[@]}"; do
-          if [ -f "$map_file" ]; then
-            map_found=1
-            echo "Found System.map: $map_file"
-            if grep -qi 'susfs' "$map_file"; then
-              map_has_susfs=1
-              echo "SUSFS symbols found in $map_file"
-              break
-            fi
-          fi
-        done
-
-        if [ "$map_has_susfs" -eq 1 ]; then
-          exit 0
-        fi
-
         image_candidates=(
           "${{ github.workspace }}/AnyKernel3/Image"
           "$HOME/out/dist/Image"
           "${{ github.workspace }}/kernel/bazel-bin/common/kernel_aarch64/Image"
         )
 
-        image_checked=0
-        for image_file in "${image_candidates[@]}"; do
-          if [ -f "$image_file" ]; then
-            image_checked=1
-            echo "Fallback check on Image: $image_file"
-            if strings "$image_file" | grep -qi 'susfs'; then
-              echo "SUSFS marker found in $image_file"
-              exit 0
+        map_candidates=(
+          "$HOME/out/dist/System.map"
+          "$HOME/out/System.map"
+          "${{ github.workspace }}/kernel/bazel-bin/common/kernel_aarch64/System.map"
+        )
+
+        required_cfgs=(
+          CONFIG_KSU_SUSFS
+          CONFIG_KSU_SUSFS_SUS_PATH
+          CONFIG_KSU_SUSFS_SUS_MOUNT
+          CONFIG_KSU_SUSFS_SUS_MAP
+          CONFIG_KSU_SUSFS_SPOOF_UNAME
+        )
+
+        map_has_susfs=0
+        for map_file in "${map_candidates[@]}"; do
+          if [ -f "$map_file" ]; then
+            echo "Found System.map: $map_file"
+            if grep -qE '(^|_)susfs_' "$map_file"; then
+              map_has_susfs=1
+              echo "Found SUSFS function symbols in $map_file"
+              break
             fi
           fi
         done
 
-        if [ "$map_found" -eq 0 ] && [ "$image_checked" -eq 0 ]; then
-          echo "ERROR: could not find System.map or Image to verify SUSFS integration"
+        ikconfig_checked=0
+        ikconfig_ok=0
+        extract_script="${{ github.workspace }}/kernel/common/scripts/extract-ikconfig"
+
+        for image_file in "${image_candidates[@]}"; do
+          [ -f "$image_file" ] || continue
+          if [ ! -x "$extract_script" ]; then
+            echo "ERROR: extract-ikconfig script missing at $extract_script"
+            exit 1
+          fi
+
+          ikconfig_checked=1
+          echo "Checking IKCONFIG in $image_file"
+          if ! "$extract_script" "$image_file" > /tmp/ikconfig.txt 2>/dev/null; then
+            echo "WARNING: could not extract IKCONFIG from $image_file"
+            continue
+          fi
+
+          cfg_missing=0
+          for cfg in "${required_cfgs[@]}"; do
+            if ! grep -q "^${cfg}=y$" /tmp/ikconfig.txt; then
+              echo "Missing ${cfg}=y in IKCONFIG from $image_file"
+              cfg_missing=1
+            fi
+          done
+
+          if [ "$cfg_missing" -eq 0 ]; then
+            ikconfig_ok=1
+            echo "IKCONFIG confirms SUSFS options enabled in $image_file"
+            break
+          fi
+        done
+
+        if [ "$ikconfig_checked" -eq 0 ]; then
+          echo "ERROR: no built Image found for SUSFS verification"
           exit 1
         fi
 
-        echo "ERROR: SUSFS was requested but no SUSFS symbols/markers were found in built artifacts"
-        exit 1
+        if [ "$ikconfig_ok" -ne 1 ]; then
+          echo "ERROR: SUSFS requested but IKCONFIG does not contain required CONFIG_KSU_SUSFS options"
+          exit 1
+        fi
+
+        if [ "$map_has_susfs" -ne 1 ]; then
+          echo "ERROR: SUSFS requested but System.map does not contain expected susfs_* symbols"
+          exit 1
+        fi
+
+        echo "SUSFS verification passed (IKCONFIG + System.map symbols)"
 
     - name: Get Cache Stats
       uses: ./.github/actions/cache-stats
