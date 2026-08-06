@@ -150,17 +150,32 @@ jobs:
         os_patch_level: ${{ inputs.os_patch_level }}
 
     - name: Setup SukiSU Ultra
-      if: ${{ (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') && (contains(inputs.feature_set, 'SUSFS') || inputs.feature_set == 'FULL') }}
+      if: ${{ (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') && !contains(inputs.feature_set, 'SUSFS') && inputs.feature_set != 'FULL' }}
       uses: ./.github/actions/sukisu
       with:
         ksu_branch: ${{ inputs.ksu_branch }}
         feature_set: ${{ inputs.feature_set }}
 
     - name: Setup KernelSU-Next
-      if: ${{ (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') && !contains(inputs.feature_set, 'SUSFS') && inputs.feature_set != 'FULL' }}
+      if: ${{ (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') && (contains(inputs.feature_set, 'SUSFS') || inputs.feature_set == 'FULL') }}
       uses: ./.github/actions/kernelsu
       with:
         ksu_branch: ${{ inputs.ksu_branch }}
+
+    - name: Verify KernelSU SUSFS Kconfig symbols
+      if: contains(inputs.feature_set, 'SUSFS') || inputs.feature_set == 'FULL'
+      shell: bash
+      working-directory: ${{ github.workspace }}/kernel
+      run: |
+        set -euo pipefail
+
+        if ! grep -RqsE '^[[:space:]]*config[[:space:]]+KSU_SUSFS([[:space:]]|$)' KernelSU-Next/kernel/KernelSU 2>/dev/null; then
+          echo "ERROR: KernelSU SUSFS Kconfig symbol (KSU_SUSFS) not found in integrated KernelSU tree"
+          echo "ERROR: This usually means a non-SUSFS KernelSU branch/commit was used"
+          exit 1
+        fi
+
+        echo "KernelSU SUSFS Kconfig symbols detected"
 
     - name: SUSFS
       if: contains(inputs.feature_set, 'SUSFS') || inputs.feature_set == 'FULL'
