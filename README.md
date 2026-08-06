@@ -137,6 +137,10 @@ After a successful workflow run, you will usually see two artifact groups with t
 - `...-AnyKernel3`
 - `...-Flashable-Zips`
 
+For Android 12 `use_kpm=true` builds, you may also see:
+
+- `...-Certified-Boot`
+
 What each one means:
 
 - `AnyKernel3`
@@ -150,6 +154,11 @@ What each one means:
 		- `...-AnyKernel3-normal.zip` (standard kernel image)
 		- `...-AnyKernel3-bypass.zip` (bypass kernel image)
 	- Recommended for normal usage when you just want to download and flash.
+
+- `Certified-Boot`
+	- Android 12 only, generated from the Google certified boot image flow after KPM patching.
+	- Contains compressed `boot.img` variants built from the patched kernel image.
+	- Use this when your Android 12 device expects direct boot image flashing instead of the AnyKernel3 path.
 
 Quick recommendation:
 

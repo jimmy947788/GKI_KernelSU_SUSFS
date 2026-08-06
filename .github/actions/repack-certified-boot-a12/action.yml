@@ -1,0 +1,227 @@
+name: Repack Android 12 Certified Boot
+description: Repack a certified Android 12 GKI boot image with the built kernel image
+inputs:
+  image_path:
+    description: Path to the kernel Image to pack into boot.img
+    required: true
+  image_lz4_path:
+    description: Optional path to Image.lz4 for boot-lz4 output
+    required: false
+    default: ""
+  sublevel:
+    description: Kernel sublevel
+    required: true
+  os_patch_level:
+    description: Android OS patch level (YYYY-MM)
+    required: true
+  artifact_prefix:
+    description: Prefix for generated file names
+    required: false
+    default: ""
+  gki_revision:
+    description: Certified boot image revision suffix
+    required: false
+    default: "r1"
+  fallback_patch_level:
+    description: Optional fallback patch level if the target certified boot zip is unavailable
+    required: false
+    default: ""
+  boot_size:
+    description: Boot partition size in bytes
+    required: false
+    default: "67108864"
+  os_version:
+    description: OS version passed to mkbootimg
+    required: false
+    default: "12.0.0"
+outputs:
+  output_dir:
+    description: Directory containing generated compressed boot images
+    value: ${{ steps.repack.outputs.output_dir }}
+runs:
+  using: composite
+  steps:
+    - name: Prepare mkbootimg tools
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        TOOLS_DIR="$RUNNER_TEMP/mkbootimg-tools"
+        export TOOLS_DIR
+        mkdir -p "$TOOLS_DIR/gki"
+
+        python3 - <<'PY'
+        import base64
+        import os
+        import pathlib
+        import urllib.request
+
+        base = 'https://android.googlesource.com/platform/system/tools/mkbootimg/+/refs/heads/main/'
+        files = {
+            'mkbootimg.py': 'mkbootimg.py',
+            'unpack_bootimg.py': 'unpack_bootimg.py',
+            'gki/generate_gki_certificate.py': 'gki/generate_gki_certificate.py',
+        }
+        tools_dir = pathlib.Path(os.environ['TOOLS_DIR'])
+        for remote_name, local_name in files.items():
+            url = f'{base}{remote_name}?format=TEXT'
+            data = urllib.request.urlopen(url).read()
+            target = tools_dir / local_name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(base64.b64decode(data))
+        PY
+
+    - name: Repack certified boot image
+      id: repack
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        IMAGE_PATH="${{ inputs.image_path }}"
+        IMAGE_LZ4_PATH="${{ inputs.image_lz4_path }}"
+        SUBLEVEL="${{ inputs.sublevel }}"
+        PATCH_LEVEL="${{ inputs.os_patch_level }}"
+        REVISION="${{ inputs.gki_revision }}"
+        FALLBACK_PATCH_LEVEL="${{ inputs.fallback_patch_level }}"
+        BOOT_SIZE="${{ inputs.boot_size }}"
+        OS_VERSION="${{ inputs.os_version }}"
+        ARTIFACT_PREFIX="${{ inputs.artifact_prefix }}"
+        TOOLS_DIR="$RUNNER_TEMP/mkbootimg-tools"
+        OUTPUT_ROOT="${{ github.workspace }}/certified-boot"
+
+        if [[ ! -f "$IMAGE_PATH" ]]; then
+          echo "Missing kernel Image at $IMAGE_PATH" >&2
+          exit 1
+        fi
+
+        if [[ -z "$ARTIFACT_PREFIX" ]]; then
+          ARTIFACT_PREFIX="android12-5.10.${SUBLEVEL}_${PATCH_LEVEL}_${REVISION}"
+        fi
+
+        AVBTOOL_PATH="${{ github.workspace }}/kernel_patches/kernel-build-tools/linux-x86/bin/avbtool"
+        AVB_KEY_PATH="${{ github.workspace }}/kernel_patches/kernel-build-tools/linux-x86/share/avb/testkey_rsa2048.pem"
+
+        if [[ ! -x "$AVBTOOL_PATH" ]]; then
+          echo "Missing avbtool at $AVBTOOL_PATH" >&2
+          exit 1
+        fi
+
+        if [[ ! -f "$AVB_KEY_PATH" ]]; then
+          echo "Missing AVB key at $AVB_KEY_PATH" >&2
+          exit 1
+        fi
+
+        find_optional_lz4() {
+          local candidate
+          for candidate in \
+            "$IMAGE_LZ4_PATH" \
+            "$HOME/out/dist/Image.lz4" \
+            "${{ github.workspace }}/kernel/out/android12-5.10/dist/Image.lz4"; do
+            if [[ -n "$candidate" && -f "$candidate" ]]; then
+              printf '%s\n' "$candidate"
+              return 0
+            fi
+          done
+          return 1
+        }
+
+        TARGET_BUILD_DIR="$OUTPUT_ROOT/$ARTIFACT_PREFIX"
+        rm -rf "$TARGET_BUILD_DIR"
+        mkdir -p "$TARGET_BUILD_DIR/extracted"
+        cd "$TARGET_BUILD_DIR"
+
+        download_zip() {
+          local patch_level="$1"
+          local revision="$2"
+          local zip_name="gki-certified-boot-android12-5.10-${patch_level}_${revision}.zip"
+          local url="https://dl.google.com/android/gki/${zip_name}"
+          local http_code
+
+          echo "[+] Checking $url"
+          http_code=$(curl -sL -w '%{http_code}' "$url" -o /dev/null)
+          if [[ "$http_code" == "200" ]]; then
+            echo "[+] Downloading $zip_name"
+            curl -LfsS -o gki-kernel.zip "$url"
+            return 0
+          fi
+
+          return 1
+        }
+
+        if ! download_zip "$PATCH_LEVEL" "$REVISION"; then
+          if [[ -n "$FALLBACK_PATCH_LEVEL" ]]; then
+            echo "[!] Primary GKI zip unavailable, trying fallback patch level $FALLBACK_PATCH_LEVEL"
+            download_zip "$FALLBACK_PATCH_LEVEL" "$REVISION" || {
+              echo "Failed to download both target and fallback GKI zips." >&2
+              exit 1
+            }
+            PATCH_LEVEL="$FALLBACK_PATCH_LEVEL"
+          else
+            echo "Target GKI zip not found for patch level $PATCH_LEVEL" >&2
+            exit 1
+          fi
+        fi
+
+        unzip -qo gki-kernel.zip -d extracted
+        rm -f gki-kernel.zip
+
+        BOOT_IMG=$(find extracted -maxdepth 1 -type f -name 'boot*.img' | head -n1)
+        if [[ -z "$BOOT_IMG" ]]; then
+          echo "Could not find boot image inside downloaded GKI zip." >&2
+          exit 1
+        fi
+
+        echo "[+] Unpacking $(basename "$BOOT_IMG")"
+        python3 "$TOOLS_DIR/unpack_bootimg.py" --boot_img="$BOOT_IMG"
+
+        if [[ ! -d out/ramdisk ]]; then
+          echo "unpack_bootimg did not produce out/ramdisk" >&2
+          exit 1
+        fi
+
+        cp "$IMAGE_PATH" ./Image
+
+        OPTIONAL_LZ4=""
+        if OPTIONAL_LZ4=$(find_optional_lz4); then
+          cp "$OPTIONAL_LZ4" ./Image.lz4
+        fi
+
+        gzip -n -c -9 Image > Image.gz
+
+        build_boot_image() {
+          local kernel_file="$1"
+          local output_name="$2"
+
+          echo "[+] Building $output_name from $kernel_file"
+          python3 "$TOOLS_DIR/mkbootimg.py" \
+            --header_version 4 \
+            --kernel "$kernel_file" \
+            --output "$output_name" \
+            --ramdisk out/ramdisk \
+            --os_version "$OS_VERSION" \
+            --os_patch_level "$PATCH_LEVEL"
+
+          "$AVBTOOL_PATH" add_hash_footer \
+            --partition_name boot \
+            --partition_size "$BOOT_SIZE" \
+            --image "$output_name" \
+            --algorithm SHA256_RSA2048 \
+            --key "$AVB_KEY_PATH"
+
+          gzip -n -f -9 "$output_name"
+          mv "$output_name.gz" "${ARTIFACT_PREFIX}-${output_name}.gz"
+        }
+
+        build_boot_image Image boot.img
+        build_boot_image Image.gz boot-gz.img
+
+        if [[ -f Image.lz4 ]]; then
+          build_boot_image Image.lz4 boot-lz4.img
+        else
+          echo "[!] Image.lz4 not found, skipping boot-lz4.img"
+        fi
+
+        echo "[+] Generated files:"
+        find . -maxdepth 1 -type f -name "${ARTIFACT_PREFIX}-boot*.gz" | sort
+
+        echo "output_dir=$TARGET_BUILD_DIR" >> "$GITHUB_OUTPUT"

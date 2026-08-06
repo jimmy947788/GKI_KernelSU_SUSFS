@@ -117,6 +117,10 @@ SukiSU app 畫面判讀方式：
 - `...-AnyKernel3`
 - `...-Flashable-Zips`
 
+若是 Android 12 且 `use_kpm=true` 的 build，還可能看到：
+
+- `...-Certified-Boot`
+
 用途差異：
 
 - `AnyKernel3`
@@ -130,6 +134,11 @@ SukiSU app 畫面判讀方式：
     - `...-AnyKernel3-normal.zip`（標準核心映像）
     - `...-AnyKernel3-bypass.zip`（bypass 核心映像）
   - 一般使用者建議直接下載這組刷入。
+
+- `Certified-Boot`
+  - 僅限 Android 12，於 KPM patch 完成後依 Google certified boot 流程額外產生。
+  - 內含由 patched kernel image 重新封裝出的壓縮 `boot.img` 變體。
+  - 若你的 Android 12 裝置更適合直接 fastboot/boot image 流程，而不是 AnyKernel3，則優先使用這組。
 
 快速建議：
 
