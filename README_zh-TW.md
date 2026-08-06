@@ -90,6 +90,31 @@ GKI 安裝方式請參考官方文件：
 
 如果你的手機 fingerprint 是 `google/raven/raven:13/TQ3A.230901.001/...`，就用 `android13-5.10` 搭配 `2023-09`。
 
+### 用 ADB 查 `kernel_build_version` 與 `os_patch_level_filter`
+
+先確認手機資訊：
+
+```bash
+adb shell getprop ro.build.version.release
+adb shell uname -r
+adb shell getprop ro.build.version.security_patch
+```
+
+對照方式：
+
+- `kernel_build_version`
+  - Android 版本看 `ro.build.version.release`。
+  - Kernel 主版本看 `uname -r` 開頭，例如 `5.10.186-android13-...` 對應 `5.10`。
+  - 例如 Android 13 + Kernel 5.10 => `android13-5.10`。
+- `os_patch_level_filter`
+  - 直接使用 `ro.build.version.security_patch` 的年月，例如 `2023-09`。
+
+一行快速查看：
+
+```bash
+adb shell 'echo "android=$(getprop ro.build.version.release) kernel=$(uname -r) patch=$(getprop ro.build.version.security_patch)"'
+```
+
 SukiSU Ultra + SUSFS：
 
 ```yaml

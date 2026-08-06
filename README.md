@@ -89,6 +89,31 @@ If your device firmware/vendor stack is from one patch level, flashing a kernel 
 
 If your phone fingerprint is `google/raven/raven:13/TQ3A.230901.001/...`, use `android13-5.10` with `2023-09`.
 
+### Use ADB to determine `kernel_build_version` and `os_patch_level_filter`
+
+Check device values first:
+
+```bash
+adb shell getprop ro.build.version.release
+adb shell uname -r
+adb shell getprop ro.build.version.security_patch
+```
+
+Mapping rules:
+
+- `kernel_build_version`
+	- Android version comes from `ro.build.version.release`.
+	- Kernel major/minor comes from the `uname -r` prefix, for example `5.10.186-android13-...` => `5.10`.
+	- Example: Android 13 + kernel 5.10 => `android13-5.10`.
+- `os_patch_level_filter`
+	- Use year-month from `ro.build.version.security_patch`, for example `2023-09`.
+
+Quick one-liner:
+
+```bash
+adb shell 'echo "android=$(getprop ro.build.version.release) kernel=$(uname -r) patch=$(getprop ro.build.version.security_patch)"'
+```
+
 SukiSU Ultra + SUSFS:
 
 ```yaml
