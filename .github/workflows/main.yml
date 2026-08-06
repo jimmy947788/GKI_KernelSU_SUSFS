@@ -33,11 +33,6 @@ on:
         type: string
         required: false
         default: ""
-      fallback_patch_level:
-        description: "Optional fallback patch level for certified boot repack. Leave empty for best stability"
-        type: string
-        required: false
-        default: ""
       feature_set:
         description: "Feature Set (SukiSU + SUSFS suggestion: KSUN+SUSFS)"
         type: choice
@@ -54,13 +49,6 @@ on:
           - NONE
           - FULL
         default: FULL
-      use_kpm:
-        description: "Enable KPM patch repository (set true for SukiSU+KPM)"
-        type: choice
-        options:
-          - "false"
-          - "true"
-        default: "false"
       runner_label:
         description: "Runner label for kernel build job (e.g. ubuntu-latest or self-hosted)"
         type: string
@@ -155,12 +143,10 @@ jobs:
       config_file: .github/config/android12-5.10.json
       os_patch_level_filter: ${{ inputs.os_patch_level_filter }}
       feature_set: ${{ inputs.feature_set || 'FULL' }}
-      use_kpm: ${{ inputs.use_kpm || 'false' }}
       runner_label: ${{ inputs.runner_label }}
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android12-5-10 }}
-      fallback_patch_level: ${{ inputs.fallback_patch_level }}
     secrets: inherit
 
   build-android13-5-10:
@@ -171,12 +157,10 @@ jobs:
       config_file: .github/config/android13-5.10.json
       os_patch_level_filter: ${{ inputs.os_patch_level_filter }}
       feature_set: ${{ inputs.feature_set || 'FULL' }}
-      use_kpm: ${{ inputs.use_kpm || 'false' }}
       runner_label: ${{ inputs.runner_label }}
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android13-5-10 }}
-      fallback_patch_level: ${{ inputs.fallback_patch_level }}
     secrets: inherit
 
   build-android13-5-15:
@@ -187,12 +171,10 @@ jobs:
       config_file: .github/config/android13-5.15.json
       os_patch_level_filter: ${{ inputs.os_patch_level_filter }}
       feature_set: ${{ inputs.feature_set || 'FULL' }}
-      use_kpm: ${{ inputs.use_kpm || 'false' }}
       runner_label: ${{ inputs.runner_label }}
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android13-5-15 }}
-      fallback_patch_level: ${{ inputs.fallback_patch_level }}
     secrets: inherit
 
   build-android14-5-15:
@@ -203,12 +185,10 @@ jobs:
       config_file: .github/config/android14-5.15.json
       os_patch_level_filter: ${{ inputs.os_patch_level_filter }}
       feature_set: ${{ inputs.feature_set || 'FULL' }}
-      use_kpm: ${{ inputs.use_kpm || 'false' }}
       runner_label: ${{ inputs.runner_label }}
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android14-5-15 }}
-      fallback_patch_level: ${{ inputs.fallback_patch_level }}
     secrets: inherit
 
   build-android14-6-1:
@@ -219,12 +199,10 @@ jobs:
       config_file: .github/config/android14-6.1.json
       os_patch_level_filter: ${{ inputs.os_patch_level_filter }}
       feature_set: ${{ inputs.feature_set || 'FULL' }}
-      use_kpm: ${{ inputs.use_kpm || 'false' }}
       runner_label: ${{ inputs.runner_label }}
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android14-6-1 }}
-      fallback_patch_level: ${{ inputs.fallback_patch_level }}
     secrets: inherit
 
   build-android15-6-6:
@@ -235,12 +213,10 @@ jobs:
       config_file: .github/config/android15-6.6.json
       os_patch_level_filter: ${{ inputs.os_patch_level_filter }}
       feature_set: ${{ inputs.feature_set || 'FULL' }}
-      use_kpm: ${{ inputs.use_kpm || 'false' }}
       runner_label: ${{ inputs.runner_label }}
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android15-6-6 }}
-      fallback_patch_level: ${{ inputs.fallback_patch_level }}
     secrets: inherit
 
   build-android16-6-12:
@@ -251,12 +227,10 @@ jobs:
       config_file: .github/config/android16-6.12.json
       os_patch_level_filter: ${{ inputs.os_patch_level_filter }}
       feature_set: ${{ inputs.feature_set || 'FULL' }}
-      use_kpm: ${{ inputs.use_kpm || 'false' }}
       runner_label: ${{ inputs.runner_label }}
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android16-6-12 }}
-      fallback_patch_level: ${{ inputs.fallback_patch_level }}
     secrets: inherit
 
   rej:

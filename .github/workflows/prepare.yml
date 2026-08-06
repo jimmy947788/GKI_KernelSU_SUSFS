@@ -16,11 +16,6 @@ on:
         description: "Feature Set"
         required: false
         type: string
-      use_kpm:
-        description: "Enable KPM patch repository"
-        required: false
-        type: string
-        default: "false"
       runner_label:
         description: "Runner label for build job"
         required: false
@@ -38,11 +33,6 @@ on:
         default: ""
       susfs_commit:
         description: "SUSFS commit hash (empty = latest on auto-derived branch)"
-        required: false
-        type: string
-        default: ""
-      fallback_patch_level:
-        description: "Optional fallback patch level for certified boot repack"
         required: false
         type: string
         default: ""
@@ -126,10 +116,8 @@ jobs:
       os_patch_level: ${{ matrix.os_patch_level }}
       variant: ${{ matrix.variant }}
       feature_set: ${{ inputs.feature_set }}
-      use_kpm: ${{ inputs.use_kpm }}
       runner_label: ${{ inputs.runner_label }}
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit }}
-      fallback_patch_level: ${{ inputs.fallback_patch_level }}
     secrets: inherit

@@ -72,33 +72,19 @@ GKI 安裝方式請參考官方文件：
 
 - 先讓 build 日期對齊你目前 ROM 的 patch level。
 - Pixel 6 Pro（Android 13，`raven-tq3a.230901.001`）建議先從 `android13-5.10` + `2023-09` 開始。
-- 先測 normal 版可開機，再逐步嘗試 bypass/KPM。
+- 先測 normal 版可開機，再逐步嘗試 bypass。
 
 ### Pixel 6 Pro（`raven`）固定範例
 
 如果你的手機 fingerprint 是 `google/raven/raven:13/TQ3A.230901.001/...`，就用 `android13-5.10` 搭配 `2023-09`。
 
-SukiSU Ultra + SUSFS，無 KPM：
+SukiSU Ultra + SUSFS：
 
 ```yaml
 release_type: Action
 kernel_build_version: android13-5.10
 os_patch_level_filter: "2023-09"
 feature_set: KSUN+SUSFS
-use_kpm: "false"
-runner_label: "gki-local"
-quick_mode: "true"
-ksu_branch: ""
-```
-
-SukiSU Ultra + SUSFS + KPM：
-
-```yaml
-release_type: Action
-kernel_build_version: android13-5.10
-os_patch_level_filter: "2023-09"
-feature_set: KSUN+SUSFS
-use_kpm: "true"
 runner_label: "gki-local"
 quick_mode: "true"
 ksu_branch: ""
@@ -106,8 +92,7 @@ ksu_branch: ""
 
 SukiSU app 畫面判讀方式：
 
-- `use_kpm=false`：SukiSU Ultra app 應該會判斷成 built-in 模式。
-- `use_kpm=true`：workflow 一樣會整合 SukiSU Ultra，但還會在封裝前額外把最終 kernel image patch 成 KPM 版。
+- SukiSU Ultra app 應該會判斷成 built-in 模式。
 - 若出現 manager/driver version mismatch，不代表沒有 root，只代表 app 版本和 kernel 內 driver 版本不完全一致。
 
 ### 編譯產物：`Flashable-Zips` 與 `AnyKernel3` 差異
@@ -116,10 +101,6 @@ SukiSU app 畫面判讀方式：
 
 - `...-AnyKernel3`
 - `...-Flashable-Zips`
-
-若是 Android 12 且 `use_kpm=true` 的 build，還可能看到：
-
-- `...-Certified-Boot`
 
 用途差異：
 
@@ -134,11 +115,6 @@ SukiSU app 畫面判讀方式：
     - `...-AnyKernel3-normal.zip`（標準核心映像）
     - `...-AnyKernel3-bypass.zip`（bypass 核心映像）
   - 一般使用者建議直接下載這組刷入。
-
-- `Certified-Boot`
-  - 僅限 Android 12，於 KPM patch 完成後依 Google certified boot 流程額外產生。
-  - 內含由 patched kernel image 重新封裝出的壓縮 `boot.img` 變體。
-  - 若你的 Android 12 裝置更適合直接 fastboot/boot image 流程，而不是 AnyKernel3，則優先使用這組。
 
 快速建議：
 
@@ -176,22 +152,11 @@ Actions 選單中各選項意義：
 - `feature_set` 不會控制所有 build 步驟。
 - 某些核心相容與打包步驟仍會執行（例如：kernel fixes、ntsync、ptrace、unicode fix、btf、封裝流程）。
 
-### SukiSU / KPM 補充說明
-
-當 `use_kpm=true` 時，現在的 workflow 不只是 clone KPM 倉庫，還會：
-
-- 下載 `SukiSU_KernelPatch_patch`
-- 在 CI 內建出 `kpimg` 與主機端 `kptools`
-- 在封裝前先把最終 kernel `Image` patch 成 KPM 版本
-
-實務注意：
-
-- `use_kpm=true` 會比 built-in 模式更重，因為還需要下載並建置 KernelPatch 相關工具鏈與產物。
+### SukiSU 補充說明
 
 目前 `KSUN+SUSFS` 的行為：
 
-- `use_kpm=false`：走 SukiSU Ultra，但不做 KPM patch，SukiSU Ultra manager 可判斷 built-in 模式。
-- `use_kpm=true`：走 SukiSU Ultra，並額外對最終 kernel image 套用 KPM patch。
+- 走 SukiSU Ultra，SukiSU Ultra manager 可判斷 built-in 模式。
 
 ### GitHub Actions `quick_mode`（快速編譯）
 
@@ -241,7 +206,6 @@ release_type: Action
 kernel_build_version: android13-5.10
 os_patch_level_filter: "2023-09"
 feature_set: KSUN+SUSFS
-use_kpm: "false"
 runner_label: "gki-local"
 quick_mode: "true"
 ksu_branch: ""

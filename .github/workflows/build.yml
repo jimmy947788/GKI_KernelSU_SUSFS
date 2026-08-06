@@ -27,10 +27,6 @@ on:
       feature_set:
         required: true
         type: string
-      use_kpm:
-        required: false
-        type: string
-        default: "false"
       runner_label:
         required: false
         type: string
@@ -44,26 +40,6 @@ on:
         type: string
         default: ""
       susfs_commit:
-        required: false
-        type: string
-        default: ""
-      gki_revision:
-        required: false
-        type: string
-        default: "r1"
-      fallback_patch_level:
-        required: false
-        type: string
-        default: ""
-      repack_boot_size:
-        required: false
-        type: string
-        default: "67108864"
-      repack_os_version:
-        required: false
-        type: string
-        default: ""
-      repack_image_lz4_path:
         required: false
         type: string
         default: ""
@@ -174,25 +150,17 @@ jobs:
         os_patch_level: ${{ inputs.os_patch_level }}
 
     - name: Setup SukiSU Ultra
-      if: ${{ (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') && (inputs.use_kpm == 'true' || contains(inputs.feature_set, 'SUSFS') || inputs.feature_set == 'FULL') }}
+      if: ${{ (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') && (contains(inputs.feature_set, 'SUSFS') || inputs.feature_set == 'FULL') }}
       uses: ./.github/actions/sukisu
       with:
         ksu_branch: ${{ inputs.ksu_branch }}
-        enable_kpm: ${{ inputs.use_kpm }}
         feature_set: ${{ inputs.feature_set }}
 
     - name: Setup KernelSU-Next
-      if: ${{ inputs.use_kpm != 'true' && (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') && !contains(inputs.feature_set, 'SUSFS') && inputs.feature_set != 'FULL' }}
+      if: ${{ (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') && !contains(inputs.feature_set, 'SUSFS') && inputs.feature_set != 'FULL' }}
       uses: ./.github/actions/kernelsu
       with:
         ksu_branch: ${{ inputs.ksu_branch }}
-
-    - name: Build SukiSU KPM payloads
-      id: kpm-build
-      if: ${{ inputs.use_kpm == 'true' && (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') }}
-      uses: ./.github/actions/build-kpm
-      with:
-        repo_path: ${{ github.workspace }}/SukiSU_KernelPatch_patch
 
     - name: SUSFS
       if: contains(inputs.feature_set, 'SUSFS') || inputs.feature_set == 'FULL'
@@ -397,82 +365,6 @@ jobs:
         version: ${{ inputs.version }}
         bypass: false
 
-    - name: Patch Normal Kernel with SukiSU KPM
-      if: ${{ inputs.use_kpm == 'true' && (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') }}
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        IMAGE_PATH="${{ github.workspace }}/AnyKernel3/Image"
-        PATCHED_IMAGE_PATH="${IMAGE_PATH}.kpm"
-        KPIMG_PATH="${{ steps.kpm-build.outputs.kpimg_path }}"
-        KPTOOLS_PATH="${{ steps.kpm-build.outputs.kptools_path }}"
-
-        "$KPTOOLS_PATH" -p -i "$IMAGE_PATH" -k "$KPIMG_PATH" -o "$PATCHED_IMAGE_PATH"
-        mv -f "$PATCHED_IMAGE_PATH" "$IMAGE_PATH"
-        "$KPTOOLS_PATH" -l -i "$IMAGE_PATH"
-
-    - name: Precheck certified boot availability
-      id: repack-precheck
-      if: ${{ inputs.use_kpm == 'true' && (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') }}
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        ANDROID_VERSION="${{ inputs.android_version }}"
-        KERNEL_VERSION="${{ inputs.kernel_version }}"
-        PATCH_LEVEL="${{ inputs.os_patch_level }}"
-        REVISION="${{ inputs.gki_revision }}"
-        FALLBACK_PATCH_LEVEL="${{ inputs.fallback_patch_level }}"
-
-        check_zip() {
-          local patch_level="$1"
-          local url="https://dl.google.com/android/gki/gki-certified-boot-${ANDROID_VERSION}-${KERNEL_VERSION}-${patch_level}_${REVISION}.zip"
-          local http_code
-          http_code=$(curl -sL -w '%{http_code}' "$url" -o /dev/null)
-          if [[ "$http_code" == "200" ]]; then
-            echo "$patch_level"
-            return 0
-          fi
-          return 1
-        }
-
-        if SELECTED_PATCH=$(check_zip "$PATCH_LEVEL"); then
-          echo "should_repack=true" >> "$GITHUB_OUTPUT"
-          echo "selected_patch_level=${SELECTED_PATCH}" >> "$GITHUB_OUTPUT"
-          echo "reason=primary zip available" >> "$GITHUB_OUTPUT"
-          exit 0
-        fi
-
-        if [[ -n "$FALLBACK_PATCH_LEVEL" ]] && SELECTED_PATCH=$(check_zip "$FALLBACK_PATCH_LEVEL"); then
-          echo "should_repack=true" >> "$GITHUB_OUTPUT"
-          echo "selected_patch_level=${SELECTED_PATCH}" >> "$GITHUB_OUTPUT"
-          echo "reason=primary missing, fallback zip available" >> "$GITHUB_OUTPUT"
-          exit 0
-        fi
-
-        echo "should_repack=false" >> "$GITHUB_OUTPUT"
-        echo "selected_patch_level=" >> "$GITHUB_OUTPUT"
-        echo "reason=no certified boot zip for primary/fallback" >> "$GITHUB_OUTPUT"
-
-    - name: Repack certified boot with KPM kernel
-      id: repack-kpm
-      continue-on-error: true
-      if: ${{ inputs.use_kpm == 'true' && (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') && steps.repack-precheck.outputs.should_repack == 'true' }}
-      uses: ./.github/actions/repack-certified-boot-a12
-      with:
-        android_version: ${{ inputs.android_version }}
-        kernel_version: ${{ inputs.kernel_version }}
-        image_path: ${{ github.workspace }}/AnyKernel3/Image
-        image_lz4_path: ${{ inputs.repack_image_lz4_path }}
-        sublevel: ${{ steps.extract.outputs.sublevel }}
-        os_patch_level: ${{ inputs.os_patch_level }}
-        artifact_prefix: ${{ steps.extract.outputs.file_name }}
-        gki_revision: ${{ inputs.gki_revision }}
-        fallback_patch_level: ${{ inputs.fallback_patch_level }}
-        boot_size: ${{ inputs.repack_boot_size }}
-        os_version: ${{ inputs.repack_os_version }}
-
     - name: Get Cache Stats
       uses: ./.github/actions/cache-stats
       with:
@@ -509,21 +401,6 @@ jobs:
       with:
         bypass: true
         version: ${{ inputs.version }}
-
-    - name: Patch Bypass Kernel with SukiSU KPM
-      if: ${{ inputs.quick_mode != 'true' && inputs.use_kpm == 'true' && (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') }}
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        IMAGE_PATH="${{ github.workspace }}/AnyKernel3/Bypass-Image"
-        PATCHED_IMAGE_PATH="${IMAGE_PATH}.kpm"
-        KPIMG_PATH="${{ steps.kpm-build.outputs.kpimg_path }}"
-        KPTOOLS_PATH="${{ steps.kpm-build.outputs.kptools_path }}"
-
-        "$KPTOOLS_PATH" -p -i "$IMAGE_PATH" -k "$KPIMG_PATH" -o "$PATCHED_IMAGE_PATH"
-        mv -f "$PATCHED_IMAGE_PATH" "$IMAGE_PATH"
-        "$KPTOOLS_PATH" -l -i "$IMAGE_PATH"
 
     - name: Package Flashable AnyKernel3 Archives
       shell: bash
@@ -605,18 +482,6 @@ jobs:
         # Count warnings from build log if available
         WARNINGS="N/A"
 
-        # Certified boot repack status (non-blocking)
-        REPACK_STATUS="Not requested"
-        if [[ "${{ inputs.use_kpm }}" == "true" && ("${{ inputs.feature_set }}" == "FULL" || "${{ inputs.feature_set }}" == *"KSUN"*) ]]; then
-          if [[ "${{ steps.repack-precheck.outputs.should_repack || 'false' }}" != "true" ]]; then
-            REPACK_STATUS="Skipped: ${{ steps.repack-precheck.outputs.reason || 'precheck not available' }}"
-          elif [[ "${{ steps.repack-kpm.outcome || '' }}" == "success" ]]; then
-            REPACK_STATUS="Success"
-          else
-            REPACK_STATUS="Warning: repack failed (non-blocking)"
-          fi
-        fi
-        
         {
           echo "## ${{ inputs.android_version }} ${{ inputs.kernel_version }}.${{ inputs.sublevel }} (${{ inputs.variant }}) — ${STATUS}"
           echo
@@ -635,10 +500,6 @@ jobs:
           echo "| **Feature Set** | ${{ inputs.feature_set }} |"
           echo "| **Variant** | ${{ inputs.variant }} |"
           echo "| **Primary OS Patch** | ${{ inputs.os_patch_level }} |"
-          echo "| **Fallback Patch Input** | ${{ inputs.fallback_patch_level || 'none' }} |"
-          echo "| **Certified Boot Revision** | ${{ inputs.gki_revision }} |"
-          echo "| **Repack Selected Patch** | ${{ steps.repack-precheck.outputs.selected_patch_level || 'none' }} |"
-          echo "| **Certified Boot Repack** | ${REPACK_STATUS} |"
           echo
           
           # Kernel Fixes
@@ -673,14 +534,5 @@ jobs:
         path: |
           ${{ github.workspace }}/${{ steps.extract.outputs.file_name }}-AnyKernel3-normal.zip
           ${{ github.workspace }}/${{ steps.extract.outputs.file_name }}-AnyKernel3-bypass.zip
-        if-no-files-found: ignore
-        compression-level: 9
-
-    - name: Upload certified boot artifacts
-      if: ${{ steps.repack-kpm.outcome == 'success' }}
-      uses: actions/upload-artifact@v7
-      with:
-        name: ${{ steps.extract.outputs.file_name }}-Certified-Boot
-        path: ${{ steps.repack-kpm.outputs.output_dir }}/*.gz
         if-no-files-found: ignore
         compression-level: 9

@@ -71,33 +71,19 @@ If your device firmware/vendor stack is from one patch level, flashing a kernel 
 
 - Match build date to your ROM patch level first.
 - For Pixel 6 Pro on Android 13 `raven-tq3a.230901.001`, start with `android13-5.10` + `2023-09`.
-- Test normal build first, then try bypass/KPM only after a known-good boot.
+- Test normal build first, then try bypass only after a known-good boot.
 
 ### Pixel 6 Pro (`raven`) fixed examples
 
 If your phone fingerprint is `google/raven/raven:13/TQ3A.230901.001/...`, use `android13-5.10` with `2023-09`.
 
-SukiSU Ultra + SUSFS, no KPM:
+SukiSU Ultra + SUSFS:
 
 ```yaml
 release_type: Action
 kernel_build_version: android13-5.10
 os_patch_level_filter: "2023-09"
 feature_set: KSUN+SUSFS
-use_kpm: "false"
-runner_label: "gki-local"
-quick_mode: "true"
-ksu_branch: ""
-```
-
-SukiSU Ultra + SUSFS + KPM:
-
-```yaml
-release_type: Action
-kernel_build_version: android13-5.10
-os_patch_level_filter: "2023-09"
-feature_set: KSUN+SUSFS
-use_kpm: "true"
 runner_label: "gki-local"
 quick_mode: "true"
 ksu_branch: ""
@@ -105,8 +91,7 @@ ksu_branch: ""
 
 How to read the SukiSU app result:
 
-- `use_kpm=false`: the SukiSU Ultra app should detect built-in mode.
-- `use_kpm=true`: the workflow still integrates SukiSU Ultra, then additionally patches the final kernel image with KPM.
+- The SukiSU Ultra app should detect built-in mode.
 - A manager/driver version mismatch warning does not automatically mean root failed; it only means the app version is not exactly the same as the in-kernel driver version.
 
 ### Valid values for `os_patch_level_filter` (Action input)
@@ -137,10 +122,6 @@ After a successful workflow run, you will usually see two artifact groups with t
 - `...-AnyKernel3`
 - `...-Flashable-Zips`
 
-For `use_kpm=true` builds, you may also see:
-
-- `...-Certified-Boot`
-
 What each one means:
 
 - `AnyKernel3`
@@ -155,41 +136,24 @@ What each one means:
 		- `...-AnyKernel3-bypass.zip` (bypass kernel image)
 	- Recommended for normal usage when you just want to download and flash.
 
-
-- `Certified-Boot`
-	- Generated from the Google certified boot image flow after KPM patching.
-	- Contains compressed `boot.img` variants built from the patched kernel image.
-	- Use this when your device/ROM path expects direct boot image flashing instead of the AnyKernel3 path.
-
 Quick recommendation:
 
 - Start with `...-AnyKernel3-normal.zip` first.
 - Only move to bypass zip if normal boot fails due to version checks or compatibility restrictions.
 
-### Important note for SukiSU / KPM mode
+### Important note for SukiSU mode
 
-If you change the workflow to enable or adjust SukiSU / KPM integration, previously built kernel zip files do not gain those features automatically.
+If you change the workflow to enable or adjust SukiSU integration, previously built kernel zip files do not gain those features automatically.
 
-- You must rebuild the kernel after changing SukiSU / KPM workflow logic.
+- You must rebuild the kernel after changing SukiSU workflow logic.
 - You must re-download the newly generated artifact.
 - You must re-flash the newly generated zip.
 
-Current behavior when `use_kpm=true`:
-
-- The workflow clones `SukiSU_KernelPatch_patch`.
-- It builds `kpimg` and host-side `kptools` during CI.
-- It patches the final kernel `Image` before packaging the flashable zip.
-
-Practical note:
-
-- `use_kpm=true` is heavier than built-in mode because it also downloads/builds the KernelPatch toolchain pieces.
-
 Current `KSUN+SUSFS` behavior:
 
-- `use_kpm=false`: uses SukiSU Ultra without KPM patching, so the SukiSU Ultra manager can detect built-in mode.
-- `use_kpm=true`: uses SukiSU Ultra and additionally applies the KPM image patch step.
+- Uses SukiSU Ultra so the SukiSU Ultra manager can detect built-in mode.
 
-Old zip files built before the SukiSU / KPM integration change will still behave like the old build and may boot successfully while the SukiSU app still reports that root is unavailable.
+Old zip files built before the SukiSU integration change will still behave like the old build and may boot successfully while the SukiSU app still reports that root is unavailable.
 
 ### GitHub Actions `feature_set` options
 
@@ -292,7 +256,6 @@ release_type: Action
 kernel_build_version: android13-5.10
 os_patch_level_filter: "2023-09"
 feature_set: KSUN+SUSFS
-use_kpm: "false"
 runner_label: "gki-local"
 quick_mode: "true"
 ksu_branch: ""
