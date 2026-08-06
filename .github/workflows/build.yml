@@ -173,6 +173,36 @@ jobs:
         os_patch_level: ${{ inputs.os_patch_level }}
         sublevel: ${{ steps.extract.outputs.sublevel }}
 
+    - name: Verify SUSFS Integration
+      if: contains(inputs.feature_set, 'SUSFS') || inputs.feature_set == 'FULL'
+      shell: bash
+      working-directory: ${{ github.workspace }}/kernel/common
+      run: |
+        set -euo pipefail
+
+        DEFCONFIG="arch/arm64/configs/gki_defconfig"
+        if [[ ! -f "$DEFCONFIG" ]]; then
+          echo "ERROR: gki_defconfig not found"
+          exit 1
+        fi
+
+        if ! grep -q '^CONFIG_KSU_SUSFS=y$' "$DEFCONFIG"; then
+          echo "ERROR: CONFIG_KSU_SUSFS is not enabled in gki_defconfig"
+          exit 1
+        fi
+
+        if [[ ! -f "fs/susfs.c" || ! -f "include/linux/susfs.h" ]]; then
+          echo "ERROR: SUSFS source files are missing (fs/susfs.c or include/linux/susfs.h)"
+          exit 1
+        fi
+
+        if ! grep -q 'susfs' fs/Makefile; then
+          echo "ERROR: fs/Makefile does not contain susfs entry"
+          exit 1
+        fi
+
+        echo "SUSFS integration check passed"
+
     - name: Baseband Guard
       if: (contains(inputs.feature_set, 'BBG') || inputs.feature_set == 'FULL')
       uses: ./.github/actions/bbg
