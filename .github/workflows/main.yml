@@ -16,7 +16,7 @@ on:
           - Release
         default: Action
       kernel_build_version:
-        description: "Kernel Version"
+        description: "Kernel Version (Pixel 6 Pro Android 13 suggestion: android13-5.10)"
         type: choice
         options:
           - All
@@ -29,17 +29,17 @@ on:
           - android16-6.12
         default: All
       os_patch_level_filter:
-        description: "Optional OS patch level filter (e.g. 2023-09). Empty = build all dates"
+        description: "Optional OS patch level filter (e.g. 2023-09). Keep equal to device patch for best boot stability"
         type: string
         required: false
         default: ""
       fallback_patch_level:
-        description: "Optional fallback patch level for certified boot repack (e.g. 2023-08). Empty = no fallback"
+        description: "Optional fallback patch level for certified boot repack. Leave empty for best stability"
         type: string
         required: false
         default: ""
       feature_set:
-        description: "Feature Set"
+        description: "Feature Set (SukiSU + SUSFS suggestion: KSUN+SUSFS)"
         type: choice
         options:
           - KSUN+SUSFS+BBG+NET+DS
@@ -55,7 +55,7 @@ on:
           - FULL
         default: FULL
       use_kpm:
-        description: "Enable KPM patch repository"
+        description: "Enable KPM patch repository (set true for SukiSU+KPM)"
         type: choice
         options:
           - "false"

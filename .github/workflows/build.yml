@@ -643,9 +643,15 @@ jobs:
           fi
           echo "| **KSU Version** | ${KSU_VER} |"
           echo "| **KSU Tag** | ${KSU_TAG} |"
+          echo "| **KSU Branch Input** | ${{ inputs.ksu_branch || 'auto-latest' }} |"
           echo "| **SUSFS Version** | ${SUSFS_VER} |"
+          echo "| **SUSFS Commit Input** | ${{ inputs.susfs_commit || 'auto-latest' }} |"
           echo "| **Feature Set** | ${{ inputs.feature_set }} |"
           echo "| **Variant** | ${{ inputs.variant }} |"
+          echo "| **Primary OS Patch** | ${{ inputs.os_patch_level }} |"
+          echo "| **Fallback Patch Input** | ${{ inputs.fallback_patch_level || 'none' }} |"
+          echo "| **Certified Boot Revision** | ${{ inputs.gki_revision }} |"
+          echo "| **Repack Selected Patch** | ${{ steps.repack-precheck.outputs.selected_patch_level || 'none' }} |"
           echo "| **Certified Boot Repack** | ${REPACK_STATUS} |"
           echo
           
