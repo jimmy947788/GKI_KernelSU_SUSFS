@@ -58,6 +58,11 @@ Install these three modules in SukiSU/KernelSU manager:
 - [KPatch-Next Module](https://github.com/KernelSU-Next/KPatch-Next-Module)
 - [SUSFS-FOR-KERNELSU](https://github.com/sidex15/susfs4ksu-module)
 
+### Recommended Root Manager
+
+For this repository's current KSUN+SUSFS build path, prefer using KernelSU-Next Manager to verify root status and module state.
+Some SukiSU Ultra app versions can show mismatch or unsupported messages even when kernel root is working correctly.
+
 ### Verified Working State (KPM + SUSFS)
 
 ![KPM and SUSFS both enabled](docs/images/kpm-susfs-enabled.png)

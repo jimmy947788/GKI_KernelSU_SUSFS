@@ -58,6 +58,11 @@ GKI 安裝方式請參考官方文件：
 - [KPatch-Next Module](https://github.com/KernelSU-Next/KPatch-Next-Module)
 - [SUSFS-FOR-KERNELSU](https://github.com/sidex15/susfs4ksu-module)
 
+### 建議使用的 Root 管理工具
+
+目前這個 repo 的 KSUN+SUSFS 建置路線，建議優先使用 KernelSU-Next Manager 驗證 root 狀態與模組狀態。
+部分版本的 SukiSU Ultra App 可能會出現 mismatch 或 unsupported 顯示，但核心 root 實際上可能已正常運作。
+
 ### 驗證成功畫面（KPM + SUSFS）
 
 ![KPM 與 SUSFS 皆已啟用](docs/images/kpm-susfs-enabled.png)
