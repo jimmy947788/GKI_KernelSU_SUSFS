@@ -41,6 +41,11 @@ on:
         required: false
         type: string
         default: ""
+      fallback_patch_level:
+        description: "Optional fallback patch level for certified boot repack"
+        required: false
+        type: string
+        default: ""
 
 jobs:
   generate-matrix:
@@ -126,4 +131,5 @@ jobs:
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit }}
+      fallback_patch_level: ${{ inputs.fallback_patch_level }}
     secrets: inherit

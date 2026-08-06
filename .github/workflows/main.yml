@@ -33,6 +33,11 @@ on:
         type: string
         required: false
         default: ""
+      fallback_patch_level:
+        description: "Optional fallback patch level for certified boot repack (e.g. 2023-08). Empty = no fallback"
+        type: string
+        required: false
+        default: ""
       feature_set:
         description: "Feature Set"
         type: choice
@@ -155,6 +160,7 @@ jobs:
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android12-5-10 }}
+      fallback_patch_level: ${{ inputs.fallback_patch_level }}
     secrets: inherit
 
   build-android13-5-10:
@@ -170,6 +176,7 @@ jobs:
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android13-5-10 }}
+      fallback_patch_level: ${{ inputs.fallback_patch_level }}
     secrets: inherit
 
   build-android13-5-15:
@@ -185,6 +192,7 @@ jobs:
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android13-5-15 }}
+      fallback_patch_level: ${{ inputs.fallback_patch_level }}
     secrets: inherit
 
   build-android14-5-15:
@@ -200,6 +208,7 @@ jobs:
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android14-5-15 }}
+      fallback_patch_level: ${{ inputs.fallback_patch_level }}
     secrets: inherit
 
   build-android14-6-1:
@@ -215,6 +224,7 @@ jobs:
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android14-6-1 }}
+      fallback_patch_level: ${{ inputs.fallback_patch_level }}
     secrets: inherit
 
   build-android15-6-6:
@@ -230,6 +240,7 @@ jobs:
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android15-6-6 }}
+      fallback_patch_level: ${{ inputs.fallback_patch_level }}
     secrets: inherit
 
   build-android16-6-12:
@@ -245,6 +256,7 @@ jobs:
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android16-6-12 }}
+      fallback_patch_level: ${{ inputs.fallback_patch_level }}
     secrets: inherit
 
   rej:
