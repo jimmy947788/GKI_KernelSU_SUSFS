@@ -168,14 +168,15 @@ jobs:
         os_patch_level: ${{ inputs.os_patch_level }}
 
     - name: Setup SukiSU Ultra
-      if: ${{ inputs.use_kpm == 'true' && (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') }}
+      if: ${{ (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') && (inputs.use_kpm == 'true' || contains(inputs.feature_set, 'SUSFS') || inputs.feature_set == 'FULL') }}
       uses: ./.github/actions/sukisu
       with:
         ksu_branch: ${{ inputs.ksu_branch }}
+        enable_kpm: ${{ inputs.use_kpm }}
         feature_set: ${{ inputs.feature_set }}
 
     - name: Setup KernelSU-Next
-      if: ${{ inputs.use_kpm != 'true' && (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') }}
+      if: ${{ inputs.use_kpm != 'true' && (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') && !contains(inputs.feature_set, 'SUSFS') && inputs.feature_set != 'FULL' }}
       uses: ./.github/actions/kernelsu
       with:
         ksu_branch: ${{ inputs.ksu_branch }}

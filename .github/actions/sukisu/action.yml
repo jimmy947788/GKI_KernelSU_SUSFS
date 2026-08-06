@@ -5,6 +5,10 @@ inputs:
     description: 'SukiSU branch, tag, or commit (empty = default ref for selected feature set)'
     required: false
     default: ""
+  enable_kpm:
+    description: 'Enable KPM-related kernel configs'
+    required: false
+    default: "false"
   feature_set:
     description: 'Selected feature set'
     required: true
@@ -46,5 +50,5 @@ runs:
       with:
         config_list: |
           CONFIG_KSU=y
-          CONFIG_KPM=y
-          CONFIG_KPROBES=y
+          ${{ inputs.enable_kpm == 'true' && 'CONFIG_KPM=y' || '' }}
+          ${{ inputs.enable_kpm == 'true' && 'CONFIG_KPROBES=y' || '' }}
