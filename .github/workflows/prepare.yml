@@ -36,6 +36,11 @@ on:
         required: false
         type: string
         default: ""
+      kpm_commit:
+        description: "SukiSU KernelPatch commit (empty = pinned upstream revision)"
+        required: false
+        type: string
+        default: ""
       susfs_commit:
         description: "SUSFS commit hash (empty = latest on auto-derived branch)"
         required: false
@@ -130,6 +135,7 @@ jobs:
       runner_label: ${{ inputs.runner_label }}
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
+      kpm_commit: ${{ inputs.kpm_commit }}
       susfs_commit: ${{ inputs.susfs_commit }}
       fallback_patch_level: ${{ inputs.fallback_patch_level }}
     secrets: inherit

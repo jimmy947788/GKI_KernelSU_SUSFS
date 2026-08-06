@@ -43,6 +43,10 @@ on:
         required: false
         type: string
         default: ""
+      kpm_commit:
+        required: false
+        type: string
+        default: ""
       susfs_commit:
         required: false
         type: string
@@ -122,6 +126,8 @@ jobs:
     - name: Prepare KPM Patch Stage
       if: ${{ inputs.use_kpm == 'true' }}
       uses: ./.github/actions/kpm-setup
+      with:
+        kpm_commit: ${{ inputs.kpm_commit }}
 
     - name: Enable KPM Kernel Configs
       if: ${{ inputs.use_kpm == 'true' }}

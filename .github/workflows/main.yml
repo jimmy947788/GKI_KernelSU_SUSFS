@@ -78,6 +78,11 @@ on:
         type: string
         required: false
         default: ""
+      kpm_commit:
+        description: "SukiSU KernelPatch commit (empty = pinned upstream revision)"
+        type: string
+        required: false
+        default: ""
       susfs_commit_android12-5-10:
         description: "SUSFS commit for android12-5.10 (empty = latest branch tip)"
         type: string
@@ -159,6 +164,7 @@ jobs:
       runner_label: ${{ inputs.runner_label }}
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
+      kpm_commit: ${{ inputs.kpm_commit }}
       susfs_commit: ${{ inputs.susfs_commit_android12-5-10 }}
       fallback_patch_level: ${{ inputs.fallback_patch_level }}
     secrets: inherit
@@ -175,6 +181,7 @@ jobs:
       runner_label: ${{ inputs.runner_label }}
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
+      kpm_commit: ${{ inputs.kpm_commit }}
       susfs_commit: ${{ inputs.susfs_commit_android13-5-10 }}
       fallback_patch_level: ${{ inputs.fallback_patch_level }}
     secrets: inherit
@@ -191,6 +198,7 @@ jobs:
       runner_label: ${{ inputs.runner_label }}
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
+      kpm_commit: ${{ inputs.kpm_commit }}
       susfs_commit: ${{ inputs.susfs_commit_android13-5-15 }}
       fallback_patch_level: ${{ inputs.fallback_patch_level }}
     secrets: inherit
@@ -207,6 +215,7 @@ jobs:
       runner_label: ${{ inputs.runner_label }}
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
+      kpm_commit: ${{ inputs.kpm_commit }}
       susfs_commit: ${{ inputs.susfs_commit_android14-5-15 }}
       fallback_patch_level: ${{ inputs.fallback_patch_level }}
     secrets: inherit
@@ -223,6 +232,7 @@ jobs:
       runner_label: ${{ inputs.runner_label }}
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
+      kpm_commit: ${{ inputs.kpm_commit }}
       susfs_commit: ${{ inputs.susfs_commit_android14-6-1 }}
       fallback_patch_level: ${{ inputs.fallback_patch_level }}
     secrets: inherit
@@ -239,6 +249,7 @@ jobs:
       runner_label: ${{ inputs.runner_label }}
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
+      kpm_commit: ${{ inputs.kpm_commit }}
       susfs_commit: ${{ inputs.susfs_commit_android15-6-6 }}
       fallback_patch_level: ${{ inputs.fallback_patch_level }}
     secrets: inherit
@@ -255,6 +266,7 @@ jobs:
       runner_label: ${{ inputs.runner_label }}
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
+      kpm_commit: ${{ inputs.kpm_commit }}
       susfs_commit: ${{ inputs.susfs_commit_android16-6-12 }}
       fallback_patch_level: ${{ inputs.fallback_patch_level }}
     secrets: inherit

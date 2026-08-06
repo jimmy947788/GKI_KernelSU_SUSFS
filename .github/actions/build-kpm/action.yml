@@ -54,20 +54,15 @@ runs:
         export ANDROID=1
         export ANDROID_NDK_HOME="${ANDROID_NDK_HOME}"
 
-        cat > "$REPO_PATH/kernel/patch/common/userd_stub.c" <<'EOF'
-        /* Auto-generated compatibility stub for upstream snapshots that declare
-         * Android userd hooks but do not provide implementations. */
+        USERD_SOURCE="patch/android/userd.c"
+        if [ ! -f "$REPO_PATH/kernel/$USERD_SOURCE" ]; then
+          echo "ERROR: required SukiSU KPM implementation is missing: $USERD_SOURCE" >&2
+          exit 1
+        fi
 
-        __attribute__((weak)) int load_ap_package_config(void)
-        {
-          return 0;
-        }
-
-        __attribute__((weak)) int refresh_trusted_manager_state(void)
-        {
-          return 0;
-        }
-        EOF
+        if ! grep -qxF "BASE_SRCS += $USERD_SOURCE" "$REPO_PATH/kernel/Makefile"; then
+          printf '\nBASE_SRCS += %s\n' "$USERD_SOURCE" >> "$REPO_PATH/kernel/Makefile"
+        fi
 
         make -C "$REPO_PATH/kernel" clean
         make -C "$REPO_PATH/kernel" -j"$(nproc)"
