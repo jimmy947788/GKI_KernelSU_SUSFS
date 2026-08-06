@@ -698,12 +698,19 @@ jobs:
         if-no-files-found: ignore
         compression-level: 9
 
-    - name: Upload Flashable Archives
+    - name: Upload Normal Flashable Zip
       uses: actions/upload-artifact@v7
       with:
-        name: ${{ steps.extract.outputs.file_name }}-Flashable-Zips
-        path: |
-          ${{ github.workspace }}/${{ steps.extract.outputs.file_name }}-AnyKernel3-normal.zip
-          ${{ github.workspace }}/${{ steps.extract.outputs.file_name }}-AnyKernel3-bypass.zip
-        if-no-files-found: ignore
-        compression-level: 9
+        name: ${{ steps.extract.outputs.file_name }}-normal
+        path: ${{ github.workspace }}/${{ steps.extract.outputs.file_name }}-AnyKernel3-normal.zip
+        if-no-files-found: error
+        compression-level: 0
+
+    - name: Upload Bypass Flashable Zip
+      if: ${{ inputs.quick_mode != 'true' }}
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ steps.extract.outputs.file_name }}-bypass
+        path: ${{ github.workspace }}/${{ steps.extract.outputs.file_name }}-AnyKernel3-bypass.zip
+        if-no-files-found: error
+        compression-level: 0
