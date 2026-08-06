@@ -426,10 +426,53 @@ jobs:
         mv -f "$PATCHED_IMAGE_PATH" "$IMAGE_PATH"
         "$KPTOOLS_PATH" -l -i "$IMAGE_PATH"
 
+    - name: Precheck certified boot availability
+      id: repack-precheck
+      if: ${{ inputs.use_kpm == 'true' && (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        ANDROID_VERSION="${{ inputs.android_version }}"
+        KERNEL_VERSION="${{ inputs.kernel_version }}"
+        PATCH_LEVEL="${{ inputs.os_patch_level }}"
+        REVISION="${{ inputs.gki_revision }}"
+        FALLBACK_PATCH_LEVEL="${{ inputs.fallback_patch_level }}"
+
+        check_zip() {
+          local patch_level="$1"
+          local url="https://dl.google.com/android/gki/gki-certified-boot-${ANDROID_VERSION}-${KERNEL_VERSION}-${patch_level}_${REVISION}.zip"
+          local http_code
+          http_code=$(curl -sL -w '%{http_code}' "$url" -o /dev/null)
+          if [[ "$http_code" == "200" ]]; then
+            echo "$patch_level"
+            return 0
+          fi
+          return 1
+        }
+
+        if SELECTED_PATCH=$(check_zip "$PATCH_LEVEL"); then
+          echo "should_repack=true" >> "$GITHUB_OUTPUT"
+          echo "selected_patch_level=${SELECTED_PATCH}" >> "$GITHUB_OUTPUT"
+          echo "reason=primary zip available" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        if [[ -n "$FALLBACK_PATCH_LEVEL" ]] && SELECTED_PATCH=$(check_zip "$FALLBACK_PATCH_LEVEL"); then
+          echo "should_repack=true" >> "$GITHUB_OUTPUT"
+          echo "selected_patch_level=${SELECTED_PATCH}" >> "$GITHUB_OUTPUT"
+          echo "reason=primary missing, fallback zip available" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        echo "should_repack=false" >> "$GITHUB_OUTPUT"
+        echo "selected_patch_level=" >> "$GITHUB_OUTPUT"
+        echo "reason=no certified boot zip for primary/fallback" >> "$GITHUB_OUTPUT"
+
     - name: Repack certified boot with KPM kernel
       id: repack-kpm
       continue-on-error: true
-      if: ${{ inputs.use_kpm == 'true' && (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') }}
+      if: ${{ inputs.use_kpm == 'true' && (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') && steps.repack-precheck.outputs.should_repack == 'true' }}
       uses: ./.github/actions/repack-certified-boot-a12
       with:
         android_version: ${{ inputs.android_version }}
@@ -575,6 +618,18 @@ jobs:
         
         # Count warnings from build log if available
         WARNINGS="N/A"
+
+        # Certified boot repack status (non-blocking)
+        REPACK_STATUS="Not requested"
+        if [[ "${{ inputs.use_kpm }}" == "true" && ("${{ inputs.feature_set }}" == "FULL" || "${{ inputs.feature_set }}" == *"KSUN"*) ]]; then
+          if [[ "${{ steps.repack-precheck.outputs.should_repack || 'false' }}" != "true" ]]; then
+            REPACK_STATUS="Skipped: ${{ steps.repack-precheck.outputs.reason || 'precheck not available' }}"
+          elif [[ "${{ steps.repack-kpm.outcome || '' }}" == "success" ]]; then
+            REPACK_STATUS="Success"
+          else
+            REPACK_STATUS="Warning: repack failed (non-blocking)"
+          fi
+        fi
         
         {
           echo "## ${{ inputs.android_version }} ${{ inputs.kernel_version }}.${{ inputs.sublevel }} (${{ inputs.variant }}) — ${STATUS}"
@@ -591,6 +646,7 @@ jobs:
           echo "| **SUSFS Version** | ${SUSFS_VER} |"
           echo "| **Feature Set** | ${{ inputs.feature_set }} |"
           echo "| **Variant** | ${{ inputs.variant }} |"
+          echo "| **Certified Boot Repack** | ${REPACK_STATUS} |"
           echo
           
           # Kernel Fixes
