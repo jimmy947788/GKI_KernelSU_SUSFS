@@ -616,6 +616,7 @@ jobs:
           echo "|--------|-------|"
           echo "| **Status** | ${STATUS} |"
           echo "| **Kernel** | ${{ inputs.kernel_version }}.${{ inputs.sublevel }}-${{ inputs.android_version }}-${{ inputs.os_patch_level }} |"
+          echo "| **Build Version** | ${{ steps.extract.outputs.build_version }} |"
           if [ -n "$KERNEL_VER_STR" ]; then
             echo "| **Version String** | \`${KERNEL_VER_STR}\` |"
           fi

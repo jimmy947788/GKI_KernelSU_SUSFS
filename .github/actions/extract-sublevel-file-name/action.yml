@@ -21,6 +21,8 @@ outputs:
     value: ${{ steps.extract.outputs.file_name }}
   sublevel:
     value: ${{ steps.extract.outputs.sublevel }}
+  build_version:
+    value: ${{ steps.extract.outputs.build_version }}
 
 runs:
   using: composite
@@ -44,8 +46,13 @@ runs:
           FILE_NAME="${FILE_NAME}-${{ inputs.variant }}"
         fi
 
+        BUILD_VERSION="r${GITHUB_RUN_NUMBER:-0}.${GITHUB_RUN_ATTEMPT:-1}"
+        FILE_NAME="${FILE_NAME}-${BUILD_VERSION}"
+
         echo "SUBLEVEL=$SUBLEVEL" >> "$GITHUB_ENV"
         echo "FILE_NAME=$FILE_NAME" >> "$GITHUB_ENV"
+        echo "BUILD_VERSION=$BUILD_VERSION" >> "$GITHUB_ENV"
 
         echo "file_name=$FILE_NAME" >> "$GITHUB_OUTPUT"
         echo "sublevel=$SUBLEVEL" >> "$GITHUB_OUTPUT"
+        echo "build_version=$BUILD_VERSION" >> "$GITHUB_OUTPUT"
