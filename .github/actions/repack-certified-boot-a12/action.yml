@@ -120,18 +120,30 @@ runs:
           ARTIFACT_PREFIX="${KERNEL_VERSION}.${SUBLEVEL}-${ANDROID_VERSION}-${PATCH_LEVEL}"
         fi
 
-        AVBTOOL_PATH="${{ github.workspace }}/kernel_patches/kernel-build-tools/linux-x86/bin/avbtool"
-        AVB_KEY_PATH="${{ github.workspace }}/kernel_patches/kernel-build-tools/linux-x86/share/avb/testkey_rsa2048.pem"
+        find_tool() {
+          local candidate
+          for candidate in "$@"; do
+            if [[ -n "$candidate" && -f "$candidate" ]]; then
+              printf '%s\n' "$candidate"
+              return 0
+            fi
+          done
+          return 1
+        }
 
-        if [[ ! -x "$AVBTOOL_PATH" ]]; then
-          echo "Missing avbtool at $AVBTOOL_PATH" >&2
+        AVBTOOL_PATH=$(find_tool \
+          "${{ github.workspace }}/kernel_patches/kernel-build-tools/linux-x86/bin/avbtool" \
+          "${{ github.workspace }}/kernel-build-tools/linux-x86/bin/avbtool") || {
+          echo "Missing avbtool in both kernel_patches/kernel-build-tools and kernel-build-tools" >&2
           exit 1
-        fi
+        }
 
-        if [[ ! -f "$AVB_KEY_PATH" ]]; then
-          echo "Missing AVB key at $AVB_KEY_PATH" >&2
+        AVB_KEY_PATH=$(find_tool \
+          "${{ github.workspace }}/kernel_patches/kernel-build-tools/linux-x86/share/avb/testkey_rsa2048.pem" \
+          "${{ github.workspace }}/kernel-build-tools/linux-x86/share/avb/testkey_rsa2048.pem") || {
+          echo "Missing AVB key in both kernel_patches/kernel-build-tools and kernel-build-tools" >&2
           exit 1
-        fi
+        }
 
         find_optional_lz4() {
           local candidate
@@ -223,7 +235,7 @@ runs:
             --os_version "$OS_VERSION" \
             --os_patch_level "$PATCH_LEVEL"
 
-          "$AVBTOOL_PATH" add_hash_footer \
+          python3 "$AVBTOOL_PATH" add_hash_footer \
             --partition_name boot \
             --partition_size "$BOOT_SIZE" \
             --image "$output_name" \
