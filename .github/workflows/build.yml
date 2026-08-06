@@ -43,10 +43,6 @@ on:
         required: false
         type: string
         default: ""
-      kpm_commit:
-        required: false
-        type: string
-        default: ""
       susfs_commit:
         required: false
         type: string
@@ -122,22 +118,6 @@ jobs:
         android_version: ${{ inputs.android_version }}
         kernel_version: ${{ inputs.kernel_version }}
         os_patch_level: ${{ inputs.os_patch_level }}
-
-    - name: Prepare KPM Patch Stage
-      if: ${{ inputs.use_kpm == 'true' }}
-      uses: ./.github/actions/kpm-setup
-      with:
-        kpm_commit: ${{ inputs.kpm_commit }}
-
-    - name: Enable KPM Kernel Configs
-      if: ${{ inputs.use_kpm == 'true' }}
-      uses: ./.github/actions/set-kernel-config
-      with:
-        config_list: |
-          CONFIG_KALLSYMS=y
-          CONFIG_KALLSYMS_ALL=y
-          CONFIG_KPM=y
-          CONFIG_KPROBES=y
 
     - name: Build FUSE-BPF Userspace Daemon (Issue #211)
       if: ${{ contains(inputs.version, 'lts') && inputs.version == 'android16-6.12' }}

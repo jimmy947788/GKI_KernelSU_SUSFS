@@ -52,3 +52,5 @@ runs:
           CONFIG_KSU=y
           ${{ inputs.enable_kpm == 'true' && 'CONFIG_KPM=y' || '' }}
           ${{ inputs.enable_kpm == 'true' && 'CONFIG_KPROBES=y' || '' }}
+          ${{ inputs.enable_kpm == 'true' && 'CONFIG_KALLSYMS=y' || '' }}
+          ${{ inputs.enable_kpm == 'true' && 'CONFIG_KALLSYMS_ALL=y' || '' }}
