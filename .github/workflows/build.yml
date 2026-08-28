@@ -43,6 +43,21 @@ on:
         required: false
         type: string
         default: ""
+      use_kpm:
+        description: "Enable KPM (CONFIG_KPM + patch_linux). Requires the SukiSU driver."
+        required: false
+        type: string
+        default: "true"
+      kpm_patch_ver:
+        description: "SukiSU_KernelPatch_patch release (latest = newest GitHub release)"
+        required: false
+        type: string
+        default: "latest"
+      kpm_patch_linux_path:
+        description: "Prebuilt patch_linux path (empty = auto-detect ~/Projects/PxGKI/KernelPatch_patch/patch_linux)"
+        required: false
+        type: string
+        default: ""
 
 jobs:
   build-gki:
@@ -149,15 +164,19 @@ jobs:
         sublevel: ${{ steps.extract.outputs.sublevel }}
         os_patch_level: ${{ inputs.os_patch_level }}
 
+    # Empty ksu_branch (or sukisu: prefix) uses pinned SukiSU builtin 6c13a06 +
+    # KPM. An explicit non-sukisu ksu_branch is the KernelSU-Next escape hatch
+    # (no KPM — that driver has no CONFIG_KPM).
     - name: Setup SukiSU Ultra
-      if: ${{ (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') && !contains(inputs.feature_set, 'SUSFS') && inputs.feature_set != 'FULL' }}
+      if: ${{ (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') && (!inputs.ksu_branch || startsWith(inputs.ksu_branch, 'sukisu:')) }}
       uses: ./.github/actions/sukisu
       with:
         ksu_branch: ${{ inputs.ksu_branch }}
+        enable_kpm: ${{ inputs.use_kpm }}
         feature_set: ${{ inputs.feature_set }}
 
     - name: Setup KernelSU-Next
-      if: ${{ (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') && (contains(inputs.feature_set, 'SUSFS') || inputs.feature_set == 'FULL') }}
+      if: ${{ (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') && inputs.ksu_branch != '' && !startsWith(inputs.ksu_branch, 'sukisu:') }}
       uses: ./.github/actions/kernelsu
       with:
         ksu_branch: ${{ inputs.ksu_branch }}
@@ -213,6 +232,18 @@ jobs:
         fi
 
         echo "SUSFS integration check passed"
+
+        if [[ "${{ inputs.use_kpm }}" == "true" && ( "${{ inputs.ksu_branch }}" == "" || "${{ inputs.ksu_branch }}" == sukisu:* ) ]]; then
+          if ! grep -q '^CONFIG_KPM=y$' "$DEFCONFIG"; then
+            echo "ERROR: CONFIG_KPM is not enabled in gki_defconfig"
+            exit 1
+          fi
+          if ! grep -qE '^[[:space:]]*config[[:space:]]+KPM([[:space:]]|$)' "$KSU_KCONFIG"; then
+            echo "ERROR: KPM symbol not found in $KSU_KCONFIG"
+            exit 1
+          fi
+          echo "KPM config check passed"
+        fi
 
     - name: Baseband Guard
       if: (contains(inputs.feature_set, 'BBG') || inputs.feature_set == 'FULL')
@@ -535,6 +566,14 @@ jobs:
 
         echo "SUSFS verification passed (IKCONFIG + System.map symbols)"
 
+    - name: Patch Normal Kernel with KPM
+      if: ${{ inputs.use_kpm == 'true' && (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') && (!inputs.ksu_branch || startsWith(inputs.ksu_branch, 'sukisu:')) }}
+      uses: ./.github/actions/kpm-patch
+      with:
+        image_path: ${{ github.workspace }}/AnyKernel3/Image
+        kpm_patch_ver: ${{ inputs.kpm_patch_ver }}
+        patch_linux_path: ${{ inputs.kpm_patch_linux_path }}
+
     - name: Get Cache Stats
       uses: ./.github/actions/cache-stats
       with:
@@ -571,6 +610,14 @@ jobs:
       with:
         bypass: true
         version: ${{ inputs.version }}
+
+    - name: Patch Bypass Kernel with KPM
+      if: ${{ inputs.quick_mode != 'true' && inputs.use_kpm == 'true' && (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') && (!inputs.ksu_branch || startsWith(inputs.ksu_branch, 'sukisu:')) }}
+      uses: ./.github/actions/kpm-patch
+      with:
+        image_path: ${{ github.workspace }}/AnyKernel3/Bypass-Image
+        kpm_patch_ver: ${{ inputs.kpm_patch_ver }}
+        patch_linux_path: ${{ inputs.kpm_patch_linux_path }}
 
     - name: Package Flashable AnyKernel3 Archives
       shell: bash
@@ -665,9 +712,10 @@ jobs:
           fi
           echo "| **KSU Version** | ${KSU_VER} |"
           echo "| **KSU Tag** | ${KSU_TAG} |"
-          echo "| **KSU Branch Input** | ${{ inputs.ksu_branch || 'auto-latest' }} |"
+          echo "| **KSU Branch Input** | ${{ inputs.ksu_branch || 'sukisu:6c13a06 (pinned)' }} |"
+          echo "| **KPM** | ${KPM_ENABLED:-false} (${KPM_PATCH_VER:-n/a}, ${KPM_PATCH_SOURCE:-n/a}) |"
           echo "| **SUSFS Version** | ${SUSFS_VER} |"
-          echo "| **SUSFS Commit Input** | ${{ inputs.susfs_commit || 'auto-latest' }} |"
+          echo "| **SUSFS Commit Input** | ${{ inputs.susfs_commit || 'ee023e3 if present, else branch tip' }} |"
           echo "| **Feature Set** | ${{ inputs.feature_set }} |"
           echo "| **Variant** | ${{ inputs.variant }} |"
           echo "| **Primary OS Patch** | ${{ inputs.os_patch_level }} |"

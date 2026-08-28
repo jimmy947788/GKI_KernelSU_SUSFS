@@ -1,0 +1,150 @@
+name: Patch kernel Image with KPM
+description: Embed KernelPatch (kpimg) into a built Image using patch_linux from SukiSU_KernelPatch_patch
+inputs:
+  image_path:
+    description: 'Path to the kernel Image (or Bypass-Image) to patch in place'
+    required: true
+  kpm_patch_ver:
+    description: >
+      Release tag from github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch
+      (empty or "latest" = newest published release; e.g. 0.13.0).
+    required: false
+    default: "latest"
+  patch_linux_path:
+    description: >
+      Optional path to a prebuilt patch_linux. When set, skips GitHub download.
+      Empty = download/cache from SukiSU_KernelPatch_patch releases, then fall
+      back to $HOME/Projects/PxGKI/KernelPatch_patch/patch_linux if offline.
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: Apply patch_linux
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        IMAGE_PATH="${{ inputs.image_path }}"
+        KPM_VER_INPUT="${{ inputs.kpm_patch_ver }}"
+        INPUT_PATH="${{ inputs.patch_linux_path }}"
+        KPM_REPO="SukiSU-Ultra/SukiSU_KernelPatch_patch"
+        KPM_BASE="https://github.com/$KPM_REPO"
+
+        if [ ! -f "$IMAGE_PATH" ]; then
+          echo "ERROR: kernel image not found at $IMAGE_PATH"
+          exit 1
+        fi
+
+        resolve_latest_tag() {
+          curl -fsSL "https://api.github.com/repos/$KPM_REPO/releases/latest" \
+            | python3 -c "import json,sys; print(json.load(sys.stdin)['tag_name'].lstrip('v'))"
+        }
+
+        if [ -z "$KPM_VER_INPUT" ] || [ "$KPM_VER_INPUT" = "latest" ]; then
+          KPM_VER="$(resolve_latest_tag)"
+          echo "Resolved latest SukiSU_KernelPatch_patch release: $KPM_VER"
+        else
+          KPM_VER="${KPM_VER_INPUT#v}"
+        fi
+
+        CACHE_ROOT="${{ github.workspace }}/.kpm-cache/kpm-$KPM_VER"
+        mkdir -p "$CACHE_ROOT"
+        PATCH_CACHE="$CACHE_ROOT/patch_linux"
+        KPIMG_CACHE="$CACHE_ROOT/kpimg"
+
+        download_release_asset() {
+          local asset="$1"
+          local dest="$2"
+          local tag url
+          for tag in "$KPM_VER" "v$KPM_VER"; do
+            url="$KPM_BASE/releases/download/$tag/$asset"
+            if curl -LSsf -o "$dest" "$url"; then
+              echo "Downloaded $asset from $url"
+              return 0
+            fi
+          done
+          return 1
+        }
+
+        ensure_release_cache() {
+          if [ -f "$PATCH_CACHE" ]; then
+            return 0
+          fi
+          echo "Fetching KPM release $KPM_VER from $KPM_BASE"
+          download_release_asset patch_linux "$PATCH_CACHE"
+          chmod 755 "$PATCH_CACHE"
+          download_release_asset kpimg "$KPIMG_CACHE" || true
+        }
+
+        PATCH_LINUX=""
+        PATCH_SOURCE=""
+        KPIMG_DIR=""
+
+        if [ -n "$INPUT_PATH" ] && [ -f "$INPUT_PATH" ]; then
+          PATCH_LINUX="$INPUT_PATH"
+          PATCH_SOURCE="$INPUT_PATH"
+          KPIMG_DIR="$(dirname "$INPUT_PATH")"
+        elif [ -n "${KPM_PATCH_LINUX:-}" ] && [ -f "$KPM_PATCH_LINUX" ]; then
+          PATCH_LINUX="$KPM_PATCH_LINUX"
+          PATCH_SOURCE="$KPM_PATCH_LINUX"
+          KPIMG_DIR="$(dirname "$KPM_PATCH_LINUX")"
+        elif ensure_release_cache 2>/dev/null; then
+          PATCH_LINUX="$PATCH_CACHE"
+          PATCH_SOURCE="release:$KPM_VER ($KPM_BASE)"
+          KPIMG_DIR="$CACHE_ROOT"
+        else
+          for candidate in \
+            "$HOME/Projects/PxGKI/KernelPatch_patch/patch_linux" \
+            "$HOME/Projects/PxGKI/Buildkernel/patch_linux-$KPM_VER"
+          do
+            [ -f "$candidate" ] || continue
+            PATCH_LINUX="$candidate"
+            PATCH_SOURCE="$candidate (offline fallback)"
+            KPIMG_DIR="$(dirname "$candidate")"
+            break
+          done
+        fi
+
+        if [ -z "$PATCH_LINUX" ]; then
+          echo "ERROR: patch_linux not found locally and download from $KPM_BASE failed"
+          exit 1
+        fi
+
+        echo "Using patch_linux: $PATCH_SOURCE"
+
+        IMAGE_BASE=$(basename "$IMAGE_PATH")
+        WORK=$(mktemp -d)
+        cp "$PATCH_LINUX" "$WORK/patch_linux"
+        chmod 755 "$WORK/patch_linux"
+        cp "$IMAGE_PATH" "$WORK/Image"
+
+        if [ -f "$KPIMG_DIR/kpimg" ]; then
+          cp "$KPIMG_DIR/kpimg" "$WORK/kpimg"
+        elif [ -f "$KPIMG_CACHE" ]; then
+          cp "$KPIMG_CACHE" "$WORK/kpimg"
+        fi
+
+        (
+          cd "$WORK"
+          ./patch_linux
+          if [ ! -f oImage ]; then
+            echo "ERROR: patch_linux did not produce oImage"
+            exit 1
+          fi
+        )
+
+        mv -f "$WORK/oImage" "$IMAGE_PATH"
+        rm -rf "$WORK"
+
+        KPM_HITS=$(strings -n 6 "$IMAGE_PATH" | grep -c KernelPatch || true)
+        if [ "$KPM_HITS" -eq 0 ]; then
+          echo "ERROR: $IMAGE_PATH has no KernelPatch strings after patch_linux"
+          exit 1
+        fi
+
+        echo "KPM embedded in $IMAGE_BASE ($KPM_HITS KernelPatch strings, $PATCH_SOURCE)"
+        echo "KPM_PATCH_VER=$KPM_VER" >> "$GITHUB_ENV"
+        echo "KPM_PATCH_SOURCE=$PATCH_SOURCE" >> "$GITHUB_ENV"
+        echo "KPM_ENABLED=true" >> "$GITHUB_ENV"

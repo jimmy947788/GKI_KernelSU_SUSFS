@@ -1,10 +1,21 @@
 name: Setup SukiSU Ultra
-description: Integrate SukiSU Ultra into the kernel source tree
+description: Integrate a pinned SukiSU Ultra driver (builtin + susfs) into the kernel tree
 inputs:
   ksu_branch:
-    description: 'SukiSU branch, tag, or commit (empty = default ref for selected feature set)'
+    description: >
+      SukiSU ref (commit/tag/branch). Empty or "sukisu:" prefix with empty remainder
+      pins to 6c13a06 (last builtin commit before the uapi-version bump). Do not use
+      main / susfs-main / v4 tags — those ship a driver with zero kernel-side susfs.
     required: false
     default: ""
+  enable_kpm:
+    description: 'Enable CONFIG_KPM (KernelPatch) in gki_defconfig'
+    required: false
+    default: "true"
+  ksu_version_ref:
+    description: 'Tag whose commit count drives KSU_VERSION (must match the manager APK)'
+    required: false
+    default: "v4.1.3"
   feature_set:
     description: 'Selected feature set'
     required: true
@@ -18,41 +29,100 @@ runs:
       run: |
         set -euo pipefail
 
+        # Pinned to 6c13a06 (2026-05-30) = last builtin commit BEFORE b8279c3
+        # "kernel, ksud, manager: implement uapi version (#3455)". That commit and
+        # everything after it move the supercall ABI (KERNEL_SU_UAPI_VERSION=2,
+        # KSU_APP_PROFILE_VER 3 -> 4) which the v4.1.3 Manager APK does not speak.
+        # Only the builtin branch still carries kernel-side susfs (config KSU_SUSFS);
+        # main / susfs_new / every v3/v4 tag drop those symbols silently in Kconfig.
+        PINNED_SUKISU_SRC="6c13a06"
+        SUKISU_VER="${{ inputs.ksu_version_ref }}"
+
         SUKISU_INPUT="${{ inputs.ksu_branch }}"
+        SUKISU_INPUT="${SUKISU_INPUT#sukisu:}"
         if [ -z "$SUKISU_INPUT" ]; then
-          if [[ "${{ inputs.feature_set }}" == "FULL" || "${{ inputs.feature_set }}" == *"SUSFS"* ]]; then
-            SUKISU_INPUT="susfs-main"
-          else
-            SUKISU_INPUT="main"
-          fi
+          SUKISU_INPUT="$PINNED_SUKISU_SRC"
         fi
 
-        if [[ ("${{ inputs.feature_set }}" == "FULL" || "${{ inputs.feature_set }}" == *"SUSFS"*) && "$SUKISU_INPUT" == "main" ]]; then
-          echo "SUSFS mode detected; remapping SukiSU ref main -> susfs-main"
-          SUKISU_INPUT="susfs-main"
-        fi
-
-        if [[ ("${{ inputs.feature_set }}" == "FULL" || "${{ inputs.feature_set }}" == *"SUSFS"*) && "$SUKISU_INPUT" != *"susfs"* ]]; then
-          echo "WARNING: SUSFS mode selected but custom SukiSU ref '$SUKISU_INPUT' does not contain 'susfs'."
-          echo "WARNING: This may produce a kernel where SUSFS modules report unsupported."
+        if [[ "$SUKISU_INPUT" == "main" || "$SUKISU_INPUT" == "susfs-main" || "$SUKISU_INPUT" == "susfs_new" ]]; then
+          echo "ERROR: SukiSU ref '$SUKISU_INPUT' is a moving tip with no kernel-side susfs"
+          echo "ERROR: Leave ksu_branch empty to use the pinned builtin commit $PINNED_SUKISU_SRC"
+          exit 1
         fi
 
         echo "Using SukiSU Ultra ref: $SUKISU_INPUT"
         curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s "$SUKISU_INPUT"
 
-        if [ ! -d "KernelSU/kernel" ]; then
-          echo "ERROR: SukiSU Ultra integration did not create KernelSU/kernel"
+        if [ ! -d "KernelSU/.git" ] || [ ! -d "KernelSU/kernel" ]; then
+          echo "ERROR: SukiSU Ultra integration did not clone KernelSU/"
           exit 1
         fi
 
-        cd KernelSU
-        SUKISU_COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo unknown)
-        SUKISU_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo unknown)
+        # setup.sh clones the repo then `git checkout $ref || echo fail` — a miss
+        # leaves HEAD on main (no susfs). Fetch builtin so a commit that only
+        # lives on that branch is actually reachable, then verify HEAD.
+        git -C KernelSU fetch -q --tags --unshallow origin 2>/dev/null \
+          || git -C KernelSU fetch -q --tags origin 2>/dev/null || true
+        git -C KernelSU fetch -q origin builtin 2>/dev/null || true
+        if ! git -C KernelSU rev-parse "$SUKISU_INPUT^{commit}" >/dev/null 2>&1; then
+          git -C KernelSU fetch -q origin "$SUKISU_INPUT" 2>/dev/null || true
+        fi
+        if git -C KernelSU rev-parse "$SUKISU_INPUT^{commit}" >/dev/null 2>&1; then
+          git -C KernelSU checkout -q --detach "$SUKISU_INPUT"
+        fi
+
+        KSU_HEAD=$(git -C KernelSU rev-parse HEAD)
+        KSU_WANT=$(git -C KernelSU rev-parse "$SUKISU_INPUT^{commit}" 2>/dev/null || echo "")
+        if [ -z "$KSU_WANT" ] || [ "$KSU_HEAD" != "$KSU_WANT" ]; then
+          echo "ERROR: SukiSU ref '$SUKISU_INPUT' not checked out (HEAD=${KSU_HEAD:0:7}) - setup.sh fell through to main"
+          exit 1
+        fi
+
+        if ! grep -qE '^config[[:space:]]+KSU_SUSFS[[:space:]]*$' KernelSU/kernel/Kconfig; then
+          echo "ERROR: KernelSU/kernel/Kconfig has no 'config KSU_SUSFS' - this SukiSU ref carries no susfs"
+          echo "ERROR: Use a commit from the builtin branch (pinned default: $PINNED_SUKISU_SRC)"
+          exit 1
+        fi
+
+        if [ "${{ inputs.enable_kpm }}" = "true" ]; then
+          if ! grep -qE '^config[[:space:]]+KPM[[:space:]]*$' KernelSU/kernel/Kconfig; then
+            echo "ERROR: KernelSU/kernel/Kconfig has no 'config KPM' - cannot enable KPM on this ref"
+            exit 1
+          fi
+        fi
+
+        # SukiSU derives KSU_VERSION from REPO_BRANCH, which is hardcoded to "main",
+        # so a checked-out commit still gets numbered off main's tip. Repoint it at
+        # the manager tag (v4.1.3 -> 40000+3611-2815 = 40796).
+        KSU_MK=""
+        for f in KernelSU/kernel/Kbuild KernelSU/kernel/Makefile; do
+          if [ -f "$f" ] && grep -q '^REPO_BRANCH[[:space:]]*:=' "$f"; then
+            KSU_MK="$f"
+            break
+          fi
+        done
+        if [ -n "$KSU_MK" ]; then
+          sed -i "s|^REPO_BRANCH[[:space:]]*:=.*|REPO_BRANCH := $SUKISU_VER|" "$KSU_MK"
+          echo "Pinned SukiSU REPO_BRANCH -> $SUKISU_VER in ${KSU_MK#KernelSU/}"
+        else
+          echo "ERROR: No REPO_BRANCH found in KernelSU/kernel/{Kbuild,Makefile} - cannot pin KSU_VERSION"
+          exit 1
+        fi
+
+        SUKISU_COMMIT=$(git -C KernelSU rev-parse --short HEAD)
+        SUKISU_LOG=$(git -C KernelSU log -1 --format='%ad %s' --date=short | cut -c1-70)
+        echo "SukiSU driver at $SUKISU_INPUT ($SUKISU_LOG)"
         echo "KSU_COMMIT=$SUKISU_COMMIT" >> "$GITHUB_ENV"
-        echo "KSU_GIT_TAG=$SUKISU_TAG" >> "$GITHUB_ENV"
+        echo "KSU_GIT_TAG=$SUKISU_VER" >> "$GITHUB_ENV"
+        echo "KSU_VERSION=$SUKISU_VER" >> "$GITHUB_ENV"
+        echo "KSU_DRIVER=sukisu" >> "$GITHUB_ENV"
 
     - name: Enable SukiSU kernel configs
       uses: ./.github/actions/set-kernel-config
       with:
         config_list: |
           CONFIG_KSU=y
+          ${{ inputs.enable_kpm == 'true' && 'CONFIG_KPM=y' || '' }}
+          ${{ inputs.enable_kpm == 'true' && 'CONFIG_KPROBES=y' || '' }}
+          ${{ inputs.enable_kpm == 'true' && 'CONFIG_KALLSYMS=y' || '' }}
+          ${{ inputs.enable_kpm == 'true' && 'CONFIG_KALLSYMS_ALL=y' || '' }}

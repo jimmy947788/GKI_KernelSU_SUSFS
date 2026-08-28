@@ -60,8 +60,9 @@ GKI 安裝方式請參考官方文件：
 
 ### 建議使用的 Root 管理工具
 
-目前這個 repo 的 KSUN+SUSFS 建置路線，建議優先使用 KernelSU-Next Manager 驗證 root 狀態與模組狀態。
-部分版本的 SukiSU Ultra App 可能會出現 mismatch 或 unsupported 顯示，但核心 root 實際上可能已正常運作。
+請用 **SukiSU Ultra Manager v4.1.3**。預設 kernel driver 釘在 builtin commit `6c13a06`，ABI 仍是 `KSU_APP_PROFILE_VER` 3。SukiSU 更新的 tip（`main`、`v4` tag、`b8279c3` 之後）會升 UAPI，v4.1.3 app 會顯示 Failed to update App Profile。
+
+`ksu_branch` 留空即可，不要填 `main` / `susfs-main` / 最新 tag。
 
 ### 驗證成功畫面（KPM + SUSFS）
 
@@ -148,7 +149,7 @@ adb shell getprop ro.build.version.security_patch
 adb shell 'echo "android=$(getprop ro.build.version.release) kernel=$(uname -r) patch=$(getprop ro.build.version.security_patch)"'
 ```
 
-SukiSU Ultra + SUSFS：
+SukiSU Ultra + SUSFS + KPM（預設）：
 
 ```yaml
 release_type: Action
@@ -158,12 +159,13 @@ feature_set: KSUN+SUSFS
 runner_label: "gki-local"
 quick_mode: "true"
 ksu_branch: ""
+use_kpm: "true"
 ```
 
 SukiSU app 畫面判讀方式：
 
-- SukiSU Ultra app 應該會判斷成 built-in 模式。
-- 若出現 manager/driver version mismatch，不代表沒有 root，只代表 app 版本和 kernel 內 driver 版本不完全一致。
+- SukiSU Ultra v4.1.3 app 應該會判斷成 built-in 模式，且 KPM 為啟用。
+- `ksu_branch` 留空會釘在 builtin `6c13a06`（不是最新）。最新 SukiSU 沒有 kernel 端 susfs。
 
 ### 編譯產物：`Flashable-Zips` 與 `AnyKernel3` 差異
 
@@ -197,7 +199,7 @@ SukiSU app 畫面判讀方式：
 
 代碼含義：
 
-- `KSUN`：啟用 KernelSU-Next
+- `KSUN`：啟用 SukiSU Ultra（釘住 builtin；只有 `ksu_branch` 明確填 Next ref 才走 KernelSU-Next）
 - `SUSFS`：啟用 SUSFS patch 流程
 - `BBG`：啟用 Baseband Guard
 - `NET`：啟用 Networking patch 集
@@ -224,9 +226,15 @@ Actions 選單中各選項意義：
 
 ### SukiSU 補充說明
 
-目前 `KSUN+SUSFS` 的行為：
+目前 `KSUN+SUSFS` 的行為（`ksu_branch` 留空）：
 
-- 走 SukiSU Ultra，SukiSU Ultra manager 可判斷 built-in 模式。
+- 走 SukiSU Ultra **builtin** `6c13a06`（不是最新 `main` / `susfs-main`）。
+- 開啟 `CONFIG_KPM=y`，編譯後從 [SukiSU_KernelPatch_patch](https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch) 最新 release 下載 `patch_linux` + `kpimg`（預設 `kpm_patch_ver=latest`，目前為 `0.13.0`）。
+- 離線 fallback：`$HOME/Projects/PxGKI/KernelPatch_patch/patch_linux`。要強制用本地檔，設 `kpm_patch_linux_path`。
+- susfs4ksu 在該 gki 分支找得到時釘 `ee023e3`（SUSFS v2.1.0）。
+- 管理器請用 SukiSU Ultra **v4.1.3**。
+
+若要改走 KernelSU-Next，把 `ksu_branch` 設成 Next 的 ref（例如 `dev-susfs`）；那條路沒有 KPM。
 
 ### GitHub Actions `quick_mode`（快速編譯）
 
@@ -279,6 +287,7 @@ feature_set: KSUN+SUSFS
 runner_label: "gki-local"
 quick_mode: "true"
 ksu_branch: ""
+use_kpm: "true"
 susfs_commit_android12-5-10: ""
 susfs_commit_android13-5-10: ""
 susfs_commit_android13-5-15: ""
@@ -290,8 +299,8 @@ susfs_commit_android16-6-12: ""
 
 此範例補充：
 
-- `ksu_branch` 留空代表使用預設最新分支。
-- `susfs_commit_*` 留空代表使用各分支最新 commit。
+- `ksu_branch` 留空代表釘住 SukiSU builtin `6c13a06`（不是最新）。
+- `susfs_commit_*` 留空時，該 gki 分支若有 `ee023e3` 就用它，否則用分支 tip。
 - 只會編譯 `android13-5.10` + `2023-09` 這一組。
 
 若你已經配置好 self-hosted runner，可改成：

@@ -3,8 +3,9 @@ description: Download and configure Wild KSU with version tracking
 inputs:
   ksu_branch:
     description: >
-      KernelSU branch or commit (empty = latest dev-susfs branch tip).
-      Prefix "sukisu:" to use SukiSU-Ultra as driver source, e.g. "sukisu:v4.1.3".
+      KernelSU branch or commit (empty is not used here — the default path is SukiSU).
+      Prefix "sukisu:" is handled by the sukisu action instead. This action is the
+      KernelSU-Next escape hatch when ksu_branch is a Next ref such as "dev-susfs".
     required: false
     default: ""
 

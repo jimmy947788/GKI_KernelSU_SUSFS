@@ -62,42 +62,59 @@ on:
           - "true"
         default: "false"
       ksu_branch:
-        description: "KernelSU branch or commit (empty = latest dev-susfs branch tip)"
+        description: "SukiSU ref (empty = pinned builtin 6c13a06 + v4.1.3). Non-empty without sukisu: prefix = KernelSU-Next."
+        type: string
+        required: false
+        default: ""
+      use_kpm:
+        description: "Enable KPM (CONFIG_KPM + patch_linux from SukiSU_KernelPatch_patch). Requires SukiSU driver."
+        type: choice
+        options:
+          - "true"
+          - "false"
+        default: "true"
+      kpm_patch_ver:
+        description: "SukiSU_KernelPatch_patch release (latest = github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch newest release)"
+        type: string
+        required: false
+        default: "latest"
+      kpm_patch_linux_path:
+        description: "Prebuilt patch_linux (empty = ~/Projects/PxGKI/KernelPatch_patch/patch_linux on self-hosted)"
         type: string
         required: false
         default: ""
       susfs_commit_android12-5-10:
-        description: "SUSFS commit for android12-5.10 (empty = latest branch tip)"
+        description: "SUSFS commit for android12-5.10 (empty = ee023e3 if on branch, else tip)"
         type: string
         required: false
         default: ""
       susfs_commit_android13-5-10:
-        description: "SUSFS commit for android13-5.10 (empty = latest branch tip)"
+        description: "SUSFS commit for android13-5.10 (empty = ee023e3 if on branch, else tip)"
         type: string
         required: false
         default: ""
       susfs_commit_android13-5-15:
-        description: "SUSFS commit for android13-5.15 (empty = latest branch tip)"
+        description: "SUSFS commit for android13-5.15 (empty = ee023e3 if on branch, else tip)"
         type: string
         required: false
         default: ""
       susfs_commit_android14-5-15:
-        description: "SUSFS commit for android14-5.15 (empty = latest branch tip)"
+        description: "SUSFS commit for android14-5.15 (empty = ee023e3 if on branch, else tip)"
         type: string
         required: false
         default: ""
       susfs_commit_android14-6-1:
-        description: "SUSFS commit for android14-6.1 (empty = latest branch tip)"
+        description: "SUSFS commit for android14-6.1 (empty = ee023e3 if on branch, else tip)"
         type: string
         required: false
         default: ""
       susfs_commit_android15-6-6:
-        description: "SUSFS commit for android15-6.6 (empty = latest branch tip)"
+        description: "SUSFS commit for android15-6.6 (empty = ee023e3 if on branch, else tip)"
         type: string
         required: false
         default: ""
       susfs_commit_android16-6-12:
-        description: "SUSFS commit for android16-6.12 (empty = latest branch tip)"
+        description: "SUSFS commit for android16-6.12 (empty = ee023e3 if on branch, else tip)"
         type: string
         required: false
         default: ""
@@ -147,6 +164,9 @@ jobs:
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android12-5-10 }}
+      use_kpm: ${{ inputs.use_kpm }}
+      kpm_patch_ver: ${{ inputs.kpm_patch_ver }}
+      kpm_patch_linux_path: ${{ inputs.kpm_patch_linux_path }}
     secrets: inherit
 
   build-android13-5-10:
@@ -161,6 +181,9 @@ jobs:
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android13-5-10 }}
+      use_kpm: ${{ inputs.use_kpm }}
+      kpm_patch_ver: ${{ inputs.kpm_patch_ver }}
+      kpm_patch_linux_path: ${{ inputs.kpm_patch_linux_path }}
     secrets: inherit
 
   build-android13-5-15:
@@ -175,6 +198,9 @@ jobs:
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android13-5-15 }}
+      use_kpm: ${{ inputs.use_kpm }}
+      kpm_patch_ver: ${{ inputs.kpm_patch_ver }}
+      kpm_patch_linux_path: ${{ inputs.kpm_patch_linux_path }}
     secrets: inherit
 
   build-android14-5-15:
@@ -189,6 +215,9 @@ jobs:
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android14-5-15 }}
+      use_kpm: ${{ inputs.use_kpm }}
+      kpm_patch_ver: ${{ inputs.kpm_patch_ver }}
+      kpm_patch_linux_path: ${{ inputs.kpm_patch_linux_path }}
     secrets: inherit
 
   build-android14-6-1:
@@ -203,6 +232,9 @@ jobs:
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android14-6-1 }}
+      use_kpm: ${{ inputs.use_kpm }}
+      kpm_patch_ver: ${{ inputs.kpm_patch_ver }}
+      kpm_patch_linux_path: ${{ inputs.kpm_patch_linux_path }}
     secrets: inherit
 
   build-android15-6-6:
@@ -217,6 +249,9 @@ jobs:
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android15-6-6 }}
+      use_kpm: ${{ inputs.use_kpm }}
+      kpm_patch_ver: ${{ inputs.kpm_patch_ver }}
+      kpm_patch_linux_path: ${{ inputs.kpm_patch_linux_path }}
     secrets: inherit
 
   build-android16-6-12:
@@ -231,6 +266,9 @@ jobs:
       quick_mode: ${{ inputs.quick_mode }}
       ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android16-6-12 }}
+      use_kpm: ${{ inputs.use_kpm }}
+      kpm_patch_ver: ${{ inputs.kpm_patch_ver }}
+      kpm_patch_linux_path: ${{ inputs.kpm_patch_linux_path }}
     secrets: inherit
 
   rej:
@@ -348,7 +386,8 @@ jobs:
           echo "# 📋 Build Summary — $(date -u '+%Y-%m-%d %H:%M UTC')"
           echo
           echo "**Feature Set:** ${{ inputs.feature_set }}"
-          echo "**KSU Branch:** ${{ inputs.ksu_branch || 'latest dev' }}"
+          echo "**KSU Branch:** ${{ inputs.ksu_branch || 'sukisu:6c13a06 (pinned)' }}"
+          echo "**KPM:** ${{ inputs.use_kpm }} (${{ inputs.kpm_patch_ver }})"
           echo
           
           # Count successes and failures

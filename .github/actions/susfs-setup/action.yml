@@ -2,7 +2,7 @@ name: 'Setup SUSFS Branch'
 description: 'Clone SUSFS repo and cherry-pick commits'
 inputs:
   susfs_commit:
-    description: 'SUSFS commit hash (empty = latest on auto-derived gki-{version} branch)'
+    description: 'SUSFS commit hash (empty = ee023e3 if present on the gki branch, else tip)'
     required: false
     default: ""
   version:
@@ -24,14 +24,33 @@ runs:
         echo "Cloning latest from $SUSFS_BRANCH..."
         git clone "$SUSFS_REPO" -b "$SUSFS_BRANCH" susfs4ksu
 
-        if [ -n "${{ inputs.susfs_commit }}" ]; then
-          echo "Checking out SUSFS commit: ${{ inputs.susfs_commit }}"
-          cd ${{ github.workspace }}/susfs4ksu
-          git checkout "${{ inputs.susfs_commit }}"
+        cd ${{ github.workspace }}/susfs4ksu
+
+        # Match the pinned SukiSU builtin era (SUSFS v2.1.0, 2026-05-30). The
+        # kernel patch, the builtin driver glue and the ksu_susfs userspace tool
+        # are one generation — mixing tips with 6c13a06 yields "unsupport".
+        PINNED_SUSFS="ee023e3"
+        SUSFS_COMMIT="${{ inputs.susfs_commit }}"
+        if [ -z "$SUSFS_COMMIT" ]; then
+          if git cat-file -e "${PINNED_SUSFS}^{commit}" 2>/dev/null; then
+            SUSFS_COMMIT="$PINNED_SUSFS"
+          else
+            echo "Pinned susfs $PINNED_SUSFS is not on $SUSFS_BRANCH; using branch tip"
+          fi
+        fi
+        if [ -n "$SUSFS_COMMIT" ]; then
+          echo "Checking out SUSFS commit: $SUSFS_COMMIT"
+          git checkout --detach "$SUSFS_COMMIT"
         fi
 
-        cd susfs4ksu
+        echo "susfs4ksu at $(git rev-parse --short HEAD)"
 
-        patch -p1 < "${{ github.workspace }}/kernel_patches/pershoot/susfs4ksu/0001-pershoot-Allow-core-to-be-built-with-no-features.patch"
-        patch -p1 < "${{ github.workspace }}/kernel_patches/pershoot/susfs4ksu/0002-pershoot-Implement-SuSFS-and-Toolkit-coexistence.patch"
+        # pershoot patches target KernelSU-Next coexistence. SukiSU builtin
+        # already carries susfs glue — applying them mixes generations.
+        if [ -d "${{ github.workspace }}/kernel/KernelSU" ]; then
+          echo "SukiSU driver present; skipping pershoot KernelSU-Next coexistence patches"
+        else
+          patch -p1 < "${{ github.workspace }}/kernel_patches/pershoot/susfs4ksu/0001-pershoot-Allow-core-to-be-built-with-no-features.patch"
+          patch -p1 < "${{ github.workspace }}/kernel_patches/pershoot/susfs4ksu/0002-pershoot-Implement-SuSFS-and-Toolkit-coexistence.patch"
+        fi
 
