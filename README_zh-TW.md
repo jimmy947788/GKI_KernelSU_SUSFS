@@ -3,6 +3,8 @@
 # 🔥 Wild Kernels for Android（繁體中文說明）
 
 [![KernelSU](https://img.shields.io/badge/KernelSU-Supported-green)](https://kernelsu.org/)
+[![SukiSU](https://img.shields.io/badge/SukiSU_Ultra-v4.1.3-blue)](https://github.com/SukiSU-Ultra/SukiSU-Ultra)
+[![KPM](https://img.shields.io/badge/KPM-Supported-purple)](https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch)
 [![SUSFS](https://img.shields.io/badge/SUSFS-Integrated-orange)](https://gitlab.com/simonpunk/susfs4ksu)
 
 </div>
@@ -40,19 +42,77 @@
 
 - 🩹 [Kernel Patches](https://github.com/WildKernels/kernel_patches)
 - 📜 [Old Build Scripts](https://github.com/TheWildJames/kernel_build_scripts)
-- ⚡ [Kernel Flasher](https://github.com/fatalcoder524/KernelFlasher)
+- 📲 [Horizon Kernel Flasher](https://github.com/libxzr/HorizonKernelFlasher)（建議：刷 `*-AnyKernel3-normal.zip`）
+- ⚡ [Kernel Flasher](https://github.com/fatalcoder524/KernelFlasher)（進階：A/B slot 備份／還原）
 
 ---
 
 ## 📋 安裝說明
 
-GKI 安裝方式請參考官方文件：
+GKI 安裝方式也可參考官方文件：
 
 📖 **[KernelSU 安裝指南](https://kernelsu.org/guide/installation.html)**
 
+### 目前支援（已驗證）
+
+此核心已針對 **SukiSU Ultra** 做相容修正，並同時支援 **KPM** 與 **SUSFS 模組**：
+
+| 項目 | 狀態 |
+|------|------|
+| 🔐 **SukiSU Ultra** | Manager **v4.1.3** + kernel driver **builtin** `6c13a06`（相容修正；不要追 SukiSU `main` / 更新的 manager tag，那些 ref 沒有 kernel 端 susfs，且 ABI 不相容） |
+| 🧩 **KPM** | `CONFIG_KPM=y`，編譯後用 repo 內 [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/) 的 `patch_linux` + `kpimg`（v0.13.0）寫入 Image |
+| 🛡️ **SUSFS** | kernel 端 `CONFIG_KSU_SUSFS=y`；使用者空間請再裝 [SUSFS-FOR-KERNELSU](https://github.com/sidex15/susfs4ksu-module) 模組 |
+
+Pixel 6 Pro（`raven` / `TQ3A.230901.001`）刷入後 `uname -r` 範例：`5.10.186-android13-Wild-r36.1`。
+
+### 1. 下載哪一個檔案
+
+workflow 成功後，同一個版本通常會出現這些產物。名稱類似：
+
+`5.10.186-android13-2023-09-r36.1-…`
+
+| 產物名稱 | 要不要下載 | 說明 |
+|----------|------------|------|
+| `…-normal`（內含 `*-AnyKernel3-normal.zip`） | **要，第一次就刷這個** | GitHub Actions 外層包裝。解壓後得到真正可刷的 zip |
+| `…-AnyKernel3-normal.zip` | **這才是要刷的檔** | 標準核心（AnyKernel3）。Horizon 選這個 |
+| `…-bypass` | 先不要 | 只在 normal 因模組版本檢查無法開機時才試。**不是**躲 root 偵測 |
+| `…-AnyKernel3`（無 `-normal` / `-bypass`） | 不用 | 原始 AnyKernel3 工作目錄，給進階使用者拆來看 |
+
+**請刷：** `*-AnyKernel3-normal.zip`
+
+若你下載的是 Actions 產物 `…-normal.zip`，先解壓一次，裡面那顆 `…-AnyKernel3-normal.zip` 才丟給 Horizon。不要把外層包裝 zip 拿去刷。
+
+先測 normal 可開機，再考慮 bypass。
+
+### 2. 用 Horizon 刷 `*-AnyKernel3-normal.zip`
+
+已驗證工具：[Horizon Kernel Flasher v1.3](https://github.com/libxzr/HorizonKernelFlasher/releases/tag/v1.3)
+
+前提：
+
+- bootloader 已解鎖
+- 手機**已經有 root**（Horizon 需要 root；可用既有 Magisk / KernelSU / SukiSU LKM）
+- 已把 `*-AnyKernel3-normal.zip` 放到手機儲存空間
+
+步驟：
+
+1. 安裝 `HorizonKernelFlasher-v1.3.apk`，在 SukiSU / KernelSU / Magisk 裡允許它 root。
+2. 打開 Horizon → 選取 `*-AnyKernel3-normal.zip`（例如 `5.10.186-android13-2023-09-r36.1-AnyKernel3-normal.zip`）。
+3. 刷入目前 active slot，完成後重開機。
+4. 確認核心版本：
+
+```bash
+adb shell uname -a
+# 應類似：Linux localhost 5.10.186-android13-Wild-r36.1 #1 SMP PREEMPT ... aarch64 Toybox
+```
+
+若你目前是 KSU LKM（原廠 kernel + 模組 root），建議刷 GKI 前先備份目前 `boot`。Pixel 6 / 6 Pro 沒有獨立 `init_boot`，動的是 `boot`。
+
+備援：也可用 [Kernel Flasher](https://github.com/fatalcoder524/KernelFlasher) 對 active slot 刷同一顆 zip（可先 Backup）。
+
 ### 建議安裝模組（KPM + SUSFS）
 
-請在 SukiSU/KernelSU 管理器安裝以下三個模組：
+刷完核心、SukiSU 顯示 built-in + KPM 後，在管理器安裝以下三個模組：
 
 - [Zygisk Next](https://github.com/Dr-TSNG/ZygiskNext)
 - [KPatch-Next Module](https://github.com/KernelSU-Next/KPatch-Next-Module)
@@ -62,9 +122,13 @@ GKI 安裝方式請參考官方文件：
 
 請用 **SukiSU Ultra Manager v4.1.3**。核心 driver 固定釘在 SukiSU **builtin** commit `6c13a06`——不要追 SukiSU `main` / tag tip（那些 ref 沒有 kernel 端 susfs，且 manager ABI 不相容）。
 
-### 驗證成功畫面（KPM + SUSFS）
+### 驗證成功畫面（Pixel 6 Pro）
 
-![KPM 與 SUSFS 皆已啟用](docs/images/kpm-susfs-enabled.png)
+Pixel 6 Pro（`raven` / `TQ3A.230901.001`）刷入 `5.10.186-android13-Wild-r36.1` 後：SukiSU Ultra **v4.1.3** 顯示 Working \<Built-in\>、SuSFS v2.1.0；設定頁可見 **KPM** 與 **SuSFS Configuration**；SUSFS WebUI 可讀取核心 uname。
+
+| 首頁（Built-in + SuSFS） | 設定（KPM / SuSFS） | SUSFS WebUI |
+|--------------------------|---------------------|-------------|
+| ![SukiSU Ultra 首頁：Working Built-in、Pixel 6 Pro、5.10.186-android13-Wild-r36.1](docs/images/Screenshot_20260829-021904.png) | ![設定頁：KPM 與 SuSFS Configuration](docs/images/Screenshot_20260829-021913.png) | ![SUSFS WebUI：SUS 路徑與核心 uname](docs/images/Screenshot_20260829-021927.png) |
 
 ### 疑難排解：WebUI 顯示全 0、按鈕沒反應、自動隱藏為空
 
@@ -187,7 +251,7 @@ SukiSU app 畫面判讀方式：
 
 快速建議：
 
-- 先刷 `...-AnyKernel3-normal.zip`。
+- 一般使用者下載 `…-normal`，解壓後用 [Horizon Kernel Flasher](https://github.com/libxzr/HorizonKernelFlasher) 刷 `...-AnyKernel3-normal.zip`。
 - 若 normal 因版本檢查或相容限制無法啟動，再試 bypass 版。
 
 ### GitHub Actions `feature_set` 選項說明
@@ -303,8 +367,9 @@ susfs_commit_android16-6-12: ""
 
 ## ✨ 主要功能
 
-- 🔐 **KernelSU**：運作於核心層的 root 方案，可直接在 kernel 空間管理 userspace 應用程式授權。
-- 🛡️ **SUSFS**：KernelSU 的隱藏與偽裝相關補丁與使用者空間模組。
+- 🔐 **SukiSU Ultra**：已做相容修正，搭配 Manager v4.1.3 + builtin driver `6c13a06`（built-in 模式）
+- 🧩 **KPM**：`CONFIG_KPM=y`，Image 內嵌 KernelPatch（`patch_linux` + `kpimg` v0.13.0）
+- 🛡️ **SUSFS**：kernel 端補丁 + [SUSFS-FOR-KERNELSU](https://github.com/sidex15/susfs4ksu-module) 使用者空間模組
 
 ---
 

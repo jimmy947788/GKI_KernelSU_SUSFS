@@ -3,6 +3,8 @@
 # 🔥 Wild Kernels for Android
 
 [![KernelSU](https://img.shields.io/badge/KernelSU-Supported-green)](https://kernelsu.org/)
+[![SukiSU](https://img.shields.io/badge/SukiSU_Ultra-v4.1.3-blue)](https://github.com/SukiSU-Ultra/SukiSU-Ultra)
+[![KPM](https://img.shields.io/badge/KPM-Supported-purple)](https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch)
 [![SUSFS](https://img.shields.io/badge/SUSFS-Integrated-orange)](https://gitlab.com/simonpunk/susfs4ksu)
 
 </div>
@@ -40,19 +42,77 @@ By flashing this kernel, **YOU** are choosing to make these modifications. If so
 
 - 🩹 [Kernel Patches](https://github.com/WildKernels/kernel_patches)
 - 📜 [Old Build Scripts](https://github.com/TheWildJames/kernel_build_scripts)
-- ⚡ [Kernel Flasher](https://github.com/fatalcoder524/KernelFlasher)
+- 📲 [Horizon Kernel Flasher](https://github.com/libxzr/HorizonKernelFlasher) (recommended: flash `*-AnyKernel3-normal.zip`)
+- ⚡ [Kernel Flasher](https://github.com/fatalcoder524/KernelFlasher) (advanced: A/B slot backup / restore)
 
 ---
 
 ## 📋 Installation Instructions
 
-For GKI installation, please follow the official guide:
+The official GKI guide is also useful:
 
 📖 **[KernelSU Installation Guide](https://kernelsu.org/guide/installation.html)**
 
+### What this build supports (verified)
+
+This kernel includes compatibility fixes for **SukiSU Ultra**, plus **KPM** and the **SUSFS module**:
+
+| Feature | Status |
+|---------|--------|
+| 🔐 **SukiSU Ultra** | Manager **v4.1.3** + kernel driver **builtin** `6c13a06` (compatibility pin — do not track SukiSU `main` / newer manager tags; those refs drop kernel-side susfs and break the ABI) |
+| 🧩 **KPM** | `CONFIG_KPM=y`; after compile, `patch_linux` + `kpimg` (v0.13.0) from [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/) are embedded into `Image` |
+| 🛡️ **SUSFS** | Kernel `CONFIG_KSU_SUSFS=y`; also install the userspace [SUSFS-FOR-KERNELSU](https://github.com/sidex15/susfs4ksu-module) module |
+
+Pixel 6 Pro (`raven` / `TQ3A.230901.001`) after flash: `uname -r` → `5.10.186-android13-Wild-r36.1`.
+
+### 1. Which file to download
+
+A successful workflow run usually publishes these artifacts with the same prefix, for example:
+
+`5.10.186-android13-2023-09-r36.1-…`
+
+| Artifact | Download? | What it is |
+|----------|-----------|------------|
+| `…-normal` (contains `*-AnyKernel3-normal.zip`) | **Yes — start here** | GitHub Actions wrapper. Unzip it to get the flashable zip |
+| `…-AnyKernel3-normal.zip` | **This is the file you flash** | Standard kernel (AnyKernel3). Pick this in Horizon |
+| `…-bypass` | Not first | Only if normal fails to boot due to module version checks. This does **not** hide root |
+| `…-AnyKernel3` (no `-normal` / `-bypass`) | Skip | Raw AnyKernel3 working tree for inspection |
+
+**Flash:** `*-AnyKernel3-normal.zip`
+
+If you downloaded the Actions artifact `…-normal.zip`, unzip it once. The inner `…-AnyKernel3-normal.zip` is what Horizon should flash. Do not flash the outer wrapper zip.
+
+Boot normal first; only try bypass if that fails.
+
+### 2. Flash `*-AnyKernel3-normal.zip` with Horizon
+
+Verified tool: [Horizon Kernel Flasher v1.3](https://github.com/libxzr/HorizonKernelFlasher/releases/tag/v1.3)
+
+Prerequisites:
+
+- Unlocked bootloader
+- The phone **already has root** (Horizon needs root — existing Magisk / KernelSU / SukiSU LKM is fine)
+- Copy `*-AnyKernel3-normal.zip` onto the device
+
+Steps:
+
+1. Install `HorizonKernelFlasher-v1.3.apk` and grant it root in SukiSU / KernelSU / Magisk.
+2. Open Horizon and select `*-AnyKernel3-normal.zip` (for example `5.10.186-android13-2023-09-r36.1-AnyKernel3-normal.zip`).
+3. Flash the active slot, then reboot.
+4. Confirm the kernel:
+
+```bash
+adb shell uname -a
+# Expect something like: Linux localhost 5.10.186-android13-Wild-r36.1 #1 SMP PREEMPT ... aarch64 Toybox
+```
+
+If you are currently on KSU LKM (stock kernel + module root), back up `boot` before flashing GKI. Pixel 6 / 6 Pro have no separate `init_boot`; the kernel lives in `boot`.
+
+Alternative: [Kernel Flasher](https://github.com/fatalcoder524/KernelFlasher) can flash the same zip to the active slot (Backup first).
+
 ### Recommended Modules (KPM + SUSFS)
 
-Install these three modules in SukiSU/KernelSU manager:
+After the kernel boots and SukiSU shows built-in + KPM, install these three modules in the manager:
 
 - [Zygisk Next](https://github.com/Dr-TSNG/ZygiskNext)
 - [KPatch-Next Module](https://github.com/KernelSU-Next/KPatch-Next-Module)
@@ -62,9 +122,13 @@ Install these three modules in SukiSU/KernelSU manager:
 
 Use **SukiSU Ultra Manager v4.1.3**. The kernel driver is pinned to SukiSU **builtin** commit `6c13a06` — do not track SukiSU `main` / tag tips (they drop kernel-side susfs and break the manager ABI).
 
-### Verified Working State (KPM + SUSFS)
+### Verified working state (Pixel 6 Pro)
 
-![KPM and SUSFS both enabled](docs/images/kpm-susfs-enabled.png)
+On Pixel 6 Pro (`raven` / `TQ3A.230901.001`) after flashing `5.10.186-android13-Wild-r36.1`: SukiSU Ultra **v4.1.3** shows Working \<Built-in\> and SuSFS v2.1.0; Settings lists **KPM** and **SuSFS Configuration**; the SUSFS WebUI can read the kernel uname.
+
+| Home (Built-in + SuSFS) | Settings (KPM / SuSFS) | SUSFS WebUI |
+|--------------------------|-------------------------|-------------|
+| ![SukiSU Ultra Home: Working Built-in, Pixel 6 Pro, 5.10.186-android13-Wild-r36.1](docs/images/Screenshot_20260829-021904.png) | ![Settings: KPM and SuSFS Configuration](docs/images/Screenshot_20260829-021913.png) | ![SUSFS WebUI: SUS paths and kernel uname](docs/images/Screenshot_20260829-021927.png) |
 
 ---
 
@@ -179,7 +243,7 @@ What each one means:
 
 Quick recommendation:
 
-- Start with `...-AnyKernel3-normal.zip` first.
+- Download the `…-normal` artifact, unzip it, and flash `...-AnyKernel3-normal.zip` with [Horizon Kernel Flasher](https://github.com/libxzr/HorizonKernelFlasher).
 - Only move to bypass zip if normal boot fails due to version checks or compatibility restrictions.
 
 ### Important note for SukiSU mode
@@ -325,8 +389,9 @@ If you already have a self-hosted runner, set:
 
 ## ✨ Features
 
-- 🔐 **SukiSU Ultra**: Kernel-based root via pinned builtin driver (`6c13a06`) with KPM + SUSFS
-- 🛡️ **SUSFS**: An addon root hiding kernel patches and userspace module for KernelSU
+- 🔐 **SukiSU Ultra**: Compatibility-fixed builtin driver (`6c13a06`) with Manager **v4.1.3** (built-in mode)
+- 🧩 **KPM**: `CONFIG_KPM=y` with KernelPatch embedded in `Image` (`patch_linux` + `kpimg` v0.13.0)
+- 🛡️ **SUSFS**: Kernel patches plus the userspace [SUSFS-FOR-KERNELSU](https://github.com/sidex15/susfs4ksu-module) module
 
 ---
 
