@@ -3,8 +3,8 @@
 # 🔥 Wild Kernels for Android（繁體中文說明）
 
 [![KernelSU](https://img.shields.io/badge/KernelSU-Supported-green)](https://kernelsu.org/)
-[![SukiSU](https://img.shields.io/badge/SukiSU_Ultra-v4.1.3-blue)](https://github.com/SukiSU-Ultra/SukiSU-Ultra)
-[![KPM](https://img.shields.io/badge/KPM-Supported-purple)](https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch)
+[![SukiSU](https://img.shields.io/badge/SukiSU_Ultra-v4.1.3-blue)](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.1.3)
+[![KPM](https://img.shields.io/badge/KPM-v0.13.0-purple)](https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch/releases/tag/0.13.0)
 [![SUSFS](https://img.shields.io/badge/SUSFS-Integrated-orange)](https://gitlab.com/simonpunk/susfs4ksu)
 
 </div>
@@ -53,36 +53,30 @@ GKI 安裝方式也可參考官方文件：
 
 📖 **[KernelSU 安裝指南](https://kernelsu.org/guide/installation.html)**
 
+### 支援版本（請對齊，不要混用）
+
+| 元件 | 支援版本 | 下載 |
+|------|----------|------|
+| 🔐 **SukiSU Ultra 管理器** | **v4.1.3**（versionCode `40796`） | [SukiSU-Ultra v4.1.3](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.1.3) |
+| 🧠 **SukiSU kernel driver** | **builtin** `6c13a06`（與 v4.1.3 同一組 ABI） | 已編進此核心 |
+| 🧩 **KPM**（KernelPatch） | **v0.13.0**（`patch_linux` + `kpimg`） | [SukiSU_KernelPatch_patch 0.13.0](https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch/releases/tag/0.13.0) |
+| 🛡️ **SUSFS** | kernel **v2.1.0** + 使用者空間模組 | [SUSFS-FOR-KERNELSU](https://github.com/sidex15/susfs4ksu-module) |
+
+不要改裝更新的 SukiSU manager，也不要換成別版 KPM：`main` / 較新 tag 沒有 kernel 端 susfs，且 manager ABI 不相容。KPM 工具已放在 repo [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/)，編譯時寫入 `Image`。
+
 ### 目前支援（已驗證）
 
-此核心已針對 **SukiSU Ultra** 做相容修正，並同時支援 **KPM** 與 **SUSFS 模組**：
-
-| 項目 | 狀態 |
-|------|------|
-| 🔐 **SukiSU Ultra** | Manager **v4.1.3** + kernel driver **builtin** `6c13a06`（相容修正；不要追 SukiSU `main` / 更新的 manager tag，那些 ref 沒有 kernel 端 susfs，且 ABI 不相容） |
-| 🧩 **KPM** | `CONFIG_KPM=y`，編譯後用 repo 內 [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/) 的 `patch_linux` + `kpimg`（v0.13.0）寫入 Image |
-| 🛡️ **SUSFS** | kernel 端 `CONFIG_KSU_SUSFS=y`；使用者空間請再裝 [SUSFS-FOR-KERNELSU](https://github.com/sidex15/susfs4ksu-module) 模組 |
+此核心已針對 **SukiSU Ultra v4.1.3** 做相容修正，並同時支援 **KPM v0.13.0** 與 **SUSFS 模組**。
 
 Pixel 6 Pro（`raven` / `TQ3A.230901.001`）刷入後 `uname -r` 範例：`5.10.186-android13-Wild-r36.1`。
 
 ### 1. 下載哪一個檔案
 
-workflow 成功後，同一個版本通常會出現這些產物。名稱類似：
+workflow 成功後**只會上傳一個**可刷產物，例如：
 
-`5.10.186-android13-2023-09-r36.1-…`
+`5.10.186-android13-2023-09-r36.1-AnyKernel3-normal.zip`
 
-| 產物名稱 | 要不要下載 | 說明 |
-|----------|------------|------|
-| `…-normal`（內含 `*-AnyKernel3-normal.zip`） | **要，第一次就刷這個** | GitHub Actions 外層包裝。解壓後得到真正可刷的 zip |
-| `…-AnyKernel3-normal.zip` | **這才是要刷的檔** | 標準核心（AnyKernel3）。Horizon 選這個 |
-| `…-bypass` | 先不要 | 只在 normal 因模組版本檢查無法開機時才試。**不是**躲 root 偵測 |
-| `…-AnyKernel3`（無 `-normal` / `-bypass`） | 不用 | 原始 AnyKernel3 工作目錄，給進階使用者拆來看 |
-
-**請刷：** `*-AnyKernel3-normal.zip`
-
-若你下載的是 Actions 產物 `…-normal.zip`，先解壓一次，裡面那顆 `…-AnyKernel3-normal.zip` 才丟給 Horizon。不要把外層包裝 zip 拿去刷。
-
-先測 normal 可開機，再考慮 bypass。
+下載後直接丟給 Horizon，不必再解一層包裝。不再產出 `*-bypass` 或沒有 `-normal` 後綴的 `*-AnyKernel3`。
 
 ### 2. 用 Horizon 刷 `*-AnyKernel3-normal.zip`
 
@@ -120,7 +114,7 @@ adb shell uname -a
 
 ### 建議使用的 Root 管理工具
 
-請用 **SukiSU Ultra Manager v4.1.3**。核心 driver 固定釘在 SukiSU **builtin** commit `6c13a06`——不要追 SukiSU `main` / tag tip（那些 ref 沒有 kernel 端 susfs，且 manager ABI 不相容）。
+請用 **[SukiSU Ultra Manager v4.1.3](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.1.3)**（versionCode `40796`）。核心 driver 固定釘在 SukiSU **builtin** commit `6c13a06`，KPM 為 **v0.13.0**——不要追 SukiSU `main` / 更新的 manager tag，也不要換別版 KPM（那些 ref 沒有 kernel 端 susfs，且 manager ABI 不相容）。
 
 ### 驗證成功畫面（Pixel 6 Pro）
 
@@ -180,7 +174,7 @@ adb shell su -c 'ls -al /data/adb/susfs 2>/dev/null'
 
 - 先讓 build 日期對齊你目前 ROM 的 patch level。
 - Pixel 6 Pro（Android 13，`raven-tq3a.230901.001`）建議先從 `android13-5.10` + `2023-09` 開始。
-- 先測 normal 版可開機，再逐步嘗試 bypass。
+- 下載並刷 `*-AnyKernel3-normal.zip`。
 
 ### Pixel 6 Pro（`raven`）固定範例
 
@@ -228,31 +222,13 @@ SukiSU app 畫面判讀方式：
 - SukiSU Ultra v4.1.3 app 應該會判斷成 built-in 模式，且 KPM 為啟用。
 - workflow 固定使用 SukiSU builtin `6c13a06`，沒有 branch 覆寫輸入。
 
-### 編譯產物：`Flashable-Zips` 與 `AnyKernel3` 差異
+### 編譯產物
 
-每次 workflow 成功後，通常會看到兩組同前綴產物：
+每次 workflow 成功後只會上傳一個可刷產物：
 
-- `...-AnyKernel3`
-- `...-Flashable-Zips`
+- `...-AnyKernel3-normal.zip`
 
-用途差異：
-
-- `AnyKernel3`
-  - 原始 AnyKernel3 工作目錄內容。
-  - 適合進階使用者自行檢查或修改封裝內容後再刷。
-  - 可能同時包含 `Image` 與 `Bypass-Image`。
-
-- `Flashable-Zips`
-  - 已預先封裝好的可刷 zip。
-  - 內含兩個最終檔案：
-    - `...-AnyKernel3-normal.zip`（標準核心映像）
-    - `...-AnyKernel3-bypass.zip`（bypass 核心映像）
-  - 一般使用者建議直接下載這組刷入。
-
-快速建議：
-
-- 一般使用者下載 `…-normal`，解壓後用 [Horizon Kernel Flasher](https://github.com/libxzr/HorizonKernelFlasher) 刷 `...-AnyKernel3-normal.zip`。
-- 若 normal 因版本檢查或相容限制無法啟動，再試 bypass 版。
+這就是給 [Horizon Kernel Flasher](https://github.com/libxzr/HorizonKernelFlasher) 的 zip。不會再產出 `*-bypass` 或原始 `*-AnyKernel3` 工作目錄。
 
 ### GitHub Actions `feature_set` 選項說明
 
@@ -301,12 +277,10 @@ Actions 選單中各選項意義：
 
 - 跳過磁碟清理步驟（Free Disk Space）。
 - 跳過 swap 建立步驟（Setup more Swap）。
-- 跳過 bypass 核心編譯（只編 normal 核心）。
-- `Flashable-Zips` 產物只會包含 `...-AnyKernel3-normal.zip`。
 
 當 `quick_mode=false`（預設）：
 
-- 走完整流程，包含 normal + bypass 兩次編譯與兩個 flashable zip。
+- 走完整流程（仍只編譯並上傳 `...-AnyKernel3-normal.zip`，不含 bypass）。
 
 建議使用方式：
 
@@ -367,8 +341,8 @@ susfs_commit_android16-6-12: ""
 
 ## ✨ 主要功能
 
-- 🔐 **SukiSU Ultra**：已做相容修正，搭配 Manager v4.1.3 + builtin driver `6c13a06`（built-in 模式）
-- 🧩 **KPM**：`CONFIG_KPM=y`，Image 內嵌 KernelPatch（`patch_linux` + `kpimg` v0.13.0）
+- 🔐 **SukiSU Ultra**：已做相容修正，請用 Manager **[v4.1.3](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.1.3)** + builtin driver `6c13a06`（built-in 模式）
+- 🧩 **KPM**：**v0.13.0**（`CONFIG_KPM=y`，Image 內嵌 `patch_linux` + `kpimg`）
 - 🛡️ **SUSFS**：kernel 端補丁 + [SUSFS-FOR-KERNELSU](https://github.com/sidex15/susfs4ksu-module) 使用者空間模組
 
 ---

@@ -584,61 +584,27 @@ jobs:
         compression_level: 9
         github_token: ${{ secrets.MY_GITHUB_TOKEN }}
 
-    - name: Build Bypass Kernel
-      if: ${{ inputs.quick_mode != 'true' }}
-      env:
-        SOURCE_DATE_EPOCH: ${{ env.SOURCE_DATE_EPOCH }}
-        KBUILD_BUILD_TIMESTAMP: ${{ env.KBUILD_BUILD_TIMESTAMP }}
-      uses: ./.github/actions/build-kernel
-      with:
-        bypass: true
-        version: ${{ inputs.version }}
-
-    - name: Patch Bypass Kernel with KPM
-      if: ${{ inputs.quick_mode != 'true' && inputs.use_kpm == 'true' && (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') }}
-      uses: ./.github/actions/kpm-patch
-      with:
-        image_path: ${{ github.workspace }}/AnyKernel3/Bypass-Image
-
-    - name: Package Flashable AnyKernel3 Archives
+    - name: Package AnyKernel3-normal
+      id: package
       shell: bash
       run: |
         set -euo pipefail
 
         PACKAGE_BASE="${{ steps.extract.outputs.file_name }}-AnyKernel3"
-        NORMAL_STAGE="/tmp/${PACKAGE_BASE}-normal"
-        BYPASS_STAGE="/tmp/${PACKAGE_BASE}-bypass"
-        BUILD_BYPASS="true"
+        NORMAL_STAGE="${{ github.workspace }}/.package/${PACKAGE_BASE}-normal"
+        ZIP_PATH="${{ github.workspace }}/${PACKAGE_BASE}-normal.zip"
 
-        if [[ "${{ inputs.quick_mode }}" == "true" ]]; then
-          BUILD_BYPASS="false"
-        fi
-
-        rm -rf "$NORMAL_STAGE" "$BYPASS_STAGE"
+        rm -rf "$NORMAL_STAGE"
+        mkdir -p "$(dirname "$NORMAL_STAGE")"
         cp -a "${{ github.workspace }}/AnyKernel3" "$NORMAL_STAGE"
-
         rm -f "$NORMAL_STAGE/Bypass-Image"
+        rm -rf "$NORMAL_STAGE/.git"
 
-        if [[ "$BUILD_BYPASS" == "true" ]]; then
-          cp -a "${{ github.workspace }}/AnyKernel3" "$BYPASS_STAGE"
-          if [ -f "$BYPASS_STAGE/Bypass-Image" ]; then
-            rm -f "$BYPASS_STAGE/Image"
-            mv "$BYPASS_STAGE/Bypass-Image" "$BYPASS_STAGE/Image"
-          fi
-        fi
+        (cd "$NORMAL_STAGE" && zip -r -9 "$ZIP_PATH" .)
+        ls -lh "$ZIP_PATH"
 
-        (cd "$NORMAL_STAGE" && zip -r -9 "${{ github.workspace }}/${PACKAGE_BASE}-normal.zip" .)
-
-        if [[ "$BUILD_BYPASS" == "true" ]]; then
-          (cd "$BYPASS_STAGE" && zip -r -9 "${{ github.workspace }}/${PACKAGE_BASE}-bypass.zip" .)
-        fi
-
-        echo "Created flashable archives:"
-        if [[ "$BUILD_BYPASS" == "true" ]]; then
-          ls -lh "${{ github.workspace }}/${PACKAGE_BASE}-normal.zip" "${{ github.workspace }}/${PACKAGE_BASE}-bypass.zip"
-        else
-          ls -lh "${{ github.workspace }}/${PACKAGE_BASE}-normal.zip"
-        fi
+        echo "stage=$NORMAL_STAGE" >> "$GITHUB_OUTPUT"
+        echo "zip=$ZIP_PATH" >> "$GITHUB_OUTPUT"
 
     - name: 📋 Consolidated Build Summary
       if: ${{ always() }}
@@ -719,27 +685,10 @@ jobs:
         if-no-files-found: ignore
         compression-level: 9
 
-    - name: Upload Artifacts
+    - name: Upload AnyKernel3-normal
       uses: actions/upload-artifact@v7
       with:
-        name: ${{ steps.extract.outputs.file_name }}-AnyKernel3
-        path: ${{ github.workspace }}/AnyKernel3/**
-        if-no-files-found: ignore
+        name: ${{ steps.extract.outputs.file_name }}-AnyKernel3-normal
+        path: ${{ steps.package.outputs.stage }}/**
+        if-no-files-found: error
         compression-level: 9
-
-    - name: Upload Normal Flashable Zip
-      uses: actions/upload-artifact@v7
-      with:
-        name: ${{ steps.extract.outputs.file_name }}-normal
-        path: ${{ github.workspace }}/${{ steps.extract.outputs.file_name }}-AnyKernel3-normal.zip
-        if-no-files-found: error
-        compression-level: 0
-
-    - name: Upload Bypass Flashable Zip
-      if: ${{ inputs.quick_mode != 'true' }}
-      uses: actions/upload-artifact@v7
-      with:
-        name: ${{ steps.extract.outputs.file_name }}-bypass
-        path: ${{ github.workspace }}/${{ steps.extract.outputs.file_name }}-AnyKernel3-bypass.zip
-        if-no-files-found: error
-        compression-level: 0

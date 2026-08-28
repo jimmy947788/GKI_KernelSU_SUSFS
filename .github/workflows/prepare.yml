@@ -22,7 +22,7 @@ on:
         type: string
         default: ""
       quick_mode:
-        description: "Quick mode: skip heavy pre-steps and bypass build"
+        description: "Quick mode: skip heavy pre-steps (disk cleanup/swap)"
         required: false
         type: string
         default: "false"

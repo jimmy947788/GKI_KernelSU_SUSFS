@@ -3,8 +3,8 @@
 # 🔥 Wild Kernels for Android
 
 [![KernelSU](https://img.shields.io/badge/KernelSU-Supported-green)](https://kernelsu.org/)
-[![SukiSU](https://img.shields.io/badge/SukiSU_Ultra-v4.1.3-blue)](https://github.com/SukiSU-Ultra/SukiSU-Ultra)
-[![KPM](https://img.shields.io/badge/KPM-Supported-purple)](https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch)
+[![SukiSU](https://img.shields.io/badge/SukiSU_Ultra-v4.1.3-blue)](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.1.3)
+[![KPM](https://img.shields.io/badge/KPM-v0.13.0-purple)](https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch/releases/tag/0.13.0)
 [![SUSFS](https://img.shields.io/badge/SUSFS-Integrated-orange)](https://gitlab.com/simonpunk/susfs4ksu)
 
 </div>
@@ -53,36 +53,30 @@ The official GKI guide is also useful:
 
 📖 **[KernelSU Installation Guide](https://kernelsu.org/guide/installation.html)**
 
+### Supported versions (match these; do not mix)
+
+| Component | Version | Download |
+|----------|---------|----------|
+| 🔐 **SukiSU Ultra manager** | **v4.1.3** (versionCode `40796`) | [SukiSU-Ultra v4.1.3](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.1.3) |
+| 🧠 **SukiSU kernel driver** | **builtin** `6c13a06` (same ABI as v4.1.3) | Built into this kernel |
+| 🧩 **KPM** (KernelPatch) | **v0.13.0** (`patch_linux` + `kpimg`) | [SukiSU_KernelPatch_patch 0.13.0](https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch/releases/tag/0.13.0) |
+| 🛡️ **SUSFS** | kernel **v2.1.0** + userspace module | [SUSFS-FOR-KERNELSU](https://github.com/sidex15/susfs4ksu-module) |
+
+Do not install a newer SukiSU manager, and do not swap in a different KPM release: `main` / newer tags drop kernel-side susfs and break the manager ABI. KPM tools already live in [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/) and are embedded into `Image` at build time.
+
 ### What this build supports (verified)
 
-This kernel includes compatibility fixes for **SukiSU Ultra**, plus **KPM** and the **SUSFS module**:
-
-| Feature | Status |
-|---------|--------|
-| 🔐 **SukiSU Ultra** | Manager **v4.1.3** + kernel driver **builtin** `6c13a06` (compatibility pin — do not track SukiSU `main` / newer manager tags; those refs drop kernel-side susfs and break the ABI) |
-| 🧩 **KPM** | `CONFIG_KPM=y`; after compile, `patch_linux` + `kpimg` (v0.13.0) from [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/) are embedded into `Image` |
-| 🛡️ **SUSFS** | Kernel `CONFIG_KSU_SUSFS=y`; also install the userspace [SUSFS-FOR-KERNELSU](https://github.com/sidex15/susfs4ksu-module) module |
+This kernel includes compatibility fixes for **SukiSU Ultra v4.1.3**, plus **KPM v0.13.0** and the **SUSFS module**.
 
 Pixel 6 Pro (`raven` / `TQ3A.230901.001`) after flash: `uname -r` → `5.10.186-android13-Wild-r36.1`.
 
 ### 1. Which file to download
 
-A successful workflow run usually publishes these artifacts with the same prefix, for example:
+A successful workflow run uploads **one** flashable artifact, for example:
 
-`5.10.186-android13-2023-09-r36.1-…`
+`5.10.186-android13-2023-09-r36.1-AnyKernel3-normal.zip`
 
-| Artifact | Download? | What it is |
-|----------|-----------|------------|
-| `…-normal` (contains `*-AnyKernel3-normal.zip`) | **Yes — start here** | GitHub Actions wrapper. Unzip it to get the flashable zip |
-| `…-AnyKernel3-normal.zip` | **This is the file you flash** | Standard kernel (AnyKernel3). Pick this in Horizon |
-| `…-bypass` | Not first | Only if normal fails to boot due to module version checks. This does **not** hide root |
-| `…-AnyKernel3` (no `-normal` / `-bypass`) | Skip | Raw AnyKernel3 working tree for inspection |
-
-**Flash:** `*-AnyKernel3-normal.zip`
-
-If you downloaded the Actions artifact `…-normal.zip`, unzip it once. The inner `…-AnyKernel3-normal.zip` is what Horizon should flash. Do not flash the outer wrapper zip.
-
-Boot normal first; only try bypass if that fails.
+Download it and flash it in Horizon. There is no extra wrapper zip, no `*-bypass`, and no raw `*-AnyKernel3` tree.
 
 ### 2. Flash `*-AnyKernel3-normal.zip` with Horizon
 
@@ -120,7 +114,7 @@ After the kernel boots and SukiSU shows built-in + KPM, install these three modu
 
 ### Recommended Root Manager
 
-Use **SukiSU Ultra Manager v4.1.3**. The kernel driver is pinned to SukiSU **builtin** commit `6c13a06` — do not track SukiSU `main` / tag tips (they drop kernel-side susfs and break the manager ABI).
+Use **[SukiSU Ultra Manager v4.1.3](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.1.3)** (versionCode `40796`). The kernel driver is pinned to SukiSU **builtin** commit `6c13a06`, and KPM is **v0.13.0** — do not track SukiSU `main` / newer manager tags, and do not mix KPM releases (they drop kernel-side susfs and break the manager ABI).
 
 ### Verified working state (Pixel 6 Pro)
 
@@ -151,7 +145,7 @@ If your device firmware/vendor stack is from one patch level, flashing a kernel 
 
 - Match build date to your ROM patch level first.
 - For Pixel 6 Pro on Android 13 `raven-tq3a.230901.001`, start with `android13-5.10` + `2023-09`.
-- Test normal build first, then try bypass only after a known-good boot.
+- Flash `*-AnyKernel3-normal.zip`.
 
 ### Pixel 6 Pro (`raven`) fixed examples
 
@@ -220,31 +214,13 @@ If left empty, the workflow builds all dates for the selected kernel version.
 
 - [android17-6.18.json](.github/config/android17-6.18.json): `lts`
 
-### Build artifacts: `Flashable-Zips` vs `AnyKernel3`
+### Build artifact
 
-After a successful workflow run, you will usually see two artifact groups with the same kernel prefix:
+After a successful workflow run, there is one flashable artifact:
 
-- `...-AnyKernel3`
-- `...-Flashable-Zips`
+- `...-AnyKernel3-normal.zip`
 
-What each one means:
-
-- `AnyKernel3`
-	- Raw AnyKernel3 working directory contents.
-	- Intended for advanced users who want to inspect or modify packaging files before flashing.
-	- May include both `Image` and `Bypass-Image` files depending on build steps.
-
-- `Flashable-Zips`
-	- Pre-packed, ready-to-flash zip outputs.
-	- Contains two final packages:
-		- `...-AnyKernel3-normal.zip` (standard kernel image)
-		- `...-AnyKernel3-bypass.zip` (bypass kernel image)
-	- Recommended for normal usage when you just want to download and flash.
-
-Quick recommendation:
-
-- Download the `…-normal` artifact, unzip it, and flash `...-AnyKernel3-normal.zip` with [Horizon Kernel Flasher](https://github.com/libxzr/HorizonKernelFlasher).
-- Only move to bypass zip if normal boot fails due to version checks or compatibility restrictions.
+That is the zip for [Horizon Kernel Flasher](https://github.com/libxzr/HorizonKernelFlasher). The workflow no longer publishes `*-bypass` or a raw `*-AnyKernel3` working tree.
 
 ### Important note for SukiSU mode
 
@@ -323,12 +299,10 @@ When `quick_mode=true`:
 
 - Skip free-disk cleanup step.
 - Skip swap setup step.
-- Skip bypass kernel compilation (builds normal kernel only).
-- `Flashable-Zips` artifact includes only `...-AnyKernel3-normal.zip`.
 
 When `quick_mode=false` (default):
 
-- Runs the full flow, including normal + bypass build and both flashable zips.
+- Runs the full flow (still builds and uploads only `...-AnyKernel3-normal.zip`; no bypass).
 
 Recommended usage:
 
@@ -389,8 +363,8 @@ If you already have a self-hosted runner, set:
 
 ## ✨ Features
 
-- 🔐 **SukiSU Ultra**: Compatibility-fixed builtin driver (`6c13a06`) with Manager **v4.1.3** (built-in mode)
-- 🧩 **KPM**: `CONFIG_KPM=y` with KernelPatch embedded in `Image` (`patch_linux` + `kpimg` v0.13.0)
+- 🔐 **SukiSU Ultra**: Compatibility-fixed builtin driver (`6c13a06`) with Manager **[v4.1.3](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.1.3)** (built-in mode)
+- 🧩 **KPM**: **v0.13.0** (`CONFIG_KPM=y`, `patch_linux` + `kpimg` embedded in `Image`)
 - 🛡️ **SUSFS**: Kernel patches plus the userspace [SUSFS-FOR-KERNELSU](https://github.com/sidex15/susfs4ksu-module) module
 
 ---

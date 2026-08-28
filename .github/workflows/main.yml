@@ -55,7 +55,7 @@ on:
         required: false
         default: ""
       quick_mode:
-        description: "Quick mode: skip disk cleanup/swap and bypass build for faster turnaround"
+        description: "Quick mode: skip disk cleanup/swap for faster turnaround"
         type: choice
         options:
           - "false"
@@ -572,19 +572,19 @@ jobs:
           cat release_body.md
         } >> "$GITHUB_STEP_SUMMARY"
 
-    - name: Download AnyKernel3 Artifacts
+    - name: Download AnyKernel3-normal Artifacts
       uses: actions/download-artifact@v7
       with:
         path: release-assets
-        pattern: '*-AnyKernel3'
+        pattern: '*-AnyKernel3-normal'
         merge-multiple: false
 
-    - name: Zip AnyKernel3 for Release
+    - name: Zip AnyKernel3-normal for Release
       run: |
         set -e
         shopt -s nullglob
 
-        for dir in release-assets/*-AnyKernel3; do
+        for dir in release-assets/*-AnyKernel3-normal; do
           zip_name="${dir}.zip"
           rm -f "$zip_name"
           cd "$dir"
