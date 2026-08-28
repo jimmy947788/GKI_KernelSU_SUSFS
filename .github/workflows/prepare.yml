@@ -17,10 +17,10 @@ on:
         required: false
         type: string
       runner_label:
-        description: "Runner label for build job"
+        description: "Runner label for build job (empty = GitHub-hosted ubuntu-latest)"
         required: false
         type: string
-        default: "ubuntu-latest"
+        default: ""
       quick_mode:
         description: "Quick mode: skip heavy pre-steps and bypass build"
         required: false

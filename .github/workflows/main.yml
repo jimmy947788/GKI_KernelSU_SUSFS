@@ -50,10 +50,10 @@ on:
           - FULL
         default: FULL
       runner_label:
-        description: "Runner label for kernel build job (e.g. ubuntu-latest or self-hosted)"
+        description: "Runner label for kernel build job (empty = GitHub-hosted ubuntu-latest; e.g. gki-local for self-hosted)"
         type: string
         required: false
-        default: "gki-local"
+        default: ""
       quick_mode:
         description: "Quick mode: skip disk cleanup/swap and bypass build for faster turnaround"
         type: choice
