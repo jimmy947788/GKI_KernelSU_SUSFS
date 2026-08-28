@@ -226,8 +226,7 @@ Actions 選單中各選項意義：
 目前 `KSUN+SUSFS` 的行為：
 
 - 固定走 SukiSU Ultra **builtin** `6c13a06` + manager **v4.1.3**（無 workflow branch 變數）。
-- 開啟 `CONFIG_KPM=y`，編譯後從 [SukiSU_KernelPatch_patch](https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch) 最新 release 下載 `patch_linux` + `kpimg`。
-- 離線 fallback：`$HOME/Projects/PxGKI/KernelPatch_patch/patch_linux`。
+- 開啟 `CONFIG_KPM=y`，編譯後使用 repo 內 [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/) 的 `patch_linux` + `kpimg`（v0.13.0）。
 - susfs4ksu 在該 gki 分支找得到時釘 `ee023e3`。不再套用 pershoot KernelSU-Next 共存 patch。
 
 ### GitHub Actions `quick_mode`（快速編譯）

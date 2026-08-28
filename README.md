@@ -193,8 +193,7 @@ If you change the workflow to enable or adjust SukiSU integration, previously bu
 Current `KSUN+SUSFS` behavior:
 
 - Uses SukiSU Ultra **builtin** `6c13a06` with manager tag **v4.1.3** (fixed — no workflow branch input).
-- Enables `CONFIG_KPM=y` and runs [`patch_linux`](https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch) from the newest GitHub release (default `kpm_patch_ver=latest`, currently `0.13.0`) plus matching `kpimg`.
-- Offline fallback: `$HOME/Projects/PxGKI/KernelPatch_patch/patch_linux`. To force a local build, set `kpm_patch_linux_path`.
+- Enables `CONFIG_KPM=y` and runs `patch_linux` + `kpimg` from the repo-local [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/) directory (v0.13.0).
 - Pins susfs4ksu to `ee023e3` (SUSFS v2.1.0) when that commit exists on the gki branch. No KernelSU-Next coexistence patches are applied.
 
 Old zip files built before the SukiSU integration change will still behave like the old build and may boot successfully while the SukiSU app still reports that root is unavailable.

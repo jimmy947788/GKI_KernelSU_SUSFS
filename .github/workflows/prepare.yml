@@ -32,20 +32,10 @@ on:
         type: string
         default: ""
       use_kpm:
-        description: "Enable KPM (CONFIG_KPM + patch_linux). Requires SukiSU."
+        description: "Enable KPM (CONFIG_KPM + patch_linux from repo SukiSU_KernelPatch_patch/). Requires SukiSU."
         required: false
         type: string
         default: "true"
-      kpm_patch_ver:
-        description: "SukiSU_KernelPatch_patch release (latest = newest GitHub release)"
-        required: false
-        type: string
-        default: "latest"
-      kpm_patch_linux_path:
-        description: "Prebuilt patch_linux path (empty = auto-detect ~/Projects/PxGKI/KernelPatch_patch/patch_linux)"
-        required: false
-        type: string
-        default: ""
 
 jobs:
   generate-matrix:
@@ -130,6 +120,4 @@ jobs:
       quick_mode: ${{ inputs.quick_mode }}
       susfs_commit: ${{ inputs.susfs_commit }}
       use_kpm: ${{ inputs.use_kpm }}
-      kpm_patch_ver: ${{ inputs.kpm_patch_ver }}
-      kpm_patch_linux_path: ${{ inputs.kpm_patch_linux_path }}
     secrets: inherit

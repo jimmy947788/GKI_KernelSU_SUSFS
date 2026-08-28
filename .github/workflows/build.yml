@@ -40,20 +40,10 @@ on:
         type: string
         default: ""
       use_kpm:
-        description: "Enable KPM (CONFIG_KPM + patch_linux). Requires the SukiSU driver."
+        description: "Enable KPM (CONFIG_KPM + patch_linux from SukiSU_KernelPatch_patch/). Requires the SukiSU driver."
         required: false
         type: string
         default: "true"
-      kpm_patch_ver:
-        description: "SukiSU_KernelPatch_patch release (latest = newest GitHub release)"
-        required: false
-        type: string
-        default: "latest"
-      kpm_patch_linux_path:
-        description: "Prebuilt patch_linux path (empty = auto-detect ~/Projects/PxGKI/KernelPatch_patch/patch_linux)"
-        required: false
-        type: string
-        default: ""
 
 jobs:
   build-gki:
@@ -88,10 +78,9 @@ jobs:
 
     - name: Setup more Swap (for LTO)
       if: ${{ inputs.quick_mode != 'true' && (inputs.runner_label == '' || inputs.runner_label == 'ubuntu-latest') }}
-      uses: thejerrybao/setup-swap-space@v1   # or pierotofy/set-swap-space
+      uses: pierotofy/set-swap-space@v1.0
       with:
-        swap-size-gb: 16          # 10-24 GB is common for heavy LTO
-        # swap-space-path: /mnt/swapfile   # optional
+        swap-size-gb: 16
 
     - name: Setup Build Environment
       uses: ./.github/actions/setup-build-environment
@@ -556,8 +545,6 @@ jobs:
       uses: ./.github/actions/kpm-patch
       with:
         image_path: ${{ github.workspace }}/AnyKernel3/Image
-        kpm_patch_ver: ${{ inputs.kpm_patch_ver }}
-        patch_linux_path: ${{ inputs.kpm_patch_linux_path }}
 
     - name: Get Cache Stats
       uses: ./.github/actions/cache-stats
@@ -601,8 +588,6 @@ jobs:
       uses: ./.github/actions/kpm-patch
       with:
         image_path: ${{ github.workspace }}/AnyKernel3/Bypass-Image
-        kpm_patch_ver: ${{ inputs.kpm_patch_ver }}
-        patch_linux_path: ${{ inputs.kpm_patch_linux_path }}
 
     - name: Package Flashable AnyKernel3 Archives
       shell: bash
@@ -698,7 +683,7 @@ jobs:
           echo "| **KSU Version** | ${KSU_VER} |"
           echo "| **KSU Tag** | ${KSU_TAG} |"
           echo "| **SukiSU Driver** | 6c13a06 (builtin, ${{ env.KSU_GIT_TAG || 'v4.1.3' }}) |"
-          echo "| **KPM** | ${KPM_ENABLED:-false} (${KPM_PATCH_VER:-n/a}, ${KPM_PATCH_SOURCE:-n/a}) |"
+          echo "| **KPM** | ${KPM_ENABLED:-false} (${KPM_PATCH_SOURCE:-n/a}) |"
           echo "| **SUSFS Version** | ${SUSFS_VER} |"
           echo "| **SUSFS Commit Input** | ${{ inputs.susfs_commit || 'ee023e3 if present, else branch tip' }} |"
           echo "| **Feature Set** | ${{ inputs.feature_set }} |"
