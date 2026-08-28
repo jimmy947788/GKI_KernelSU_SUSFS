@@ -38,18 +38,18 @@ jobs:
             curl -fsSL "https://gitlab.com/api/v4/projects/simonpunk%2Fsusfs4ksu/repository/commits?ref_name=${branch}&per_page=1" | jq -r '.[0].message | split("\n")[0]'
           }
 
-          github_latest_commit() {
-            curl -fsSL "https://api.github.com/repos/pershoot/KernelSU-Next/commits/dev-susfs" | jq -r '.sha'
+          github_sukisu_commit() {
+            curl -fsSL "https://api.github.com/repos/SukiSU-Ultra/SukiSU-Ultra/commits/6c13a06" | jq -r '.sha'
           }
 
-          github_latest_message() {
-            curl -fsSL "https://api.github.com/repos/pershoot/KernelSU-Next/commits/dev-susfs" | jq -r '.commit.message | split("\n")[0]'
+          github_sukisu_message() {
+            curl -fsSL "https://api.github.com/repos/SukiSU-Ultra/SukiSU-Ultra/commits/6c13a06" | jq -r '.commit.message | split("\n")[0]'
           }
 
           {
             echo "# Commit Status Report"
             echo ""
-            echo "This report shows the latest upstream commit for each supported SUSFS branch plus KernelSU-Next."
+            echo "Pinned SukiSU driver (6c13a06) vs latest upstream SUSFS branch tips."
             echo ""
           } >> "$summary_file"
 
@@ -79,14 +79,14 @@ jobs:
 
           {
             echo ""
-            echo "## KernelSU-Next"
+            echo "## SukiSU Ultra (pinned build driver)"
             echo ""
-            echo "| Branch | Latest Commit | Latest Message |"
+            echo "| Ref | Commit | Latest Message |"
             echo "| --- | --- | --- |"
           } >> "$summary_file"
 
-          latest_kernelsu_commit="$(github_latest_commit)"
-          latest_kernelsu_message="$(github_latest_message)"
-          latest_kernelsu_message="$(sanitize_cell "$latest_kernelsu_message")"
+          sukisu_commit="$(github_sukisu_commit)"
+          sukisu_message="$(github_sukisu_message)"
+          sukisu_message="$(sanitize_cell "$sukisu_message")"
 
-          printf '| %s | %s | %s |\n' "dev-susfs" "$latest_kernelsu_commit" "$latest_kernelsu_message" >> "$summary_file"
+          printf '| %s | %s | %s |\n' "builtin@6c13a06" "$sukisu_commit" "$sukisu_message" >> "$summary_file"

@@ -7,7 +7,7 @@ from pathlib import Path
 PLACEHOLDERS = {
     "{{KSU_VERSION}}": lambda: os.environ.get("KSU_VERSION", "unknown"),
     "{{KSU_GIT_TAG}}": lambda: os.environ.get("KSU_GIT_TAG", "no-tag"),
-    "{{KSUN_BRANCH}}": lambda: os.environ.get("KSUN_BRANCH", "dev"),
+    "{{KSUN_BRANCH}}": lambda: os.environ.get("KSUN_BRANCH", "builtin"),
     "{{KSUN_COMMIT}}": lambda: os.environ.get("KSUN_COMMIT", "unknown"),
     "{{KSU_MANAGER}}": lambda: os.environ.get("KSU_MANAGER", "Placeholder"),
     "{{SUSFS_BRANCHES}}": lambda: os.environ.get("SUSFS_COMMIT", "latest on auto-derived gki-{version} branch"),
@@ -55,19 +55,19 @@ emit("**IMPORTANT DISCLAIMER**")
 for line in data["release"]["disclaimer"]:
     emit(line)
 
-kernelsu = data.get("kernelsu", {})
+sukisu = data.get("sukisu", data.get("kernelsu", {}))
 emit()
-emit(f"## {kernelsu.get('name', 'KernelSU-Next')}")
-emit(f"- Version: {os.environ.get('KSU_VERSION', kernelsu.get('version', 'unknown'))}")
-emit(f"- Tag: {os.environ.get('KSU_GIT_TAG', kernelsu.get('tag', 'no-tag'))}")
-emit(f"- Branch: {os.environ.get('KSUN_BRANCH', kernelsu.get('branch', 'dev'))}")
-emit(f"- Commit: {os.environ.get('KSUN_COMMIT', kernelsu.get('commit', 'unknown'))}")
-if kernelsu.get("url"):
-    emit(f"- URL: {kernelsu['url']}")
-if kernelsu.get("manager"):
-    emit(f"- Manager: {kernelsu['manager']}")
+emit(f"## {sukisu.get('name', 'SukiSU Ultra')}")
+emit(f"- Version: {os.environ.get('KSU_VERSION', sukisu.get('version', 'v4.1.3'))}")
+emit(f"- Tag: {os.environ.get('KSU_GIT_TAG', sukisu.get('tag', 'v4.1.3'))}")
+emit(f"- Branch: {os.environ.get('KSUN_BRANCH', sukisu.get('branch', 'builtin'))}")
+emit(f"- Commit: {os.environ.get('KSUN_COMMIT', sukisu.get('commit', '6c13a06'))}")
+if sukisu.get("url"):
+    emit(f"- URL: {sukisu['url']}")
+if sukisu.get("manager"):
+    emit(f"- Manager: {sukisu['manager']}")
 
-skip_keys = {"release", "kernelsu"}
+skip_keys = {"release", "sukisu", "kernelsu"}
 for key in data.keys():
     if key in skip_keys:
         continue

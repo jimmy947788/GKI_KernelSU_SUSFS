@@ -60,9 +60,7 @@ GKI 安裝方式請參考官方文件：
 
 ### 建議使用的 Root 管理工具
 
-請用 **SukiSU Ultra Manager v4.1.3**。預設 kernel driver 釘在 builtin commit `6c13a06`，ABI 仍是 `KSU_APP_PROFILE_VER` 3。SukiSU 更新的 tip（`main`、`v4` tag、`b8279c3` 之後）會升 UAPI，v4.1.3 app 會顯示 Failed to update App Profile。
-
-`ksu_branch` 留空即可，不要填 `main` / `susfs-main` / 最新 tag。
+請用 **SukiSU Ultra Manager v4.1.3**。核心 driver 固定釘在 SukiSU **builtin** commit `6c13a06`——不要追 SukiSU `main` / tag tip（那些 ref 沒有 kernel 端 susfs，且 manager ABI 不相容）。
 
 ### 驗證成功畫面（KPM + SUSFS）
 
@@ -158,14 +156,13 @@ os_patch_level_filter: "2023-09"
 feature_set: KSUN+SUSFS
 runner_label: "gki-local"
 quick_mode: "true"
-ksu_branch: ""
 use_kpm: "true"
 ```
 
 SukiSU app 畫面判讀方式：
 
 - SukiSU Ultra v4.1.3 app 應該會判斷成 built-in 模式，且 KPM 為啟用。
-- `ksu_branch` 留空會釘在 builtin `6c13a06`（不是最新）。最新 SukiSU 沒有 kernel 端 susfs。
+- workflow 固定使用 SukiSU builtin `6c13a06`，沒有 branch 覆寫輸入。
 
 ### 編譯產物：`Flashable-Zips` 與 `AnyKernel3` 差異
 
@@ -199,7 +196,7 @@ SukiSU app 畫面判讀方式：
 
 代碼含義：
 
-- `KSUN`：啟用 SukiSU Ultra（釘住 builtin；只有 `ksu_branch` 明確填 Next ref 才走 KernelSU-Next）
+- `KSUN`：啟用釘住的 SukiSU Ultra（builtin `6c13a06`）
 - `SUSFS`：啟用 SUSFS patch 流程
 - `BBG`：啟用 Baseband Guard
 - `NET`：啟用 Networking patch 集
@@ -226,15 +223,12 @@ Actions 選單中各選項意義：
 
 ### SukiSU 補充說明
 
-目前 `KSUN+SUSFS` 的行為（`ksu_branch` 留空）：
+目前 `KSUN+SUSFS` 的行為：
 
-- 走 SukiSU Ultra **builtin** `6c13a06`（不是最新 `main` / `susfs-main`）。
-- 開啟 `CONFIG_KPM=y`，編譯後從 [SukiSU_KernelPatch_patch](https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch) 最新 release 下載 `patch_linux` + `kpimg`（預設 `kpm_patch_ver=latest`，目前為 `0.13.0`）。
-- 離線 fallback：`$HOME/Projects/PxGKI/KernelPatch_patch/patch_linux`。要強制用本地檔，設 `kpm_patch_linux_path`。
-- susfs4ksu 在該 gki 分支找得到時釘 `ee023e3`（SUSFS v2.1.0）。
-- 管理器請用 SukiSU Ultra **v4.1.3**。
-
-若要改走 KernelSU-Next，把 `ksu_branch` 設成 Next 的 ref（例如 `dev-susfs`）；那條路沒有 KPM。
+- 固定走 SukiSU Ultra **builtin** `6c13a06` + manager **v4.1.3**（無 workflow branch 變數）。
+- 開啟 `CONFIG_KPM=y`，編譯後從 [SukiSU_KernelPatch_patch](https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch) 最新 release 下載 `patch_linux` + `kpimg`。
+- 離線 fallback：`$HOME/Projects/PxGKI/KernelPatch_patch/patch_linux`。
+- susfs4ksu 在該 gki 分支找得到時釘 `ee023e3`。不再套用 pershoot KernelSU-Next 共存 patch。
 
 ### GitHub Actions `quick_mode`（快速編譯）
 
@@ -286,7 +280,6 @@ os_patch_level_filter: "2023-09"
 feature_set: KSUN+SUSFS
 runner_label: "gki-local"
 quick_mode: "true"
-ksu_branch: ""
 use_kpm: "true"
 susfs_commit_android12-5-10: ""
 susfs_commit_android13-5-10: ""
@@ -299,7 +292,7 @@ susfs_commit_android16-6-12: ""
 
 此範例補充：
 
-- `ksu_branch` 留空代表釘住 SukiSU builtin `6c13a06`（不是最新）。
+- SukiSU driver 固定為 builtin `6c13a06` / manager `v4.1.3`。
 - `susfs_commit_*` 留空時，該 gki 分支若有 `ee023e3` 就用它，否則用分支 tip。
 - 只會編譯 `android13-5.10` + `2023-09` 這一組。
 
@@ -319,7 +312,7 @@ susfs_commit_android16-6-12: ""
 ## 🏆 鳴謝
 
 - 🔐 **KernelSU**：由 [tiann](https://github.com/tiann/KernelSU) 開發
-- 🚀 **KernelSU-Next**：由 [rifsxd](https://github.com/KernelSU-Next/KernelSU-Next) 開發
+- 🚀 **SukiSU Ultra**：[SukiSU-Ultra](https://github.com/SukiSU-Ultra/SukiSU-Ultra)（釘住 builtin `6c13a06`）
 - ✨ **Magic-KSU**：由 [5ec1cff](https://github.com/5ec1cff/KernelSU) 開發
 - 🛡️ **SUSFS**：由 [simonpunk](https://gitlab.com/simonpunk/susfs4ksu.git) 開發
 - 🛡️ **Baseband-guard (BBG)**：由 [vc-teahouse](https://github.com/vc-teahouse/Baseband-guard) 開發

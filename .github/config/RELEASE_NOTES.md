@@ -8,7 +8,7 @@
 Join the telegram here: https://t.me/WildKernelsTG
 
 # Features
-- [KernelSU-Next](#kernelsu-next)
+- [SukiSU Ultra](#sukisu-ultra)
 - [SUSFS v2.2.0](#susfs-v220)
 - [Baseband Guard (BBG)](#baseband-guard-bbg)
 - [DroidSpaces-OSS](#droidspaces-oss)
@@ -18,17 +18,14 @@ Join the telegram here: https://t.me/WildKernelsTG
 
 <!-- NOTE: Anchor links above must match the heading IDs below. GitHub Flavored Markdown auto-generates anchors from heading text, but since these headings contain links, we use explicit IDs for reliable navigation. -->
 
-## [KernelSU-Next](https://github.com/pershoot/KernelSU-Next) {#kernelsu-next}
+## [SukiSU Ultra](https://github.com/SukiSU-Ultra/SukiSU-Ultra) {#sukisu-ultra}
 
-A kernel-based root solution for Android devices.
-
-> [!WARNING]
-> This release uses the [pershoot/KernelSU-Next](https://github.com/pershoot/KernelSU-Next) fork. The fork maintainer has said it is not ready for production use, so treat it as use at your own risk.
+Kernel-based root for Android GKI devices. This release pins the **builtin** driver at commit `6c13a06` with manager tag **v4.1.3** (KPM + kernel-side SUSFS).
 
 Manager: {{KSU_MANAGER}}
 
 > [!IMPORTANT]
-> For best compatiblity ensure your Manager Version and Kernel Version match eg. 30100 = 30100.
+> Use SukiSU Ultra Manager **v4.1.3**. Newer SukiSU tips change the UAPI and are not compatible with this pinned driver.
 
 **Version**  
 `{{KSU_VERSION}}`

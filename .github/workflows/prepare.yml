@@ -26,11 +26,6 @@ on:
         required: false
         type: string
         default: "false"
-      ksu_branch:
-        description: "SukiSU ref (empty = pinned builtin 6c13a06). Prefix ksun: is not used; a non-empty non-sukisu: value selects KernelSU-Next."
-        required: false
-        type: string
-        default: ""
       susfs_commit:
         description: "SUSFS commit hash (empty = ee023e3 if present on the gki branch, else tip)"
         required: false
@@ -133,7 +128,6 @@ jobs:
       feature_set: ${{ inputs.feature_set }}
       runner_label: ${{ inputs.runner_label }}
       quick_mode: ${{ inputs.quick_mode }}
-      ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit }}
       use_kpm: ${{ inputs.use_kpm }}
       kpm_patch_ver: ${{ inputs.kpm_patch_ver }}

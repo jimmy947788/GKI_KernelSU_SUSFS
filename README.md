@@ -60,9 +60,7 @@ Install these three modules in SukiSU/KernelSU manager:
 
 ### Recommended Root Manager
 
-Use **SukiSU Ultra Manager v4.1.3**. The default kernel driver is pinned to builtin commit `6c13a06`, which still speaks `KSU_APP_PROFILE_VER` 3. Newer SukiSU tips (`main`, `v4` tags, anything at or after `b8279c3`) bump the UAPI and the v4.1.3 app reports "Failed to update App Profile".
-
-Leave `ksu_branch` empty. Do not point it at `main` / `susfs-main` / latest tags.
+Use **SukiSU Ultra Manager v4.1.3**. The kernel driver is pinned to SukiSU **builtin** commit `6c13a06` — do not track SukiSU `main` / tag tips (they drop kernel-side susfs and break the manager ABI).
 
 ### Verified Working State (KPM + SUSFS)
 
@@ -129,14 +127,13 @@ os_patch_level_filter: "2023-09"
 feature_set: KSUN+SUSFS
 runner_label: "gki-local"
 quick_mode: "true"
-ksu_branch: ""
 use_kpm: "true"
 ```
 
 How to read the SukiSU app result:
 
 - The SukiSU Ultra v4.1.3 app should detect built-in mode **and** KPM.
-- Empty `ksu_branch` pins the driver to builtin `6c13a06` (not latest). Latest SukiSU has no kernel-side susfs.
+- The workflow always uses SukiSU builtin `6c13a06` — there is no branch override input.
 
 ### Valid values for `os_patch_level_filter` (Action input)
 
@@ -193,15 +190,12 @@ If you change the workflow to enable or adjust SukiSU integration, previously bu
 - You must re-download the newly generated artifact.
 - You must re-flash the newly generated zip.
 
-Current `KSUN+SUSFS` behavior (empty `ksu_branch`):
+Current `KSUN+SUSFS` behavior:
 
-- Uses SukiSU Ultra **builtin** `6c13a06` (not latest `main` / `susfs-main`).
+- Uses SukiSU Ultra **builtin** `6c13a06` with manager tag **v4.1.3** (fixed — no workflow branch input).
 - Enables `CONFIG_KPM=y` and runs [`patch_linux`](https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch) from the newest GitHub release (default `kpm_patch_ver=latest`, currently `0.13.0`) plus matching `kpimg`.
 - Offline fallback: `$HOME/Projects/PxGKI/KernelPatch_patch/patch_linux`. To force a local build, set `kpm_patch_linux_path`.
-- Pins susfs4ksu to `ee023e3` (SUSFS v2.1.0) when that commit exists on the gki branch.
-- Use SukiSU Ultra Manager **v4.1.3**.
-
-To build KernelSU-Next instead, set `ksu_branch` to a Next ref such as `dev-susfs` (no KPM on that path).
+- Pins susfs4ksu to `ee023e3` (SUSFS v2.1.0) when that commit exists on the gki branch. No KernelSU-Next coexistence patches are applied.
 
 Old zip files built before the SukiSU integration change will still behave like the old build and may boot successfully while the SukiSU app still reports that root is unavailable.
 
@@ -211,7 +205,7 @@ In the `Build Kernels` workflow, `feature_set` controls optional patch groups.
 
 Token meaning:
 
-- `KSUN`: Enable SukiSU Ultra setup (pinned builtin; KernelSU-Next only if `ksu_branch` is an explicit Next ref)
+- `KSUN`: Enable pinned SukiSU Ultra setup (builtin `6c13a06`)
 - `SUSFS`: Enable SUSFS setup/patches
 - `BBG`: Enable Baseband Guard patches
 - `NET`: Enable networking patch set
@@ -308,7 +302,6 @@ os_patch_level_filter: "2023-09"
 feature_set: KSUN+SUSFS
 runner_label: "gki-local"
 quick_mode: "true"
-ksu_branch: ""
 use_kpm: "true"
 susfs_commit_android12-5-10: ""
 susfs_commit_android13-5-10: ""
@@ -321,7 +314,7 @@ susfs_commit_android16-6-12: ""
 
 Notes for this example:
 
-- Empty `ksu_branch` pins SukiSU to builtin `6c13a06` (not latest).
+- SukiSU driver is always pinned to builtin `6c13a06` / manager `v4.1.3`.
 - Empty `susfs_commit_*` uses `ee023e3` when that commit is on the gki branch, otherwise the branch tip.
 - Only `android13-5.10` + `2023-09` is built.
 
@@ -333,7 +326,7 @@ If you already have a self-hosted runner, set:
 
 ## ✨ Features
 
-- 🔐 **KernelSU**: A root solution for Android GKI devices that works in kernel mode and grants root permission to userspace applications directly in kernel space
+- 🔐 **SukiSU Ultra**: Kernel-based root via pinned builtin driver (`6c13a06`) with KPM + SUSFS
 - 🛡️ **SUSFS**: An addon root hiding kernel patches and userspace module for KernelSU
 
 ---
@@ -341,7 +334,7 @@ If you already have a self-hosted runner, set:
 ## 🏆 Credits
 
 - 🔐 **KernelSU**: Developed by [tiann](https://github.com/tiann/KernelSU)
-- 🚀 **KernelSU-Next**: Developed by [rifsxd](https://github.com/KernelSU-Next/KernelSU-Next)
+- 🚀 **SukiSU Ultra**: [SukiSU-Ultra](https://github.com/SukiSU-Ultra/SukiSU-Ultra) (pinned builtin `6c13a06`)
 - ✨ **Magic-KSU**: Developed by [5ec1cff](https://github.com/5ec1cff/KernelSU)
 - 🛡️ **SUSFS**: Developed by [simonpunk](https://gitlab.com/simonpunk/susfs4ksu.git)
 - 🛡️ **Baseband-guard (BBG)**: Developed by [vc-teahouse](https://github.com/vc-teahouse/Baseband-guard)

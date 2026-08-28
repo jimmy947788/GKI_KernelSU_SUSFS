@@ -1,6 +1,6 @@
 {
-  "kernelsu": {
-    "dev": "5a4a71874caaad06aa126f761c93391de1d32361"
+  "sukisu": {
+    "builtin": "6c13a06"
   },
   "susfs": {
     "gki-android12-5.10": "86114db0c49f20fa7857b8b559f3ab87cbc2d00d",

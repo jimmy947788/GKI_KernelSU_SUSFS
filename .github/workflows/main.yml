@@ -61,11 +61,6 @@ on:
           - "false"
           - "true"
         default: "false"
-      ksu_branch:
-        description: "SukiSU ref (empty = pinned builtin 6c13a06 + v4.1.3). Non-empty without sukisu: prefix = KernelSU-Next."
-        type: string
-        required: false
-        default: ""
       use_kpm:
         description: "Enable KPM (CONFIG_KPM + patch_linux from SukiSU_KernelPatch_patch). Requires SukiSU driver."
         type: choice
@@ -162,7 +157,6 @@ jobs:
       feature_set: ${{ inputs.feature_set || 'FULL' }}
       runner_label: ${{ inputs.runner_label }}
       quick_mode: ${{ inputs.quick_mode }}
-      ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android12-5-10 }}
       use_kpm: ${{ inputs.use_kpm }}
       kpm_patch_ver: ${{ inputs.kpm_patch_ver }}
@@ -179,7 +173,6 @@ jobs:
       feature_set: ${{ inputs.feature_set || 'FULL' }}
       runner_label: ${{ inputs.runner_label }}
       quick_mode: ${{ inputs.quick_mode }}
-      ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android13-5-10 }}
       use_kpm: ${{ inputs.use_kpm }}
       kpm_patch_ver: ${{ inputs.kpm_patch_ver }}
@@ -196,7 +189,6 @@ jobs:
       feature_set: ${{ inputs.feature_set || 'FULL' }}
       runner_label: ${{ inputs.runner_label }}
       quick_mode: ${{ inputs.quick_mode }}
-      ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android13-5-15 }}
       use_kpm: ${{ inputs.use_kpm }}
       kpm_patch_ver: ${{ inputs.kpm_patch_ver }}
@@ -213,7 +205,6 @@ jobs:
       feature_set: ${{ inputs.feature_set || 'FULL' }}
       runner_label: ${{ inputs.runner_label }}
       quick_mode: ${{ inputs.quick_mode }}
-      ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android14-5-15 }}
       use_kpm: ${{ inputs.use_kpm }}
       kpm_patch_ver: ${{ inputs.kpm_patch_ver }}
@@ -230,7 +221,6 @@ jobs:
       feature_set: ${{ inputs.feature_set || 'FULL' }}
       runner_label: ${{ inputs.runner_label }}
       quick_mode: ${{ inputs.quick_mode }}
-      ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android14-6-1 }}
       use_kpm: ${{ inputs.use_kpm }}
       kpm_patch_ver: ${{ inputs.kpm_patch_ver }}
@@ -247,7 +237,6 @@ jobs:
       feature_set: ${{ inputs.feature_set || 'FULL' }}
       runner_label: ${{ inputs.runner_label }}
       quick_mode: ${{ inputs.quick_mode }}
-      ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android15-6-6 }}
       use_kpm: ${{ inputs.use_kpm }}
       kpm_patch_ver: ${{ inputs.kpm_patch_ver }}
@@ -264,7 +253,6 @@ jobs:
       feature_set: ${{ inputs.feature_set || 'FULL' }}
       runner_label: ${{ inputs.runner_label }}
       quick_mode: ${{ inputs.quick_mode }}
-      ksu_branch: ${{ inputs.ksu_branch }}
       susfs_commit: ${{ inputs.susfs_commit_android16-6-12 }}
       use_kpm: ${{ inputs.use_kpm }}
       kpm_patch_ver: ${{ inputs.kpm_patch_ver }}
@@ -386,7 +374,7 @@ jobs:
           echo "# 📋 Build Summary — $(date -u '+%Y-%m-%d %H:%M UTC')"
           echo
           echo "**Feature Set:** ${{ inputs.feature_set }}"
-          echo "**KSU Branch:** ${{ inputs.ksu_branch || 'sukisu:6c13a06 (pinned)' }}"
+          echo "**SukiSU Driver:** 6c13a06 (builtin, v4.1.3)"
           echo "**KPM:** ${{ inputs.use_kpm }} (${{ inputs.kpm_patch_ver }})"
           echo
           
@@ -565,58 +553,30 @@ jobs:
 
         echo "release_title=$release_title" >> "$GITHUB_OUTPUT"
 
-    - name: Extract KernelSU Version Info
+    - name: Extract SukiSU Version Info
       id: ksu_version
       run: |
         set -euo pipefail
 
-        KSU_REPO="https://github.com/pershoot/KernelSU-Next.git"
-        KSU_INPUT="${{ inputs.ksu_branch }}"
-        if [ -z "$KSU_INPUT" ]; then
-          KSU_INPUT="dev-susfs"
-        fi
+        SUKISU_REPO="https://github.com/SukiSU-Ultra/SukiSU-Ultra.git"
+        SUKISU_SRC="6c13a06"
+        SUKISU_VER="v4.1.3"
 
-        # Try as branch first, fall back to commit
-        if git ls-remote --heads "$KSU_REPO" "$KSU_INPUT" | grep -q .; then
-          echo "Cloning KernelSU-Next from branch: $KSU_INPUT"
-          git clone --branch "$KSU_INPUT" "$KSU_REPO" /tmp/kernelsu-next
-          cd /tmp/kernelsu-next
-          KSUN_COMMIT=$(git rev-parse HEAD)
-        else
-          echo "Cloning KernelSU-Next from dev-susfs branch, then checking out commit: $KSU_INPUT"
-          git clone --branch dev-susfs "$KSU_REPO" /tmp/kernelsu-next
-          cd /tmp/kernelsu-next
-          git fetch --depth=50 origin "$KSU_INPUT"
-          git checkout "$KSU_INPUT"
-          KSUN_COMMIT="$KSU_INPUT"
-        fi
+        git clone --filter=blob:none --no-checkout "$SUKISU_REPO" /tmp/sukisu
+        cd /tmp/sukisu
+        git fetch origin "$SUKISU_SRC" builtin 2>/dev/null || git fetch origin "$SUKISU_SRC"
+        git checkout --detach "$SUKISU_SRC"
+        KSU_COMMIT=$(git rev-parse --short HEAD)
 
-        # Extract version info
-        COMMITS_COUNT=$(git rev-list --count HEAD)
-        BASE_VERSION=30000
-        KSU_VERSION=$(expr $COMMITS_COUNT "+" $BASE_VERSION)
+        KSU_MANAGER="https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/$SUKISU_VER"
 
-        # Extract git tag
-        KSU_GIT_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "no-tag")
+        echo "SukiSU driver: $SUKISU_SRC ($KSU_COMMIT)"
+        echo "SukiSU manager tag: $SUKISU_VER"
 
-        MANAGER_RUN_ID=$(curl -fsSL "https://api.github.com/repos/pershoot/KernelSU-Next/actions/workflows/build-manager-ci.yml/runs?head_sha=${KSUN_COMMIT}" | jq -r '.workflow_runs[0].id // empty')
-        if [[ -n "${MANAGER_RUN_ID:-}" ]]; then
-          KSU_MANAGER="https://github.com/pershoot/KernelSU-Next/actions/runs/${MANAGER_RUN_ID}"
-        else
-          KSU_MANAGER="https://github.com/pershoot/KernelSU-Next/actions/workflows/build-manager-ci.yml"
-        fi
-
-        echo "Commits count: $COMMITS_COUNT"
-        echo "KSU Version: $KSU_VERSION"
-        echo "KSU Git Tag: $KSU_GIT_TAG"
-        echo "KSU Manager: $KSU_MANAGER"
-
-        # Export as environment for next step
-        echo "KSUN_BRANCH=$KSU_INPUT" >> $GITHUB_ENV
-        echo "KSUN_COMMIT=$KSUN_COMMIT" >> $GITHUB_ENV
-        echo "KSU_COMMITS_COUNT=$COMMITS_COUNT" >> $GITHUB_ENV
-        echo "KSU_VERSION=$KSU_VERSION" >> $GITHUB_ENV
-        echo "KSU_GIT_TAG=$KSU_GIT_TAG" >> $GITHUB_ENV
+        echo "KSUN_BRANCH=builtin" >> $GITHUB_ENV
+        echo "KSUN_COMMIT=$KSU_COMMIT" >> $GITHUB_ENV
+        echo "KSU_VERSION=$SUKISU_VER" >> $GITHUB_ENV
+        echo "KSU_GIT_TAG=$SUKISU_VER" >> $GITHUB_ENV
         echo "KSU_MANAGER=$KSU_MANAGER" >> $GITHUB_ENV
 
     - name: Set release body

@@ -1,5 +1,5 @@
 name: 'Setup SUSFS Branch'
-description: 'Clone SUSFS repo and cherry-pick commits'
+description: 'Clone SUSFS repo matched to the pinned SukiSU builtin era'
 inputs:
   susfs_commit:
     description: 'SUSFS commit hash (empty = ee023e3 if present on the gki branch, else tip)'
@@ -28,7 +28,7 @@ runs:
 
         # Match the pinned SukiSU builtin era (SUSFS v2.1.0, 2026-05-30). The
         # kernel patch, the builtin driver glue and the ksu_susfs userspace tool
-        # are one generation — mixing tips with 6c13a06 yields "unsupport".
+        # are one generation — do not apply pershoot KernelSU-Next coexistence patches.
         PINNED_SUSFS="ee023e3"
         SUSFS_COMMIT="${{ inputs.susfs_commit }}"
         if [ -z "$SUSFS_COMMIT" ]; then
@@ -44,13 +44,3 @@ runs:
         fi
 
         echo "susfs4ksu at $(git rev-parse --short HEAD)"
-
-        # pershoot patches target KernelSU-Next coexistence. SukiSU builtin
-        # already carries susfs glue — applying them mixes generations.
-        if [ -d "${{ github.workspace }}/kernel/KernelSU" ]; then
-          echo "SukiSU driver present; skipping pershoot KernelSU-Next coexistence patches"
-        else
-          patch -p1 < "${{ github.workspace }}/kernel_patches/pershoot/susfs4ksu/0001-pershoot-Allow-core-to-be-built-with-no-features.patch"
-          patch -p1 < "${{ github.workspace }}/kernel_patches/pershoot/susfs4ksu/0002-pershoot-Implement-SuSFS-and-Toolkit-coexistence.patch"
-        fi
-
