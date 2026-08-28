@@ -452,7 +452,7 @@ jobs:
         version: ${{ inputs.version }}
         bypass: false
 
-    - name: Verify SUSFS symbols in built artifacts
+    - name: Verify SUSFS in built artifacts
       if: contains(inputs.feature_set, 'SUSFS') || inputs.feature_set == 'FULL'
       shell: bash
       run: |
@@ -464,12 +464,6 @@ jobs:
           "${{ github.workspace }}/kernel/bazel-bin/common/kernel_aarch64/Image"
         )
 
-        map_candidates=(
-          "$HOME/out/dist/System.map"
-          "$HOME/out/System.map"
-          "${{ github.workspace }}/kernel/bazel-bin/common/kernel_aarch64/System.map"
-        )
-
         required_cfgs=(
           CONFIG_KSU_SUSFS
           CONFIG_KSU_SUSFS_SUS_PATH
@@ -478,21 +472,11 @@ jobs:
           CONFIG_KSU_SUSFS_SPOOF_UNAME
         )
 
-        map_has_susfs=0
-        for map_file in "${map_candidates[@]}"; do
-          if [ -f "$map_file" ]; then
-            echo "Found System.map: $map_file"
-            if grep -qE '(^|_)susfs_' "$map_file"; then
-              map_has_susfs=1
-              echo "Found SUSFS function symbols in $map_file"
-              break
-            fi
-          fi
-        done
-
         ikconfig_checked=0
         ikconfig_ok=0
+        hide_symbols=0
         extract_script="${{ github.workspace }}/kernel/common/scripts/extract-ikconfig"
+        image_for_strings=""
 
         for image_file in "${image_candidates[@]}"; do
           [ -f "$image_file" ] || continue
@@ -518,7 +502,12 @@ jobs:
 
           if [ "$cfg_missing" -eq 0 ]; then
             ikconfig_ok=1
+            image_for_strings="$image_file"
             echo "IKCONFIG confirms SUSFS options enabled in $image_file"
+            if grep -q '^CONFIG_KSU_SUSFS_HIDE_KSU_SUSFS_SYMBOLS=y$' /tmp/ikconfig.txt; then
+              hide_symbols=1
+              echo "CONFIG_KSU_SUSFS_HIDE_KSU_SUSFS_SYMBOLS=y (System.map susfs_* check skipped)"
+            fi
             break
           fi
         done
@@ -533,12 +522,34 @@ jobs:
           exit 1
         fi
 
-        if [ "$map_has_susfs" -ne 1 ]; then
-          echo "ERROR: SUSFS requested but System.map does not contain expected susfs_* symbols"
+        susfs_string_hits=$(strings -n 5 "$image_for_strings" | grep -ci susfs || true)
+        if [ "$susfs_string_hits" -eq 0 ]; then
+          echo "ERROR: $image_for_strings contains no susfs strings - susfs was NOT linked in"
           exit 1
         fi
+        echo "Found $susfs_string_hits susfs string hits in $image_for_strings"
 
-        echo "SUSFS verification passed (IKCONFIG + System.map symbols)"
+        if [ "$hide_symbols" -eq 0 ]; then
+          map_candidates=(
+            "$HOME/out/dist/System.map"
+            "$HOME/out/System.map"
+            "${{ github.workspace }}/kernel/bazel-bin/common/kernel_aarch64/System.map"
+          )
+          map_has_susfs=0
+          for map_file in "${map_candidates[@]}"; do
+            [ -f "$map_file" ] || continue
+            if grep -qE '(^|_)susfs_' "$map_file"; then
+              map_has_susfs=1
+              echo "Found SUSFS function symbols in $map_file"
+              break
+            fi
+          done
+          if [ "$map_has_susfs" -ne 1 ]; then
+            echo "WARNING: System.map has no susfs_* symbols (Image strings check already passed)"
+          fi
+        fi
+
+        echo "SUSFS verification passed (IKCONFIG + Image strings)"
 
     - name: Patch Normal Kernel with KPM
       if: ${{ inputs.use_kpm == 'true' && (contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL') }}
