@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🔥 Wild Kernels for Android
+# 🔥 SukiSU(Wild) Kernels for Android
 
 [![KernelSU](https://img.shields.io/badge/KernelSU-Supported-green)](https://kernelsu.org/)
 [![SukiSU](https://img.shields.io/badge/SukiSU_Ultra-v4.1.3-blue)](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.1.3)
