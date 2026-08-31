@@ -41,7 +41,7 @@ Manager: {{KSU_MANAGER}}
 
 ## [SUSFS v2.2.0](https://gitlab.com/simonpunk/susfs4ksu) {#susfs-v220}
 
-A KSU addon for hiding root using kernel patches and a userspace module!
+A SukiSU Ultra addon for hiding root using kernel patches and a userspace module!
 
 Reccomended Module: [susfs4ksu-module by sidex15](https://github.com/sidex15/susfs4ksu-module)
 
@@ -114,7 +114,7 @@ Provide high-performance, low-latency synchronization primitives compatible with
 ### Prerequisites
 - Unlocked bootloader.
 - Backup your current boot image.
-- Have root access using Magisk / KernelSU / Apatch (Any forks).
+- Have root access using Magisk, SukiSU LKM, or another KSU-family LKM (for flashing tools that require root).
 
 ### Via Kernel Flasher
 Download the correct AnyKernel3 ZIP for your device.
@@ -124,8 +124,8 @@ b. KSU LKM (boot/init_boot/vendor_boot‑patched): Flash back the stock boot/ini
 c. KSU GKI: if you are 100% sure you already flashed stock init_boot/boot/vendor_boot, no action is needed; otherwise, follow the same steps as KSU LKM.
 d. APatch: remove /data/adb contents to avoid leftover root conflicts after flashing the AnyKernel3 ZIP.
 Flash the ZIP to the active slot using Kernel Flasher.
-Install the KernelSU‑Next Manager APK, same version as mentioned in the release notes.
-Open the KernelSU‑Next app.
+Install the **SukiSU Ultra Manager** APK at the version pinned in this release (see SukiSU Ultra section above).
+Open the SukiSU Ultra app and confirm built-in + KPM status.
 Reboot the device if you performed any cleanup in step 2
 
 ## Force Load Kernel Modules (Bypass) — flashing with `Bypass-Image`

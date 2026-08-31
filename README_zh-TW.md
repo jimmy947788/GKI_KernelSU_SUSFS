@@ -1,9 +1,11 @@
 <div align="center">
 
-# 🔥 Wild Kernels for Android（繁體中文說明）
+# 🔥 SukiSU (Wild) GKI 核心 — Android 刷機用
 
-[![KernelSU](https://img.shields.io/badge/KernelSU-Supported-green)](https://kernelsu.org/)
-[![SukiSU](https://img.shields.io/badge/SukiSU_Ultra-v4.1.3-blue)](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.1.3)
+**支援 GKI 2.0 的 Android 核心建置，內建 SukiSU Ultra（built-in root）、KPM 與 SUSFS — 讓 Pixel 6 Pro、Pixel 6a 等裝置能繼續使用最新版 SukiSU 管理工具刷機。**
+
+[![GKI 2.0](https://img.shields.io/badge/GKI-2.0-green)](https://source.android.com/docs/core/architecture/kernel/gki)
+[![SukiSU Ultra](https://img.shields.io/badge/SukiSU_Ultra-v4.1.3-blue)](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.1.3)
 [![KPM](https://img.shields.io/badge/KPM-v0.13.0-purple)](https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch/releases/tag/0.13.0)
 [![SUSFS](https://img.shields.io/badge/SUSFS-Integrated-orange)](https://gitlab.com/simonpunk/susfs4ksu)
 
@@ -13,6 +15,18 @@
 
 - English: [README.md](README.md)
 - 繁體中文: [README_zh-TW.md](README_zh-TW.md)
+
+## 📌 專案簡述
+
+本倉庫自動化建置 **GKI 2.0**（Generic Kernel Image）核心，適用 Android 12+（kernel 5.10 起）。每次編譯會整合：
+
+- **SukiSU Ultra** — 內建 root driver（built-in 模式，非 LKM 模組刷入）
+- **KPM**（KernelPatch）— 編譯後以 `patch_linux` + `kpimg` 寫入 `Image`
+- **SUSFS** — kernel 端補丁 + 對應的使用者空間模組
+
+主要目標是讓 **Google Pixel 6 Pro**（`raven`）與 **Pixel 6a**（`bluejay`）能在自訂 GKI 核心上，繼續使用釘住的 **SukiSU Ultra v4.1.3** 管理器、KPM 模組與 SUSFS WebUI，而不必依賴原廠/vendor 核心或過時的 root 方案。
+
+> **說明：** workflow 裡的 `KSUN` 是 KernelSU 時代的舊代號；在本 repo 中一律代表 **SukiSU Ultra** 整合流程。
 
 ## ⚠️ 風險聲明
 
@@ -28,13 +42,15 @@
 
 ---
 
-## 🔧 可用核心專案
+## 🔧 Wild Kernels 系列
 
-| 核心 | 倉庫 | 狀態 |
+| 建置線 | 倉庫 | 狀態 |
 |--------|------------|--------|
-| 🏗️ **GKI** | [GKI_KernelSU_SUSFS](https://github.com/WildKernels/GKI_KernelSU_SUSFS) | ✅ Active |
+| 🏗️ **GKI**（本 repo） | [GKI_KernelSU_SUSFS](https://github.com/WildKernels/GKI_KernelSU_SUSFS) | ✅ Active — SukiSU Ultra + KPM + SUSFS |
 | 👑 **Sultan** | [Sultan_KernelSU_SUSFS](https://github.com/WildKernels/Sultan_KernelSU_SUSFS) | ✅ Active |
 | 📱 **OnePlus** | [OnePlus_KernelSU_SUSFS](https://github.com/WildKernels/OnePlus_KernelSU_SUSFS) | ✅ Active |
+
+倉庫名稱仍保留 `KernelSU` 是歷史沿用；**本 GKI 建置線以 SukiSU Ultra 為目標**，不是原版 KernelSU 管理器或 LKM 流程。
 
 ---
 
@@ -49,9 +65,9 @@
 
 ## 📋 安裝說明
 
-GKI 安裝方式也可參考官方文件：
+GKI 刷機概念與管理器設定可參考：
 
-📖 **[KernelSU 安裝指南](https://kernelsu.org/guide/installation.html)**
+📖 **[SukiSU Ultra 安裝指南](https://sukisu.org/guide/installation)**（GKI / AnyKernel3 方式）
 
 ### 支援版本（請對齊，不要混用）
 
@@ -68,7 +84,9 @@ GKI 安裝方式也可參考官方文件：
 
 此核心已針對 **SukiSU Ultra v4.1.3** 做相容修正，並同時支援 **KPM v0.13.0** 與 **SUSFS 模組**。
 
-Pixel 6 Pro（`raven` / `TQ3A.230901.001`）刷入後 `uname -r` 範例：`5.10.186-android13-Wild-r36.1`。
+**Pixel 6 Pro**（`raven` / `TQ3A.230901.001`）刷入後 `uname -r` 範例：`5.10.186-android13-Wild-r36.1`。
+
+**Pixel 6a**（`bluejay`）使用相同 GKI 組合（`android13-5.10` + 對應 OS patch level）。請依 firmware 的 security patch 月份選 build `date`，規則與下方 Pixel 6 Pro 相同。
 
 ### 1. 下載哪一個檔案
 
@@ -85,12 +103,12 @@ workflow 成功後**只會上傳一個**可刷產物，例如：
 前提：
 
 - bootloader 已解鎖
-- 手機**已經有 root**（Horizon 需要 root；可用既有 Magisk / KernelSU / SukiSU LKM）
+- 手機**已經有 root**（Horizon 需要 root；可用既有 Magisk、SukiSU LKM 或其他 KSU 系 LKM）
 - 已把 `*-AnyKernel3-normal.zip` 放到手機儲存空間
 
 步驟：
 
-1. 安裝 `HorizonKernelFlasher-v1.3.apk`，在 SukiSU / KernelSU / Magisk 裡允許它 root。
+1. 安裝 `HorizonKernelFlasher-v1.3.apk`，在 **SukiSU Ultra**（或你目前的 root 管理器）裡允許它 root。
 2. 打開 Horizon → 選取 `*-AnyKernel3-normal.zip`（例如 `5.10.186-android13-2023-09-r36.1-AnyKernel3-normal.zip`）。
 3. 刷入目前 active slot，完成後重開機。
 4. 確認核心版本：
@@ -100,7 +118,7 @@ adb shell uname -a
 # 應類似：Linux localhost 5.10.186-android13-Wild-r36.1 #1 SMP PREEMPT ... aarch64 Toybox
 ```
 
-若你目前是 KSU LKM（原廠 kernel + 模組 root），建議刷 GKI 前先備份目前 `boot`。Pixel 6 / 6 Pro 沒有獨立 `init_boot`，動的是 `boot`。
+若你目前是 LKM root（原廠 kernel + 可載入模組），建議刷 GKI 前先備份目前 `boot`。Pixel 6 / 6 Pro / 6a 沒有獨立 `init_boot`，動的是 `boot`。
 
 備援：也可用 [Kernel Flasher](https://github.com/fatalcoder524/KernelFlasher) 對 active slot 刷同一顆 zip（可先 Backup）。
 
@@ -116,9 +134,9 @@ adb shell uname -a
 
 請用 **[SukiSU Ultra Manager v4.1.3](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.1.3)**（versionCode `40796`）。核心 driver 固定釘在 SukiSU **builtin** commit `6c13a06`，KPM 為 **v0.13.0**——不要追 SukiSU `main` / 更新的 manager tag，也不要換別版 KPM（那些 ref 沒有 kernel 端 susfs，且 manager ABI 不相容）。
 
-### 驗證成功畫面（Pixel 6 Pro）
+### 驗證成功畫面（Pixel 6 Pro / 6a）
 
-Pixel 6 Pro（`raven` / `TQ3A.230901.001`）刷入 `5.10.186-android13-Wild-r36.1` 後：SukiSU Ultra **v4.1.3** 顯示 Working \<Built-in\>、SuSFS v2.1.0；設定頁可見 **KPM** 與 **SuSFS Configuration**；SUSFS WebUI 可讀取核心 uname。
+Pixel 6 Pro（`raven` / `TQ3A.230901.001`）刷入 `5.10.186-android13-Wild-r36.1` 後：SukiSU Ultra **v4.1.3** 顯示 Working \<Built-in\>、SuSFS v2.1.0；設定頁可見 **KPM** 與 **SuSFS Configuration**；SUSFS WebUI 可讀取核心 uname。Pixel 6a（`bluejay`）刷入對應的 `android13-5.10` + patch level zip 後，管理器與模組堆疊相同。
 
 | 首頁（Built-in + SuSFS） | 設定（KPM / SuSFS） | SUSFS WebUI |
 |--------------------------|---------------------|-------------|
@@ -145,7 +163,7 @@ adb shell su -c 'ls -al /data/adb/susfs 2>/dev/null'
 
 如果 kernel 端有 SUSFS 符號、但 WebUI 仍全 0，請依序做：
 
-1. 在 SukiSU/KernelSU 管理器中，確認 WebUI 對應應用有 root 權限（允許且不彈窗）。
+1. 在 **SukiSU Ultra** 管理器中，確認 WebUI 對應應用有 root 權限（允許且不彈窗）。
 2. 重新安裝最新版 `SUSFS-FOR-KERNELSU` 模組（需符合 WebUI 顯示的最低版本要求，例如 `v1.5.3+-r28`）。
 3. 同時安裝並啟用 `Zygisk Next` 與 `KPatch-Next Module`，安裝後完整重開機。
 4. 進入模組頁面執行一次動作（例如重建/套用規則）再回 WebUI 檢查計數。
@@ -173,12 +191,15 @@ adb shell su -c 'ls -al /data/adb/susfs 2>/dev/null'
 ### 實務建議
 
 - 先讓 build 日期對齊你目前 ROM 的 patch level。
-- Pixel 6 Pro（Android 13，`raven-tq3a.230901.001`）建議先從 `android13-5.10` + `2023-09` 開始。
+- Pixel 6 Pro / 6a（Android 13）建議從 `android13-5.10` + 與 `ro.build.version.security_patch` 相同的 `date` 開始（例如 `raven-tq3a.230901.001` 用 `2023-09`）。
 - 下載並刷 `*-AnyKernel3-normal.zip`。
 
-### Pixel 6 Pro（`raven`）固定範例
+### Pixel 6 Pro / 6a 固定範例
 
-如果你的手機 fingerprint 是 `google/raven/raven:13/TQ3A.230901.001/...`，就用 `android13-5.10` 搭配 `2023-09`。
+| 裝置 | Codename | 指紋範例 | 建議 matrix |
+|------|----------|----------|-------------|
+| Pixel 6 Pro | `raven` | `google/raven/raven:13/TQ3A.230901.001/...` | `android13-5.10` + `2023-09` |
+| Pixel 6a | `bluejay` | 依你的 `getprop ro.build.fingerprint` patch 月份 | `android13-5.10` + 與 security patch 相同的 `YYYY-MM` |
 
 ### 用 ADB 查 `kernel_build_version` 與 `os_patch_level_filter`
 
@@ -236,7 +257,7 @@ SukiSU app 畫面判讀方式：
 
 代碼含義：
 
-- `KSUN`：啟用釘住的 SukiSU Ultra（builtin `6c13a06`）
+- `KSUN`：啟用釘住的 **SukiSU Ultra**（builtin `6c13a06`；舊 workflow 代號）
 - `SUSFS`：啟用 SUSFS patch 流程
 - `BBG`：啟用 Baseband Guard
 - `NET`：啟用 Networking patch 集
@@ -245,14 +266,14 @@ SukiSU app 畫面判讀方式：
 Actions 選單中各選項意義：
 
 - `KSUN+SUSFS+BBG+NET+DS`：啟用上述五個功能群組
-- `KSUN+SUSFS+BBG`：啟用 KernelSU + SUSFS + BBG
-- `KSUN+SUSFS+NET`：啟用 KernelSU + SUSFS + NET
-- `KSUN+SUSFS+DS`：啟用 KernelSU + SUSFS + DS
-- `KSUN+SUSFS`：啟用 KernelSU + SUSFS
-- `KSUN+BBG`：啟用 KernelSU + BBG
-- `KSUN+NET`：啟用 KernelSU + NET
-- `KSUN+DS`：啟用 KernelSU + DS
-- `KSUN`：只啟用 KernelSU
+- `KSUN+SUSFS+BBG`：啟用 SukiSU Ultra + SUSFS + BBG
+- `KSUN+SUSFS+NET`：啟用 SukiSU Ultra + SUSFS + NET
+- `KSUN+SUSFS+DS`：啟用 SukiSU Ultra + SUSFS + DS
+- `KSUN+SUSFS`：啟用 SukiSU Ultra + SUSFS（**建議預設**）
+- `KSUN+BBG`：啟用 SukiSU Ultra + BBG
+- `KSUN+NET`：啟用 SukiSU Ultra + NET
+- `KSUN+DS`：啟用 SukiSU Ultra + DS
+- `KSUN`：只啟用 SukiSU Ultra
 - `NONE`：停用上述五個可選群組
 - `FULL`：等同全開（效果同 `KSUN+SUSFS+BBG+NET+DS`）
 
@@ -267,7 +288,7 @@ Actions 選單中各選項意義：
 
 - 固定走 SukiSU Ultra **builtin** `6c13a06` + manager **v4.1.3**（無 workflow branch 變數）。
 - 開啟 `CONFIG_KPM=y`，編譯後使用 repo 內 [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/) 的 `patch_linux` + `kpimg`（v0.13.0）。
-- susfs4ksu 在該 gki 分支找得到時釘 `ee023e3`。不再套用 pershoot KernelSU-Next 共存 patch。
+- susfs4ksu 在該 gki 分支找得到時釘 `ee023e3`。不再套用第三方 KSU 共存 patch。
 
 ### GitHub Actions `quick_mode`（快速編譯）
 

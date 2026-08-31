@@ -1,9 +1,11 @@
 <div align="center">
 
-# 🔥 SukiSU(Wild) Kernels for Android
+# 🔥 SukiSU (Wild) GKI Kernels for Android
 
-[![KernelSU](https://img.shields.io/badge/KernelSU-Supported-green)](https://kernelsu.org/)
-[![SukiSU](https://img.shields.io/badge/SukiSU_Ultra-v4.1.3-blue)](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.1.3)
+**GKI 2.0 kernel builds with SukiSU Ultra (built-in root), KPM, and SUSFS — for Pixel 6 Pro, Pixel 6a, and other GKI devices.**
+
+[![GKI 2.0](https://img.shields.io/badge/GKI-2.0-green)](https://source.android.com/docs/core/architecture/kernel/gki)
+[![SukiSU Ultra](https://img.shields.io/badge/SukiSU_Ultra-v4.1.3-blue)](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.1.3)
 [![KPM](https://img.shields.io/badge/KPM-v0.13.0-purple)](https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch/releases/tag/0.13.0)
 [![SUSFS](https://img.shields.io/badge/SUSFS-Integrated-orange)](https://gitlab.com/simonpunk/susfs4ksu)
 
@@ -13,6 +15,18 @@
 
 - English: [README.md](README.md)
 - 繁體中文: [README_zh-TW.md](README_zh-TW.md)
+
+## 📌 About this project
+
+This repository automates **Generic Kernel Image (GKI 2.0)** builds for Android 12+ (kernel 5.10 and newer). Each release integrates:
+
+- **SukiSU Ultra** — built-in root driver (not LKM/module mode)
+- **KPM** (KernelPatch) — `patch_linux` + `kpimg` embedded into `Image` at build time
+- **SUSFS** — kernel patches plus the matching userspace module
+
+The primary goal is to let **Google Pixel 6 Pro** (`raven`) and **Pixel 6a** (`bluejay`) stay on a flashable GKI kernel that works with the pinned **SukiSU Ultra v4.1.3** manager, KPM modules, and SUSFS WebUI — without relying on stock/vendor kernels or outdated root stacks.
+
+> **Note:** Workflow token `KSUN` is a legacy name from the KernelSU era; in this repo it always means **SukiSU Ultra** integration.
 
 ## ⚠️ Your warranty is no longer valid!
 
@@ -28,13 +42,15 @@ By flashing this kernel, **YOU** are choosing to make these modifications. If so
 
 ---
 
-## 🔧 Available Kernels
+## 🔧 Wild Kernels family
 
-| Kernel | Repository | Status |
-|--------|------------|--------|
-| 🏗️ **GKI** | [GKI_KernelSU_SUSFS](https://github.com/WildKernels/GKI_KernelSU_SUSFS) | ✅ Active |
+| Build line | Repository | Status |
+|------------|------------|--------|
+| 🏗️ **GKI** (this repo) | [GKI_KernelSU_SUSFS](https://github.com/WildKernels/GKI_KernelSU_SUSFS) | ✅ Active — SukiSU Ultra + KPM + SUSFS |
 | 👑 **Sultan** | [Sultan_KernelSU_SUSFS](https://github.com/WildKernels/Sultan_KernelSU_SUSFS) | ✅ Active |
 | 📱 **OnePlus** | [OnePlus_KernelSU_SUSFS](https://github.com/WildKernels/OnePlus_KernelSU_SUSFS) | ✅ Active |
+
+Repository names still contain `KernelSU` for historical reasons; **this GKI line targets SukiSU Ultra**, not the original KernelSU manager or LKM workflow.
 
 ---
 
@@ -49,9 +65,9 @@ By flashing this kernel, **YOU** are choosing to make these modifications. If so
 
 ## 📋 Installation Instructions
 
-The official GKI guide is also useful:
+For GKI flashing concepts and manager setup, see:
 
-📖 **[KernelSU Installation Guide](https://kernelsu.org/guide/installation.html)**
+📖 **[SukiSU Ultra Installation Guide](https://sukisu.org/guide/installation)** (GKI / AnyKernel3 method)
 
 ### Supported versions (match these; do not mix)
 
@@ -68,7 +84,9 @@ Do not install a newer SukiSU manager, and do not swap in a different KPM releas
 
 This kernel includes compatibility fixes for **SukiSU Ultra v4.1.3**, plus **KPM v0.13.0** and the **SUSFS module**.
 
-Pixel 6 Pro (`raven` / `TQ3A.230901.001`) after flash: `uname -r` → `5.10.186-android13-Wild-r36.1`.
+Verified on **Pixel 6 Pro** (`raven` / `TQ3A.230901.001`) after flash: `uname -r` → `5.10.186-android13-Wild-r36.1`.
+
+**Pixel 6a** (`bluejay`) uses the same GKI stack (`android13-5.10` + matching OS patch level). Pick the build whose `date` matches your firmware security patch — same rules as Pixel 6 Pro below.
 
 ### 1. Which file to download
 
@@ -85,12 +103,12 @@ Verified tool: [Horizon Kernel Flasher v1.3](https://github.com/libxzr/HorizonKe
 Prerequisites:
 
 - Unlocked bootloader
-- The phone **already has root** (Horizon needs root — existing Magisk / KernelSU / SukiSU LKM is fine)
+- The phone **already has root** (Horizon needs root — existing Magisk, SukiSU LKM, or other KSU-family LKM is fine)
 - Copy `*-AnyKernel3-normal.zip` onto the device
 
 Steps:
 
-1. Install `HorizonKernelFlasher-v1.3.apk` and grant it root in SukiSU / KernelSU / Magisk.
+1. Install `HorizonKernelFlasher-v1.3.apk` and grant it root in **SukiSU Ultra** (or your current root manager).
 2. Open Horizon and select `*-AnyKernel3-normal.zip` (for example `5.10.186-android13-2023-09-r36.1-AnyKernel3-normal.zip`).
 3. Flash the active slot, then reboot.
 4. Confirm the kernel:
@@ -100,7 +118,7 @@ adb shell uname -a
 # Expect something like: Linux localhost 5.10.186-android13-Wild-r36.1 #1 SMP PREEMPT ... aarch64 Toybox
 ```
 
-If you are currently on KSU LKM (stock kernel + module root), back up `boot` before flashing GKI. Pixel 6 / 6 Pro have no separate `init_boot`; the kernel lives in `boot`.
+If you are currently on LKM root (stock kernel + loadable module), back up `boot` before flashing GKI. Pixel 6 / 6 Pro / 6a have no separate `init_boot`; the kernel lives in `boot`.
 
 Alternative: [Kernel Flasher](https://github.com/fatalcoder524/KernelFlasher) can flash the same zip to the active slot (Backup first).
 
@@ -116,9 +134,9 @@ After the kernel boots and SukiSU shows built-in + KPM, install these three modu
 
 Use **[SukiSU Ultra Manager v4.1.3](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.1.3)** (versionCode `40796`). The kernel driver is pinned to SukiSU **builtin** commit `6c13a06`, and KPM is **v0.13.0** — do not track SukiSU `main` / newer manager tags, and do not mix KPM releases (they drop kernel-side susfs and break the manager ABI).
 
-### Verified working state (Pixel 6 Pro)
+### Verified working state (Pixel 6 Pro / 6a)
 
-On Pixel 6 Pro (`raven` / `TQ3A.230901.001`) after flashing `5.10.186-android13-Wild-r36.1`: SukiSU Ultra **v4.1.3** shows Working \<Built-in\> and SuSFS v2.1.0; Settings lists **KPM** and **SuSFS Configuration**; the SUSFS WebUI can read the kernel uname.
+On Pixel 6 Pro (`raven` / `TQ3A.230901.001`) after flashing `5.10.186-android13-Wild-r36.1`: SukiSU Ultra **v4.1.3** shows Working \<Built-in\> and SuSFS v2.1.0; Settings lists **KPM** and **SuSFS Configuration**; the SUSFS WebUI can read the kernel uname. Pixel 6a (`bluejay`) follows the same manager/module stack once the matching `android13-5.10` + patch-level zip is flashed.
 
 | Home (Built-in + SuSFS) | Settings (KPM / SuSFS) | SUSFS WebUI |
 |--------------------------|-------------------------|-------------|
@@ -144,12 +162,15 @@ If your device firmware/vendor stack is from one patch level, flashing a kernel 
 ### Practical guidance
 
 - Match build date to your ROM patch level first.
-- For Pixel 6 Pro on Android 13 `raven-tq3a.230901.001`, start with `android13-5.10` + `2023-09`.
+- For Pixel 6 Pro / 6a on Android 13, start with `android13-5.10` + the `date` that matches `ro.build.version.security_patch` (e.g. `2023-09` for `raven-tq3a.230901.001`).
 - Flash `*-AnyKernel3-normal.zip`.
 
-### Pixel 6 Pro (`raven`) fixed examples
+### Pixel 6 Pro / 6a fixed examples
 
-If your phone fingerprint is `google/raven/raven:13/TQ3A.230901.001/...`, use `android13-5.10` with `2023-09`.
+| Device | Codename | Example fingerprint | Suggested matrix |
+|--------|----------|---------------------|------------------|
+| Pixel 6 Pro | `raven` | `google/raven/raven:13/TQ3A.230901.001/...` | `android13-5.10` + `2023-09` |
+| Pixel 6a | `bluejay` | match your `getprop ro.build.fingerprint` patch month | `android13-5.10` + same `YYYY-MM` as security patch |
 
 ### Use ADB to determine `kernel_build_version` and `os_patch_level_filter`
 
@@ -234,7 +255,7 @@ Current `KSUN+SUSFS` behavior:
 
 - Uses SukiSU Ultra **builtin** `6c13a06` with manager tag **v4.1.3** (fixed — no workflow branch input).
 - Enables `CONFIG_KPM=y` and runs `patch_linux` + `kpimg` from the repo-local [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/) directory (v0.13.0).
-- Pins susfs4ksu to `ee023e3` (SUSFS v2.1.0) when that commit exists on the gki branch. No KernelSU-Next coexistence patches are applied.
+- Pins susfs4ksu to `ee023e3` (SUSFS v2.1.0) when that commit exists on the gki branch. No third-party KSU coexistence patches are applied.
 
 Old zip files built before the SukiSU integration change will still behave like the old build and may boot successfully while the SukiSU app still reports that root is unavailable.
 
@@ -244,7 +265,7 @@ In the `Build Kernels` workflow, `feature_set` controls optional patch groups.
 
 Token meaning:
 
-- `KSUN`: Enable pinned SukiSU Ultra setup (builtin `6c13a06`)
+- `KSUN`: Enable pinned **SukiSU Ultra** setup (builtin `6c13a06`; legacy token name)
 - `SUSFS`: Enable SUSFS setup/patches
 - `BBG`: Enable Baseband Guard patches
 - `NET`: Enable networking patch set
@@ -275,14 +296,14 @@ Recommended usage order (stability-first):
 Available options in the action menu:
 
 - `KSUN+SUSFS+BBG+NET+DS`: Enable all five optional groups
-- `KSUN+SUSFS+BBG`: Enable KernelSU + SUSFS + Baseband Guard
-- `KSUN+SUSFS+NET`: Enable KernelSU + SUSFS + networking
-- `KSUN+SUSFS+DS`: Enable KernelSU + SUSFS + DroidSpaces
-- `KSUN+SUSFS`: Enable KernelSU + SUSFS
-- `KSUN+BBG`: Enable KernelSU + Baseband Guard
-- `KSUN+NET`: Enable KernelSU + networking
-- `KSUN+DS`: Enable KernelSU + DroidSpaces
-- `KSUN`: Enable KernelSU only
+- `KSUN+SUSFS+BBG`: Enable SukiSU Ultra + SUSFS + Baseband Guard
+- `KSUN+SUSFS+NET`: Enable SukiSU Ultra + SUSFS + networking
+- `KSUN+SUSFS+DS`: Enable SukiSU Ultra + SUSFS + DroidSpaces
+- `KSUN+SUSFS`: Enable SukiSU Ultra + SUSFS (**recommended default**)
+- `KSUN+BBG`: Enable SukiSU Ultra + Baseband Guard
+- `KSUN+NET`: Enable SukiSU Ultra + networking
+- `KSUN+DS`: Enable SukiSU Ultra + DroidSpaces
+- `KSUN`: Enable SukiSU Ultra only
 - `NONE`: Disable all five optional groups above
 - `FULL`: Alias for enabling all optional groups (same effective behavior as `KSUN+SUSFS+BBG+NET+DS`)
 

@@ -37,24 +37,26 @@ body:
 
   - type: input
     attributes:
-        label: KSUN Kernel Version
-        description: Your KSUN kernel version number
+        label: Wild / GKI kernel build ID
+        description: Build revision from the zip name (e.g. r36.1)
         placeholder: "e.g., 13971"
     validations:
         required: true
 
   - type: dropdown
     attributes:
-        label: Manager
-        description: Which KernelSU manager you're using
+        label: Root manager
+        description: Which root manager you use with this SukiSU Ultra GKI kernel
         options:
+          - SukiSU Ultra
+          - SukiSU (other fork)
           - Wild KSU
           - KernelSU Next
           - KernelSU
           - MKSU
           - KowSU
           - RKSU
-          - SukiSU
+          - Magisk / other
     validations:
         required: true
 
