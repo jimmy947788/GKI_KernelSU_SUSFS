@@ -2,7 +2,7 @@ name: 'Setup SUSFS Branch'
 description: 'Clone SUSFS repo matched to the pinned SukiSU builtin era'
 inputs:
   susfs_commit:
-    description: 'SUSFS commit hash (empty = 2c774fdb on android13-5.10; other versions must pass a commit)'
+    description: 'SUSFS commit hash (empty = 2d40afc3 on android13-5.10; other versions must pass a commit)'
     required: false
     default: ""
   version:
@@ -28,18 +28,20 @@ runs:
 
         # builtin b20dee702 calls susfs_set_current_proc_no_su() and
         # susfs_set_current_proc_umounted_for_zygote_next(). Those inlines
-        # exist from SUSFS v2.3.0. 2c774fdb (2026-09-13) is that generation
-        # on gki-android13-5.10 only. ee023e3 (v2.1.0) does not have them.
+        # exist from SUSFS v2.3.0. 2d40afc3 (2026-09-17, "Fix compiling error")
+        # is that generation on gki-android13-5.10 and declares
+        # susfs_sus_kstat_spoof_vfs_statfs. 2c774fdb calls it without a
+        # prototype. ee023e3 (v2.1.0) does not have the proc_no_su inlines.
         # Do not apply pershoot KernelSU-Next coexistence patches.
         SUSFS_COMMIT="${{ inputs.susfs_commit }}"
         if [ -z "$SUSFS_COMMIT" ]; then
           case "${{ inputs.version }}" in
             android13-5.10)
-              SUSFS_COMMIT="2c774fdb"
+              SUSFS_COMMIT="2d40afc3"
               ;;
             *)
               echo "ERROR: ${{ inputs.version }} has no SUSFS pin for SukiSU builtin b20dee702."
-              echo "android13-5.10 defaults to 2c774fdb (SUSFS v2.3.0, TIF_PROC_NO_SU)."
+              echo "android13-5.10 defaults to 2d40afc3 (SUSFS v2.3.0, TIF_PROC_NO_SU)."
               echo "Pass susfs_commit for this gki branch after confirming that header."
               exit 1
               ;;

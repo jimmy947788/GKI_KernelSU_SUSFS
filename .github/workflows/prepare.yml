@@ -27,7 +27,7 @@ on:
         type: string
         default: "false"
       susfs_commit:
-        description: "SUSFS commit hash (empty = 2c774fdb on android13-5.10; other versions must pass a commit)"
+        description: "SUSFS commit hash (empty = 2d40afc3 on android13-5.10; other versions must pass a commit)"
         required: false
         type: string
         default: ""

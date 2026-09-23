@@ -76,7 +76,7 @@ GKI 刷機概念與管理器設定可參考：
 | 🔐 **SukiSU Ultra 管理器** | **v4.2.0**（versionCode `40899`） | [SukiSU-Ultra v4.2.0](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.2.0) |
 | 🧠 **SukiSU kernel driver** | **builtin** `b20dee702`（UAPI v2，與管理器 v4.2.0 同一組 handshake） | 已編進此核心 |
 | 🧩 **KPM**（KernelPatch） | **v0.13.0**（`patch_linux` + `kpimg`） | [SukiSU_KernelPatch_patch 0.13.0](https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch/releases/tag/0.13.0) |
-| 🛡️ **SUSFS** | **v2.3.0**（`android13-5.10` 為 `2c774fdb`）+ 使用者空間模組 | [SUSFS-FOR-KERNELSU](https://github.com/sidex15/susfs4ksu-module) |
+| 🛡️ **SUSFS** | **v2.3.0**（`android13-5.10` 為 `2d40afc3`）+ 使用者空間模組 | [SUSFS-FOR-KERNELSU](https://github.com/sidex15/susfs4ksu-module) |
 
 這顆核心請配 Manager **v4.2.0**。不要把 driver 釘成 `main` 上的 tag `v4.2.0`：那棵樹沒有 kernel 端 susfs。也不要換成別版 KPM。KPM 工具已放在 repo [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/)，編譯時寫入 `Image`。這次先對齊 **android13-5.10**；其他 GKI 版本要各自指定 SUSFS commit 才編得起來。
 
@@ -288,7 +288,7 @@ Actions 選單中各選項意義：
 
 - 固定走 SukiSU Ultra **builtin** `b20dee702` + manager **v4.2.0**（無 workflow branch 變數）。
 - 開啟 `CONFIG_KPM=y`，編譯後使用 repo 內 [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/) 的 `patch_linux` + `kpimg`（v0.13.0）。
-- `gki-android13-5.10` 的 susfs4ksu 釘 `2c774fdb`（SUSFS v2.3.0）。其他 GKI 版本在這條分支沒有預設 SUSFS pin。不再套用第三方 KSU 共存 patch。
+- `gki-android13-5.10` 的 susfs4ksu 釘 `2d40afc3`（SUSFS v2.3.0）。其他 GKI 版本在這條分支沒有預設 SUSFS pin。不再套用第三方 KSU 共存 patch。
 
 ### GitHub Actions `quick_mode`（快速編譯）
 
@@ -351,7 +351,7 @@ susfs_commit_android16-6-12: ""
 此範例補充：
 
 - SukiSU driver 固定為 builtin `b20dee702` / manager `v4.2.0`。
-- `susfs_commit_android13-5-10` 留空時用 `2c774fdb`。其他 `susfs_commit_*` 必須自填，沒有 `ee023e3` fallback。
+- `susfs_commit_android13-5-10` 留空時用 `2d40afc3`。其他 `susfs_commit_*` 必須自填，沒有 `ee023e3` fallback。
 - 只會編譯 `android13-5.10` + `2023-09` 這一組。
 
 若你已經配置好 self-hosted runner，可改成：
