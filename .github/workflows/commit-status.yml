@@ -39,17 +39,17 @@ jobs:
           }
 
           github_sukisu_commit() {
-            curl -fsSL "https://api.github.com/repos/SukiSU-Ultra/SukiSU-Ultra/commits/6c13a06" | jq -r '.sha'
+            curl -fsSL "https://api.github.com/repos/SukiSU-Ultra/SukiSU-Ultra/commits/b20dee702" | jq -r '.sha'
           }
 
           github_sukisu_message() {
-            curl -fsSL "https://api.github.com/repos/SukiSU-Ultra/SukiSU-Ultra/commits/6c13a06" | jq -r '.commit.message | split("\n")[0]'
+            curl -fsSL "https://api.github.com/repos/SukiSU-Ultra/SukiSU-Ultra/commits/b20dee702" | jq -r '.commit.message | split("\n")[0]'
           }
 
           {
             echo "# Commit Status Report"
             echo ""
-            echo "Pinned SukiSU driver (6c13a06) vs latest upstream SUSFS branch tips."
+            echo "Pinned SukiSU driver (b20dee702) vs latest upstream SUSFS branch tips."
             echo ""
           } >> "$summary_file"
 
@@ -89,4 +89,4 @@ jobs:
           sukisu_message="$(github_sukisu_message)"
           sukisu_message="$(sanitize_cell "$sukisu_message")"
 
-          printf '| %s | %s | %s |\n' "builtin@6c13a06" "$sukisu_commit" "$sukisu_message" >> "$summary_file"
+          printf '| %s | %s | %s |\n' "builtin@b20dee702" "$sukisu_commit" "$sukisu_message" >> "$summary_file"

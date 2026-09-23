@@ -58,10 +58,10 @@ for line in data["release"]["disclaimer"]:
 sukisu = data.get("sukisu", data.get("kernelsu", {}))
 emit()
 emit(f"## {sukisu.get('name', 'SukiSU Ultra')}")
-emit(f"- Version: {os.environ.get('KSU_VERSION', sukisu.get('version', 'v4.1.3'))}")
-emit(f"- Tag: {os.environ.get('KSU_GIT_TAG', sukisu.get('tag', 'v4.1.3'))}")
+emit(f"- Version: {os.environ.get('KSU_VERSION', sukisu.get('version', 'v4.2.0'))}")
+emit(f"- Tag: {os.environ.get('KSU_GIT_TAG', sukisu.get('tag', 'v4.2.0'))}")
 emit(f"- Branch: {os.environ.get('KSUN_BRANCH', sukisu.get('branch', 'builtin'))}")
-emit(f"- Commit: {os.environ.get('KSUN_COMMIT', sukisu.get('commit', '6c13a06'))}")
+emit(f"- Commit: {os.environ.get('KSUN_COMMIT', sukisu.get('commit', 'b20dee702'))}")
 if sukisu.get("url"):
     emit(f"- URL: {sukisu['url']}")
 if sukisu.get("manager"):

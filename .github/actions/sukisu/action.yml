@@ -8,7 +8,7 @@ inputs:
   ksu_version_ref:
     description: 'Tag whose commit count drives KSU_VERSION (must match the manager APK)'
     required: false
-    default: "v4.1.3"
+    default: "v4.2.0"
 
 runs:
   using: composite
@@ -19,12 +19,12 @@ runs:
       run: |
         set -euo pipefail
 
-        # Pinned to 6c13a06 (2026-05-30) = last builtin commit BEFORE b8279c3
-        # "kernel, ksud, manager: implement uapi version (#3455)". That commit and
-        # everything after it move the supercall ABI (KERNEL_SU_UAPI_VERSION=2,
-        # KSU_APP_PROFILE_VER 3 -> 4) which the v4.1.3 Manager APK does not speak.
-        # Only the builtin branch still carries kernel-side susfs (config KSU_SUSFS).
-        PINNED_SUKISU_SRC="6c13a06"
+        # builtin b20dee702 (2026-09-13) speaks Manager v4.2.0:
+        # KERNEL_SU_UAPI_VERSION=2, KSU_APP_PROFILE_VER=4, and still has
+        # config KSU_SUSFS. Do not pin tag v4.2.0 (main): that tree drops
+        # kernel-side susfs. ksu_version_ref must stay v4.2.0 so KSU_VERSION
+        # is 40899 (40000 + 3714 - 2815), matching the manager versionCode.
+        PINNED_SUKISU_SRC="b20dee702"
         SUKISU_VER="${{ inputs.ksu_version_ref }}"
         SUKISU_INPUT="$PINNED_SUKISU_SRC"
 

@@ -9,7 +9,7 @@ Join the telegram here: https://t.me/WildKernelsTG
 
 # Features
 - [SukiSU Ultra](#sukisu-ultra)
-- [SUSFS v2.2.0](#susfs-v220)
+- [SUSFS v2.3.0](#susfs-v220)
 - [Baseband Guard (BBG)](#baseband-guard-bbg)
 - [DroidSpaces-OSS](#droidspaces-oss)
 - [Networking Improvements](#networking-improvements)
@@ -20,12 +20,12 @@ Join the telegram here: https://t.me/WildKernelsTG
 
 ## [SukiSU Ultra](https://github.com/SukiSU-Ultra/SukiSU-Ultra) {#sukisu-ultra}
 
-Kernel-based root for Android GKI devices. This release pins the **builtin** driver at commit `6c13a06` with manager tag **v4.1.3** (KPM + kernel-side SUSFS).
+Kernel-based root for Android GKI devices. This release pins the **builtin** driver at commit `b20dee702` with manager tag **v4.2.0** (KPM + kernel-side SUSFS). android13-5.10 SUSFS is `2c774fdb` (v2.3.0).
 
 Manager: {{KSU_MANAGER}}
 
 > [!IMPORTANT]
-> Use SukiSU Ultra Manager **v4.1.3**. Newer SukiSU tips change the UAPI and are not compatible with this pinned driver.
+> Use SukiSU Ultra Manager **v4.2.0** (versionCode `40899`). This driver is builtin `b20dee702`, not the `v4.2.0` tag on `main`.
 
 **Version**  
 `{{KSU_VERSION}}`
@@ -39,7 +39,7 @@ Manager: {{KSU_MANAGER}}
 **Commit**  
 `{{KSUN_COMMIT}}`
 
-## [SUSFS v2.2.0](https://gitlab.com/simonpunk/susfs4ksu) {#susfs-v220}
+## [SUSFS v2.3.0](https://gitlab.com/simonpunk/susfs4ksu) {#susfs-v220}
 
 A SukiSU Ultra addon for hiding root using kernel patches and a userspace module!
 

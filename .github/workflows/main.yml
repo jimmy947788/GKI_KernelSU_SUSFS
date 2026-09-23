@@ -69,37 +69,37 @@ on:
           - "false"
         default: "true"
       susfs_commit_android12-5-10:
-        description: "SUSFS commit for android12-5.10 (empty = ee023e3 if on branch, else tip)"
+        description: "SUSFS commit for android12-5.10 (required; no default pin for SukiSU v4.2.0 yet)"
         type: string
         required: false
         default: ""
       susfs_commit_android13-5-10:
-        description: "SUSFS commit for android13-5.10 (empty = ee023e3 if on branch, else tip)"
+        description: "SUSFS commit for android13-5.10 (empty = 2c774fdb, SUSFS v2.3.0)"
         type: string
         required: false
         default: ""
       susfs_commit_android13-5-15:
-        description: "SUSFS commit for android13-5.15 (empty = ee023e3 if on branch, else tip)"
+        description: "SUSFS commit for android13-5.15 (required; no default pin for SukiSU v4.2.0 yet)"
         type: string
         required: false
         default: ""
       susfs_commit_android14-5-15:
-        description: "SUSFS commit for android14-5.15 (empty = ee023e3 if on branch, else tip)"
+        description: "SUSFS commit for android14-5.15 (required; no default pin for SukiSU v4.2.0 yet)"
         type: string
         required: false
         default: ""
       susfs_commit_android14-6-1:
-        description: "SUSFS commit for android14-6.1 (empty = ee023e3 if on branch, else tip)"
+        description: "SUSFS commit for android14-6.1 (required; no default pin for SukiSU v4.2.0 yet)"
         type: string
         required: false
         default: ""
       susfs_commit_android15-6-6:
-        description: "SUSFS commit for android15-6.6 (empty = ee023e3 if on branch, else tip)"
+        description: "SUSFS commit for android15-6.6 (required; no default pin for SukiSU v4.2.0 yet)"
         type: string
         required: false
         default: ""
       susfs_commit_android16-6-12:
-        description: "SUSFS commit for android16-6.12 (empty = ee023e3 if on branch, else tip)"
+        description: "SUSFS commit for android16-6.12 (required; no default pin for SukiSU v4.2.0 yet)"
         type: string
         required: false
         default: ""
@@ -350,7 +350,7 @@ jobs:
           echo "# 📋 Build Summary — $(date -u '+%Y-%m-%d %H:%M UTC')"
           echo
           echo "**Feature Set:** ${{ inputs.feature_set }}"
-          echo "**SukiSU Driver:** 6c13a06 (builtin, v4.1.3)"
+          echo "**SukiSU Driver:** b20dee702 (builtin, v4.2.0)"
           echo "**KPM:** ${{ inputs.use_kpm }} (repo SukiSU_KernelPatch_patch/)"
           echo
           
@@ -388,13 +388,13 @@ jobs:
           
           echo
           echo "> **SUSFS Commits:**"
-          echo "> - android12-5.10: ${{ inputs.susfs_commit_android12-5-10 || 'latest' }}"
-          echo "> - android13-5.10: ${{ inputs.susfs_commit_android13-5-10 || 'latest' }}"
-          echo "> - android13-5.15: ${{ inputs.susfs_commit_android13-5-15 || 'latest' }}"
-          echo "> - android14-5.15: ${{ inputs.susfs_commit_android14-5-15 || 'latest' }}"
-          echo "> - android14-6.1: ${{ inputs.susfs_commit_android14-6-1 || 'latest' }}"
-          echo "> - android15-6.6: ${{ inputs.susfs_commit_android15-6-6 || 'latest' }}"
-          echo "> - android16-6.12: ${{ inputs.susfs_commit_android16-6-12 || 'latest' }}"
+          echo "> - android12-5.10: ${{ inputs.susfs_commit_android12-5-10 || 'unset' }}"
+          echo "> - android13-5.10: ${{ inputs.susfs_commit_android13-5-10 || '2c774fdb' }}"
+          echo "> - android13-5.15: ${{ inputs.susfs_commit_android13-5-15 || 'unset' }}"
+          echo "> - android14-5.15: ${{ inputs.susfs_commit_android14-5-15 || 'unset' }}"
+          echo "> - android14-6.1: ${{ inputs.susfs_commit_android14-6-1 || 'unset' }}"
+          echo "> - android15-6.6: ${{ inputs.susfs_commit_android15-6-6 || 'unset' }}"
+          echo "> - android16-6.12: ${{ inputs.susfs_commit_android16-6-12 || 'unset' }}"
         } >> "$GITHUB_STEP_SUMMARY"
 
     - name: 🧹 Cleanup Summary Files
@@ -535,8 +535,8 @@ jobs:
         set -euo pipefail
 
         SUKISU_REPO="https://github.com/SukiSU-Ultra/SukiSU-Ultra.git"
-        SUKISU_SRC="6c13a06"
-        SUKISU_VER="v4.1.3"
+        SUKISU_SRC="b20dee702"
+        SUKISU_VER="v4.2.0"
 
         git clone --filter=blob:none --no-checkout "$SUKISU_REPO" /tmp/sukisu
         cd /tmp/sukisu

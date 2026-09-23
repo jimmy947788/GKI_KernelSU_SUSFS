@@ -659,10 +659,10 @@ jobs:
           fi
           echo "| **KSU Version** | ${KSU_VER} |"
           echo "| **KSU Tag** | ${KSU_TAG} |"
-          echo "| **SukiSU Driver** | 6c13a06 (builtin, ${{ env.KSU_GIT_TAG || 'v4.1.3' }}) |"
+          echo "| **SukiSU Driver** | b20dee702 (builtin, ${{ env.KSU_GIT_TAG || 'v4.2.0' }}) |"
           echo "| **KPM** | ${KPM_ENABLED:-false} (${KPM_PATCH_SOURCE:-n/a}) |"
           echo "| **SUSFS Version** | ${SUSFS_VER} |"
-          echo "| **SUSFS Commit Input** | ${{ inputs.susfs_commit || 'ee023e3 if present, else branch tip' }} |"
+          echo "| **SUSFS Commit Input** | ${{ inputs.susfs_commit || '2c774fdb on android13-5.10, else required' }} |"
           echo "| **Feature Set** | ${{ inputs.feature_set }} |"
           echo "| **Variant** | ${{ inputs.variant }} |"
           echo "| **Primary OS Patch** | ${{ inputs.os_patch_level }} |"
