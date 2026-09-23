@@ -74,7 +74,7 @@ on:
         required: false
         default: ""
       susfs_commit_android13-5-10:
-        description: "SUSFS commit for android13-5.10 (empty = 2d40afc3, SUSFS v2.3.0)"
+        description: "SUSFS commit for android13-5.10 (empty = f2878eb5, SUSFS v2.3.0)"
         type: string
         required: false
         default: ""
@@ -389,7 +389,7 @@ jobs:
           echo
           echo "> **SUSFS Commits:**"
           echo "> - android12-5.10: ${{ inputs.susfs_commit_android12-5-10 || 'unset' }}"
-          echo "> - android13-5.10: ${{ inputs.susfs_commit_android13-5-10 || '2d40afc3' }}"
+          echo "> - android13-5.10: ${{ inputs.susfs_commit_android13-5-10 || 'f2878eb5' }}"
           echo "> - android13-5.15: ${{ inputs.susfs_commit_android13-5-15 || 'unset' }}"
           echo "> - android14-5.15: ${{ inputs.susfs_commit_android14-5-15 || 'unset' }}"
           echo "> - android14-6.1: ${{ inputs.susfs_commit_android14-6-1 || 'unset' }}"

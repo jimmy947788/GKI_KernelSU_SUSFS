@@ -76,7 +76,7 @@ For GKI flashing concepts and manager setup, see:
 | 🔐 **SukiSU Ultra manager** | **v4.2.0** (versionCode `40899`) | [SukiSU-Ultra v4.2.0](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.2.0) |
 | 🧠 **SukiSU kernel driver** | **builtin** `b20dee702` (UAPI v2, same handshake as manager v4.2.0) | Built into this kernel |
 | 🧩 **KPM** (KernelPatch) | **v0.13.0** (`patch_linux` + `kpimg`) | [SukiSU_KernelPatch_patch 0.13.0](https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch/releases/tag/0.13.0) |
-| 🛡️ **SUSFS** | **v2.3.0** (`2d40afc3` on `android13-5.10`) + userspace module | [SUSFS-FOR-KERNELSU](https://github.com/sidex15/susfs4ksu-module) |
+| 🛡️ **SUSFS** | **v2.3.0** (`f2878eb5` on `android13-5.10`) + userspace module | [SUSFS-FOR-KERNELSU](https://github.com/sidex15/susfs4ksu-module) |
 
 Use Manager **v4.2.0** with this kernel. Do not pin the driver to tag `v4.2.0` on `main`: that tree drops kernel-side susfs. Do not swap in a different KPM release. KPM tools already live in [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/) and are embedded into `Image` at build time. This pairing is set up for **android13-5.10** first; other GKI versions need their own SUSFS commit before they will build.
 
@@ -255,7 +255,7 @@ Current `KSUN+SUSFS` behavior:
 
 - Uses SukiSU Ultra **builtin** `b20dee702` with manager tag **v4.2.0** (fixed — no workflow branch input).
 - Enables `CONFIG_KPM=y` and runs `patch_linux` + `kpimg` from the repo-local [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/) directory (v0.13.0).
-- Pins `gki-android13-5.10` susfs4ksu to `2d40afc3` (SUSFS v2.3.0). Other GKI versions have no default SUSFS pin on this branch. No third-party KSU coexistence patches are applied.
+- Pins `gki-android13-5.10` susfs4ksu to `f2878eb5` (SUSFS v2.3.0). Other GKI versions have no default SUSFS pin on this branch. No third-party KSU coexistence patches are applied.
 
 Old zip files built before the SukiSU integration change will still behave like the old build and may boot successfully while the SukiSU app still reports that root is unavailable.
 
@@ -373,7 +373,7 @@ susfs_commit_android16-6-12: ""
 Notes for this example:
 
 - SukiSU driver is always pinned to builtin `b20dee702` / manager `v4.2.0`.
-- Empty `susfs_commit_android13-5-10` uses `2d40afc3`. Other `susfs_commit_*` values must be set; there is no `ee023e3` fallback.
+- Empty `susfs_commit_android13-5-10` uses `f2878eb5`. Other `susfs_commit_*` values must be set; there is no `ee023e3` fallback.
 - Only `android13-5.10` + `2023-09` is built.
 
 If you already have a self-hosted runner, set:
