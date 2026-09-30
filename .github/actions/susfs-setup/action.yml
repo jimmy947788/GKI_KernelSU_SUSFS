@@ -2,7 +2,7 @@ name: 'Setup SUSFS Branch'
 description: 'Clone SUSFS repo matched to the pinned SukiSU builtin era'
 inputs:
   susfs_commit:
-    description: 'SUSFS commit hash (empty = f2878eb5 on android13-5.10; other versions must pass a commit)'
+    description: 'SUSFS commit hash (empty = use .github/config/commits.json pin for this GKI branch)'
     required: false
     default: ""
   version:
@@ -28,25 +28,24 @@ runs:
 
         # builtin b20dee702 calls susfs_set_current_proc_no_su() and
         # susfs_set_current_proc_umounted_for_zygote_next(). Those inlines
-        # exist from SUSFS v2.3.0. f2878eb5 (2026-09-06) is on
-        # gki-android13-5.10 and still has those inlines. The 2026-09-10
-        # refactor calls ksu_handle_post_execveat_sucompat, which builtin
-        # b20dee702 does not define. ee023e3 (v2.1.0) does not have the
-        # proc_no_su inlines.
+        # exist from SUSFS v2.3.0. Keep the default pins centralized in
+        # .github/config/commits.json so every GKI branch can have its own
+        # validated SUSFS generation.
         # Do not apply pershoot KernelSU-Next coexistence patches.
         SUSFS_COMMIT="${{ inputs.susfs_commit }}"
         if [ -z "$SUSFS_COMMIT" ]; then
-          case "${{ inputs.version }}" in
-            android13-5.10)
-              SUSFS_COMMIT="f2878eb5"
-              ;;
-            *)
-              echo "ERROR: ${{ inputs.version }} has no SUSFS pin for SukiSU builtin b20dee702."
-              echo "android13-5.10 defaults to f2878eb5 (SUSFS v2.3.0, TIF_PROC_NO_SU)."
-              echo "Pass susfs_commit for this gki branch after confirming that header."
-              exit 1
-              ;;
-          esac
+          COMMITS_JSON="${{ github.workspace }}/.github/config/commits.json"
+          if [ ! -f "$COMMITS_JSON" ]; then
+            echo "ERROR: default SUSFS pin file not found: $COMMITS_JSON"
+            exit 1
+          fi
+
+          SUSFS_COMMIT="$(jq -r --arg branch "$SUSFS_BRANCH" '.susfs[$branch] // ""' "$COMMITS_JSON")"
+          if [ -z "$SUSFS_COMMIT" ]; then
+            echo "ERROR: $SUSFS_BRANCH has no SUSFS pin in $COMMITS_JSON for SukiSU builtin b20dee702."
+            echo "Add a .susfs[\"$SUSFS_BRANCH\"] pin after confirming SUSFS v2.3.0+ headers, or pass susfs_commit explicitly."
+            exit 1
+          fi
         fi
         if [ -n "$SUSFS_COMMIT" ]; then
           echo "Checking out SUSFS commit: $SUSFS_COMMIT"
