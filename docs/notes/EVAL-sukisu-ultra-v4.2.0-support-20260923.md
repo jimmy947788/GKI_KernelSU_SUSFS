@@ -1,7 +1,7 @@
 # 評估報告：讓 GKI 支援 SukiSU Ultra v4.2.0（俗稱 "v4.20"）
 
 **日期：** 2026-09-23
-**實作：** 分支 `sukisu-v4.2.0` 已按方案 A 改 pin。driver `b20dee702`、版本 ref `v4.2.0`（versionCode `40899`）、`android13-5.10` SUSFS `f2878eb5`（v2.3.0）。`2d40afc3` 會呼叫 builtin 沒有的 `ksu_handle_post_execveat_sucompat`。其他 GKI 版本沒有預設 SUSFS pin。
+**實作：** 分支 `sukisu-v4.2.0` 已按方案 A 改 pin。driver `b20dee702`、版本 ref `v4.2.0`（versionCode `40899`）、`android13-5.10` SUSFS `18fe1544`（v2.3.0，早於不相容的 `ksu_install_su_fd` exec hook）。`2d40afc3` 會呼叫 builtin 沒有的 `ksu_handle_post_execveat_sucompat`。
 **範圍：** 版本相容與要改的 pin。不含漏洞利用。
 
 ## 結論

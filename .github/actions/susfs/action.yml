@@ -2,7 +2,7 @@ name: 'Setup SUSFS'
 description: 'Clone and apply SUSFS patches with version-specific fixes'
 inputs:
   susfs_commit:
-    description: 'SUSFS commit hash (empty = latest on auto-derived gki-{version} branch)'
+    description: 'SUSFS commit hash (empty = use .github/config/commits.json pin for this GKI branch)'
     required: false
     default: ""
   version:
