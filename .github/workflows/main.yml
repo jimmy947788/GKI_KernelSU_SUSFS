@@ -351,7 +351,7 @@ jobs:
           echo "# 📋 Build Summary — $(date -u '+%Y-%m-%d %H:%M UTC')"
           echo
           echo "**Feature Set:** ${{ inputs.feature_set }}"
-          echo "**SukiSU Driver:** b20dee702 (builtin, v4.2.0)"
+          echo "**SukiSU Driver:** b16e899a5 (builtin, v4.3.0)"
           echo "**KPM:** ${{ inputs.use_kpm }} (repo SukiSU_KernelPatch_patch/)"
           echo
           
@@ -536,8 +536,8 @@ jobs:
         set -euo pipefail
 
         SUKISU_REPO="https://github.com/SukiSU-Ultra/SukiSU-Ultra.git"
-        SUKISU_SRC="b20dee702"
-        SUKISU_VER="v4.2.0"
+        SUKISU_SRC="b16e899a5"
+        SUKISU_VER="v4.3.0"
 
         git clone --filter=blob:none --no-checkout "$SUKISU_REPO" /tmp/sukisu
         cd /tmp/sukisu

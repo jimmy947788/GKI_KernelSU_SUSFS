@@ -2,7 +2,7 @@
 
 # SukiSU KernelPatch (KPM)
 
-Prebuilt tools from [SukiSU-Ultra/SukiSU_KernelPatch_patch](https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch) **v0.13.0**.
+Prebuilt tools from [SukiSU-Ultra/SukiSU_KernelPatch_patch](https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch) **v0.14.0**.
 
 CI and local builds use this directory directly — no GitHub release download.
 

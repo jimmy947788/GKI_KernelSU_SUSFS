@@ -26,11 +26,11 @@ runs:
 
         cd ${{ github.workspace }}/susfs4ksu
 
-        # builtin b20dee702 calls susfs_set_current_proc_no_su() and
-        # susfs_set_current_proc_umounted_for_zygote_next(). Those inlines
-        # exist from SUSFS v2.3.0. Keep the default pins centralized in
-        # .github/config/commits.json so every GKI branch can have its own
-        # validated SUSFS generation.
+        # builtin b16e899a5 calls susfs_set_priority_uid_filter() and
+        # susfs_parse_priority_app_strings(), and the SUSFS patches call
+        # ksu_handle_post_execveat_sucompat(). Keep the default pins
+        # centralized in .github/config/commits.json so every GKI branch can
+        # have its own validated SUSFS generation.
         # Do not apply pershoot KernelSU-Next coexistence patches.
         SUSFS_COMMIT="${{ inputs.susfs_commit }}"
         if [ -z "$SUSFS_COMMIT" ]; then
@@ -42,8 +42,8 @@ runs:
 
           SUSFS_COMMIT="$(jq -r --arg branch "$SUSFS_BRANCH" '.susfs[$branch] // ""' "$COMMITS_JSON")"
           if [ -z "$SUSFS_COMMIT" ]; then
-            echo "ERROR: $SUSFS_BRANCH has no SUSFS pin in $COMMITS_JSON for SukiSU builtin b20dee702."
-            echo "Add a .susfs[\"$SUSFS_BRANCH\"] pin after confirming SUSFS v2.3.0+ headers, or pass susfs_commit explicitly."
+            echo "ERROR: $SUSFS_BRANCH has no SUSFS pin in $COMMITS_JSON for SukiSU builtin b16e899a5."
+            echo "Add a .susfs[\"$SUSFS_BRANCH\"] pin after confirming SUSFS has the priority uid filter, or pass susfs_commit explicitly."
             exit 1
           fi
         fi

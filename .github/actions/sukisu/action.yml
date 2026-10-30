@@ -8,11 +8,11 @@ inputs:
   ksu_version_ref:
     description: 'Tag whose commit count drives KSU_VERSION (must match the manager APK)'
     required: false
-    default: "v4.2.0"
+    default: "v4.3.0"
   ksu_version_code:
     description: 'Numeric KSU_VERSION baked into the driver (must equal the release manager APK versionCode)'
     required: false
-    default: "40900"
+    default: "41100"
 
 runs:
   using: composite
@@ -23,15 +23,14 @@ runs:
       run: |
         set -euo pipefail
 
-        # builtin b20dee702 (2026-09-13) speaks Manager v4.2.0:
-        # KERNEL_SU_UAPI_VERSION=2, KSU_APP_PROFILE_VER=4, and still has
-        # config KSU_SUSFS. Do not pin tag v4.2.0 (main): that tree drops
-        # kernel-side susfs.
-        # The release APK SukiSU_v4.2.0_40900 is one above what the Makefile
-        # derives from tag v4.2.0 (40000 + 3714 - 2815 = 40899), and the
-        # Makefile also counts commits through the GitHub API at build time.
+        # builtin b16e899a5 (2026-10-30) speaks Manager v4.3.0:
+        # KERNEL_SU_UAPI_VERSION=6, KSU_APP_PROFILE_VER=4, the extension hub
+        # ioctl and KPM bridge ABI 2, and still has config KSU_SUSFS. Do not
+        # pin tag v4.3.0 (main): that tree drops kernel-side susfs.
+        # The Makefile derives 40000 + 3915 - 2815 = 41100 from tag v4.3.0,
+        # but also counts commits through the GitHub API at build time.
         # Pin the number so the manager does not report a version mismatch.
-        PINNED_SUKISU_SRC="b20dee702"
+        PINNED_SUKISU_SRC="b16e899a5"
         SUKISU_VER="${{ inputs.ksu_version_ref }}"
         SUKISU_CODE="${{ inputs.ksu_version_code }}"
         SUKISU_INPUT="$PINNED_SUKISU_SRC"

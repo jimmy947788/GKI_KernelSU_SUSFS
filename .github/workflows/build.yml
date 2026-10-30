@@ -659,7 +659,7 @@ jobs:
           fi
           echo "| **KSU Version** | ${KSU_VER} |"
           echo "| **KSU Tag** | ${KSU_TAG} |"
-          echo "| **SukiSU Driver** | b20dee702 (builtin, ${{ env.KSU_GIT_TAG || 'v4.2.0' }}) |"
+          echo "| **SukiSU Driver** | b16e899a5 (builtin, ${{ env.KSU_GIT_TAG || 'v4.3.0' }}) |"
           echo "| **KPM** | ${KPM_ENABLED:-false} (${KPM_PATCH_SOURCE:-n/a}) |"
           echo "| **SUSFS Version** | ${SUSFS_VER} |"
           echo "| **SUSFS Commit Input** | ${{ inputs.susfs_commit || 'commits.json pin' }} |"

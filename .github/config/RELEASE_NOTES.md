@@ -20,12 +20,12 @@ Join the telegram here: https://t.me/WildKernelsTG
 
 ## [SukiSU Ultra](https://github.com/SukiSU-Ultra/SukiSU-Ultra) {#sukisu-ultra}
 
-Kernel-based root for Android GKI devices. This release pins the **builtin** driver at commit `b20dee702` with manager tag **v4.2.0** (KPM + kernel-side SUSFS). android13-5.10 SUSFS is `18fe1544` (v2.3.0, before the incompatible `ksu_install_su_fd` exec hook).
+Kernel-based root for Android GKI devices. This release pins the **builtin** driver at commit `b16e899a5` with manager tag **v4.3.0** (KPM + kernel-side SUSFS). android13-5.10 SUSFS is `cfa82d53` (v2.3.0 with the priority uid filter and post-execveat hook).
 
 Manager: {{KSU_MANAGER}}
 
 > [!IMPORTANT]
-> Use SukiSU Ultra Manager **v4.2.0** (versionCode `40900`). This driver is builtin `b20dee702`, not the `v4.2.0` tag on `main`.
+> Use SukiSU Ultra Manager **v4.3.0** (versionCode `41100`). This driver is builtin `b16e899a5`, not the `v4.3.0` tag on `main`.
 
 **Version**  
 `{{KSU_VERSION}}`
