@@ -63,7 +63,7 @@ on:
           - "true"
         default: "false"
       use_kpm:
-        description: "Enable KPM (CONFIG_KPM + patch_linux from repo SukiSU_KernelPatch_patch/). Requires SukiSU driver."
+        description: "Enable KPM (CONFIG_KPM + kptools-linux from repo SukiSU_KernelPatch_patch/). Requires SukiSU driver."
         type: choice
         options:
           - "true"

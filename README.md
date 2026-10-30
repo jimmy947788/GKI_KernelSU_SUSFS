@@ -21,7 +21,7 @@
 This repository automates **Generic Kernel Image (GKI 2.0)** builds for Android 12+ (kernel 5.10 and newer). Each release integrates:
 
 - **SukiSU Ultra** — built-in root driver (not LKM/module mode)
-- **KPM** (KernelPatch) — `patch_linux` + `kpimg` embedded into `Image` at build time
+- **KPM** (KernelPatch) — `kptools-linux` + `kpimg` embedded into `Image` at build time
 - **SUSFS** — kernel patches plus the matching userspace module
 
 The primary goal is to let **Google Pixel 6 Pro** (`raven`) and **Pixel 6a** (`bluejay`) stay on a flashable GKI kernel that works with the pinned **SukiSU Ultra v4.3.0** manager, KPM modules, and SUSFS WebUI — without relying on stock/vendor kernels or outdated root stacks.
@@ -75,7 +75,7 @@ For GKI flashing concepts and manager setup, see:
 |----------|---------|----------|
 | 🔐 **SukiSU Ultra manager** | **v4.3.0** (versionCode `41100`) | [SukiSU-Ultra v4.3.0](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.3.0) |
 | 🧠 **SukiSU kernel driver** | **builtin** `b16e899a5` (UAPI 6, same handshake as manager v4.3.0) | Built into this kernel |
-| 🧩 **KPM** (KernelPatch) | **v0.14.0** (`patch_linux` + `kpimg`) | [SukiSU_KernelPatch_patch 0.14.0](https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch/releases/tag/0.14.0) |
+| 🧩 **KPM** (KernelPatch) | **v0.14.0** (`kptools-linux` + `kpimg`) | [SukiSU_KernelPatch_patch 0.14.0](https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch/releases/tag/0.14.0) |
 | 🛡️ **SUSFS** | **v2.3.0** (`cfa82d53` on `android13-5.10`) + userspace module | [SUSFS-FOR-KERNELSU](https://github.com/sidex15/susfs4ksu-module) |
 
 Use Manager **v4.3.0** with this kernel. Do not pin the driver to tag `v4.3.0` on `main`: that tree drops kernel-side susfs. Do not swap in a different KPM release. KPM tools already live in [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/) and are embedded into `Image` at build time. Default SUSFS pins are tracked in `.github/config/commits.json`; **android13-5.10** is the first verified target for this branch.
@@ -254,7 +254,7 @@ If you change the workflow to enable or adjust SukiSU integration, previously bu
 Current `KSUN+SUSFS` behavior:
 
 - Uses SukiSU Ultra **builtin** `b16e899a5` with manager tag **v4.3.0** (fixed — no workflow branch input).
-- Enables `CONFIG_KPM=y` and runs `patch_linux` + `kpimg` from the repo-local [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/) directory (v0.14.0).
+- Enables `CONFIG_KPM=y` and runs `kptools-linux` + `kpimg` from the repo-local [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/) directory (v0.14.0).
 - Pins `gki-android13-5.10` susfs4ksu to `cfa82d53` (SUSFS v2.3.0 with the priority uid filter and post-execveat hook). Other GKI defaults come from `.github/config/commits.json`. No third-party KSU coexistence patches are applied.
 
 Old zip files built before the SukiSU integration change will still behave like the old build and may boot successfully while the SukiSU app still reports that root is unavailable.
@@ -388,7 +388,7 @@ If you already have a self-hosted runner, set:
 ## ✨ Features
 
 - 🔐 **SukiSU Ultra**: builtin driver (`b16e899a5`) with Manager **[v4.3.0](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.3.0)** (built-in mode)
-- 🧩 **KPM**: **v0.14.0** (`CONFIG_KPM=y`, `patch_linux` + `kpimg` embedded in `Image`)
+- 🧩 **KPM**: **v0.14.0** (`CONFIG_KPM=y`, `kptools-linux` + `kpimg` embedded in `Image`)
 - 🛡️ **SUSFS**: Kernel patches plus the userspace [SUSFS-FOR-KERNELSU](https://github.com/sidex15/susfs4ksu-module) module
 
 ---

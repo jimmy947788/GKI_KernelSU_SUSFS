@@ -8,14 +8,14 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Apply patch_linux
+    - name: Apply kptools
       shell: bash
       run: |
         set -euo pipefail
 
         IMAGE_PATH="${{ inputs.image_path }}"
         KPM_DIR="${{ github.workspace }}/SukiSU_KernelPatch_patch"
-        PATCH_LINUX="$KPM_DIR/patch_linux"
+        KPTOOLS="$KPM_DIR/kptools-linux"
         KPIMG="$KPM_DIR/kpimg"
 
         if [ ! -f "$IMAGE_PATH" ]; then
@@ -23,32 +23,29 @@ runs:
           exit 1
         fi
 
-        if [ ! -f "$PATCH_LINUX" ]; then
-          echo "ERROR: patch_linux not found at $PATCH_LINUX"
-          echo "Place patch_linux + kpimg from SukiSU_KernelPatch_patch release into:"
+        if [ ! -f "$KPTOOLS" ] || [ ! -f "$KPIMG" ]; then
+          echo "ERROR: kptools-linux or kpimg not found in $KPM_DIR"
+          echo "Place kptools-linux + kpimg from SukiSU_KernelPatch_patch release into:"
           echo "  $KPM_DIR/"
           exit 1
         fi
 
-        echo "Using patch_linux: $PATCH_LINUX"
+        echo "Using kptools: $KPTOOLS"
 
         IMAGE_BASE=$(basename "$IMAGE_PATH")
         WORK=$(mktemp -d)
-        cp "$PATCH_LINUX" "$WORK/patch_linux"
-        chmod 755 "$WORK/patch_linux"
+        cp "$KPTOOLS" "$WORK/kptools-linux"
+        chmod 755 "$WORK/kptools-linux"
+        cp "$KPIMG" "$WORK/kpimg"
         cp "$IMAGE_PATH" "$WORK/Image"
 
-        if [ -f "$KPIMG" ]; then
-          cp "$KPIMG" "$WORK/kpimg"
-        else
-          echo "WARNING: kpimg not found at $KPIMG; patch_linux may fail"
-        fi
-
+        # Do not use the 0.14.0 patch_linux wrapper: its embedded kpimg is a
+        # single byte, it ignores the kpimg file, and it always exits 0.
         (
           cd "$WORK"
-          ./patch_linux
+          ./kptools-linux -p -s 123 -i Image -k kpimg -o oImage
           if [ ! -f oImage ]; then
-            echo "ERROR: patch_linux did not produce oImage"
+            echo "ERROR: kptools did not produce oImage"
             exit 1
           fi
         )
@@ -58,10 +55,10 @@ runs:
 
         KPM_HITS=$(strings -n 6 "$IMAGE_PATH" | grep -c KernelPatch || true)
         if [ "$KPM_HITS" -eq 0 ]; then
-          echo "ERROR: $IMAGE_PATH has no KernelPatch strings after patch_linux"
+          echo "ERROR: $IMAGE_PATH has no KernelPatch strings after kptools"
           exit 1
         fi
 
-        echo "KPM embedded in $IMAGE_BASE ($KPM_HITS KernelPatch strings, $PATCH_LINUX)"
-        echo "KPM_PATCH_SOURCE=$PATCH_LINUX" >> "$GITHUB_ENV"
+        echo "KPM embedded in $IMAGE_BASE ($KPM_HITS KernelPatch strings, $KPTOOLS)"
+        echo "KPM_PATCH_SOURCE=$KPTOOLS" >> "$GITHUB_ENV"
         echo "KPM_ENABLED=true" >> "$GITHUB_ENV"

@@ -10,14 +10,15 @@ CI and local builds use this directory directly — no GitHub release download.
 
 | File | Purpose |
 |------|---------|
-| `patch_linux` | Patches the built kernel `Image` after compile (x86_64 host binary) |
-| `kpimg` | KernelPatch payload embedded by `patch_linux` |
+| `kptools-linux` | Patches the built kernel `Image` after compile (x86_64 host binary) |
+| `kpimg` | KernelPatch payload embedded by `kptools-linux` |
 
 Optional (not used by CI):
 
 | File | Purpose |
 |------|---------|
-| `patch_android` | ARM64 patch tool for on-device use |
 | `kptools-android` | Android kptools |
 
-Download the matching release assets and place `patch_linux` + `kpimg` here before building with `use_kpm: true`.
+Download the matching release assets and place `kptools-linux` + `kpimg` here before building with `use_kpm: true`.
+
+Do not use the 0.14.0 `patch_linux` or `patch_android` assets. `patch_linux` embeds a one-byte `kpimg`, ignores the `kpimg` file, and always exits 0. `patch_android` comes from the same source and was removed with it.

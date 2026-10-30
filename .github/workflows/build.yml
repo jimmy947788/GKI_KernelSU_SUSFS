@@ -40,7 +40,7 @@ on:
         type: string
         default: ""
       use_kpm:
-        description: "Enable KPM (CONFIG_KPM + patch_linux from SukiSU_KernelPatch_patch/). Requires the SukiSU driver."
+        description: "Enable KPM (CONFIG_KPM + kptools-linux from SukiSU_KernelPatch_patch/). Requires the SukiSU driver."
         required: false
         type: string
         default: "true"

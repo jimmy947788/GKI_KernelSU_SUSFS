@@ -43,13 +43,15 @@ tag `0.14.0` 的原始碼是 `SUKISU_KPM_ABI_VERSION 1`，但 release 資產在 
 - `50_add_susfs_in_gki-android13-5.10.patch`（`cfa82d53`）可套用，無 reject，一個 hunk 有 fuzz 1。
 - 用 Ubuntu clang 21 編到 `Image`，build log 印出 `41100 [v4.3.0-b16e899a@HEAD]`。
 
-## 未解決：KPM 0.14.0 的 `patch_linux` 在本機失敗
+## 不要用 KPM 0.14.0 的 `patch_linux`
 
-對上面的本機 `Image` 執行 0.14.0 的 `patch_linux`，印出 `double free or corruption (!prev)`，產生的 `oImage` 只比 `Image` 大 1680 bytes，也沒有 `KernelPatch` 字串。同一個 `Image` 用 0.13.0 的工具則正常（多 181824 bytes）。
+0.14.0 的 `patch_linux` 內建的 `kpimg` 只有 1 byte。上游 CI artifact（`patch_linux` 雜湊與 release 相同）的 `patch/include/kpimg_enc.h` 內容是 `res_kpimg_enc[] = { 0 }`。
 
-- 外層 `patch_linux` 不論內部 `kptools` 是否崩潰都回傳 0，所以不能只看 exit code。`kpm-patch` action 的 `KernelPatch` 字串檢查會擋下這種結果，不會產出壞核心。
-- 原因未確認。本機 `Image` 關閉了 `DEBUG_INFO_BTF`，而 kptools 在 2026-10-14 加入了 BTF 支援（`4a721382b`），這是待驗證的假設。
-- 0.13.0 不能當退路：它沒有 ABI 2 bridge，KPM 會被 kernel 的 probe 拒絕。
+- 它會忽略旁邊的 `kpimg` 檔。CI log 顯示 `kpimg: 0x2c91000,0x10`、`kpimg version: 0`，但仍印出 `patch done`。
+- 不論內部 `kptools` 是否成功都回傳 0。本機對非 LTO 的 `Image` 執行時印出 `double free or corruption (!prev)`，`oImage` 只多 1680 bytes。
+- 最後由 `kpm-patch` action 的 `KernelPatch` 字串檢查擋下。
+
+因此 action 改成直接跑同一個 release 的 `kptools-linux -p -s 123 -i Image -k kpimg -o oImage`，參數和 `patch_linux` 內部相同。0.13.0 不能當退路：它沒有 ABI 2 bridge，KPM 會被 kernel 的 probe 拒絕。
 
 ## 尚未驗證
 

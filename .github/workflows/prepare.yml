@@ -32,7 +32,7 @@ on:
         type: string
         default: ""
       use_kpm:
-        description: "Enable KPM (CONFIG_KPM + patch_linux from repo SukiSU_KernelPatch_patch/). Requires SukiSU."
+        description: "Enable KPM (CONFIG_KPM + kptools-linux from repo SukiSU_KernelPatch_patch/). Requires SukiSU."
         required: false
         type: string
         default: "true"
