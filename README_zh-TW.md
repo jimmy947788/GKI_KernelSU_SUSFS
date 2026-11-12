@@ -5,7 +5,7 @@
 **支援 GKI 2.0 的 Android 核心建置，內建 SukiSU Ultra（built-in root）、KPM 與 SUSFS — 讓 Pixel 6 Pro、Pixel 6a 等裝置能繼續使用最新版 SukiSU 管理工具刷機。**
 
 [![GKI 2.0](https://img.shields.io/badge/GKI-2.0-green)](https://source.android.com/docs/core/architecture/kernel/gki)
-[![SukiSU Ultra](https://img.shields.io/badge/SukiSU_Ultra-v4.3.0-blue)](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.3.0)
+[![SukiSU Ultra](https://img.shields.io/badge/SukiSU_Ultra-v4.3.0--r2-blue)](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.3.0-r2)
 [![KPM](https://img.shields.io/badge/KPM-v0.14.0-purple)](https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch/releases/tag/0.14.0)
 [![SUSFS](https://img.shields.io/badge/SUSFS-Integrated-orange)](https://gitlab.com/simonpunk/susfs4ksu)
 
@@ -24,7 +24,7 @@
 - **KPM**（KernelPatch）— 編譯後以 `kptools-linux` + `kpimg` 寫入 `Image`
 - **SUSFS** — kernel 端補丁 + 對應的使用者空間模組
 
-主要目標是讓 **Google Pixel 6 Pro**（`raven`）與 **Pixel 6a**（`bluejay`）能在自訂 GKI 核心上，繼續使用釘住的 **SukiSU Ultra v4.3.0** 管理器、KPM 模組與 SUSFS WebUI，而不必依賴原廠/vendor 核心或過時的 root 方案。
+主要目標是讓 **Google Pixel 6 Pro**（`raven`）與 **Pixel 6a**（`bluejay`）能在自訂 GKI 核心上，繼續使用釘住的 **SukiSU Ultra v4.3.0-r2** 管理器、KPM 模組與 ReSuSFS，而不必依賴原廠/vendor 核心或過時的 root 方案。
 
 > **說明：** workflow 裡的 `KSUN` 是 KernelSU 時代的舊代號；在本 repo 中一律代表 **SukiSU Ultra** 整合流程。
 
@@ -73,16 +73,17 @@ GKI 刷機概念與管理器設定可參考：
 
 | 元件 | 支援版本 | 下載 |
 |------|----------|------|
-| 🔐 **SukiSU Ultra 管理器** | **v4.3.0**（versionCode `41100`） | [SukiSU-Ultra v4.3.0](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.3.0) |
-| 🧠 **SukiSU kernel driver** | **builtin** `b16e899a5`（UAPI 6，與管理器 v4.3.0 同一組 handshake） | 已編進此核心 |
+| 🔐 **SukiSU Ultra 管理器** | **v4.3.0-r2**（versionCode `41150`） | [SukiSU-Ultra v4.3.0-r2](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.3.0-r2) |
+| 🧠 **SukiSU kernel driver** | **builtin** `b16e899a5`（UAPI 6，與管理器 v4.3.0-r2 同一組 handshake） | 已編進此核心 |
 | 🧩 **KPM**（KernelPatch） | **v0.14.0**（`kptools-linux` + `kpimg`） | [SukiSU_KernelPatch_patch 0.14.0](https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch/releases/tag/0.14.0) |
-| 🛡️ **SUSFS** | **v2.3.0**（`android13-5.10` 為 `cfa82d53`）+ 使用者空間模組 | [SUSFS-FOR-KERNELSU](https://github.com/sidex15/susfs4ksu-module) |
+| 🛡️ **Kernel SuSFS** | **v2.3.0**（`android13-5.10` 為 `cfa82d53`），編進核心 | [susfs4ksu](https://gitlab.com/simonpunk/susfs4ksu) |
+| 📦 **ReSuSFS** | **v26.10.23**（設定內建 SuSFS 的使用者空間模組） | [ReSuSFS v26.10.23](https://github.com/ahmed-alnassif/ReSuSFS/releases/tag/v26.10.23) |
 
-這顆核心請配 Manager **v4.3.0**。不要把 driver 釘成 `main` 上的 tag `v4.3.0`：那棵樹沒有 kernel 端 susfs。也不要換成別版 KPM。KPM 工具已放在 repo [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/)，編譯時寫入 `Image`。預設 SUSFS pin 集中在 `.github/config/commits.json`；**android13-5.10** 是這條分支第一個驗證目標。
+這顆核心請配 Manager **v4.3.0-r2**。不要把 driver 釘成 `main` 上的 tag `v4.3.0-r2`：那棵樹沒有 kernel 端 susfs。也不要換成別版 KPM。KPM 工具已放在 repo [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/)，編譯時寫入 `Image`。Kernel SuSFS 仍編進映像。ReSuSFS 只負責設定這個介面；它附的原廠 GKI `susfs_guard_lkm` 載不進這顆核心。預設 SUSFS pin 集中在 `.github/config/commits.json`；**android13-5.10** 是這條分支第一個驗證目標。
 
 ### 目前支援（已驗證）
 
-此分支的目標是 **android13-5.10** 上的 **SukiSU Ultra v4.3.0**、**KPM v0.14.0** 與 **SUSFS v2.3.0**。下面的實機畫面仍是上一組 v4.1.3，換上這個 pin 之後還要再刷一次確認。
+此分支的目標是 **android13-5.10** 上的 **SukiSU Ultra v4.3.0-r2**、**KPM v0.14.0**、內建 **SUSFS v2.3.0** 與 **ReSuSFS v26.10.23**。下面的實機畫面仍是上一組 v4.1.3，換上這個 pin 之後還要再刷一次確認。
 
 **Pixel 6 Pro**（`raven` / `TQ3A.230901.001`）刷入後 `uname -r` 範例：`5.10.186-android13-Wild-r36.1`。
 
@@ -122,17 +123,19 @@ adb shell uname -a
 
 備援：也可用 [Kernel Flasher](https://github.com/fatalcoder524/KernelFlasher) 對 active slot 刷同一顆 zip（可先 Backup）。
 
-### 建議安裝模組（KPM + SUSFS）
+### 建議安裝模組（KPM + ReSuSFS）
 
 刷完核心、SukiSU 顯示 built-in + KPM 後，在管理器安裝以下三個模組：
 
 - [Zygisk Next](https://github.com/Dr-TSNG/ZygiskNext)
 - [KPatch-Next Module](https://github.com/KernelSU-Next/KPatch-Next-Module)
-- [SUSFS-FOR-KERNELSU](https://github.com/sidex15/susfs4ksu-module)
+- [ReSuSFS v26.10.23](https://github.com/ahmed-alnassif/ReSuSFS/releases/tag/v26.10.23)
+
+ReSuSFS 用的是這顆核心裡已經編進去的 SuSFS。不要走它下載 LKM 的那條路。
 
 ### 建議使用的 Root 管理工具
 
-請用 **[SukiSU Ultra Manager v4.3.0](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.3.0)**（versionCode `41100`）。核心 driver 固定釘在 SukiSU **builtin** commit `b16e899a5`（不是 `main` 上的 tag `v4.3.0`），KPM 為 **v0.14.0**。
+請用 **[SukiSU Ultra Manager v4.3.0-r2](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.3.0-r2)**（versionCode `41150`）。核心 driver 固定釘在 SukiSU **builtin** commit `b16e899a5`（不是 `main` 上的 tag `v4.3.0-r2`），KPM 為 **v0.14.0**。
 
 ### 驗證成功畫面（Pixel 6 Pro / 6a）
 
@@ -240,7 +243,7 @@ use_kpm: "true"
 
 SukiSU app 畫面判讀方式：
 
-- SukiSU Ultra v4.3.0 app 應該會判斷成 built-in 模式，且 KPM 為啟用。
+- SukiSU Ultra v4.3.0-r2 app 應該會判斷成 built-in 模式，且 KPM 為啟用。
 - workflow 固定使用 SukiSU builtin `b16e899a5`，沒有 branch 覆寫輸入。
 
 ### 編譯產物
@@ -289,7 +292,7 @@ Actions 選單中各選項意義：
 
 目前 `KSUN+SUSFS` 的行為：
 
-- 固定走 SukiSU Ultra **builtin** `b16e899a5` + manager **v4.3.0**（無 workflow branch 變數）。
+- 固定走 SukiSU Ultra **builtin** `b16e899a5` + manager **v4.3.0-r2**（versionCode `41150`，無 workflow branch 變數）。
 - 開啟 `CONFIG_KPM=y`，編譯後使用 repo 內 [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/) 的 `kptools-linux` + `kpimg`（v0.14.0）。
 - `gki-android13-5.10` 的 susfs4ksu 釘 `cfa82d53`（SUSFS v2.3.0，含 priority uid filter 與 post-execveat hook）。其他 GKI 預設值來自 `.github/config/commits.json`。不再套用第三方 KSU 共存 patch。
 
@@ -353,7 +356,7 @@ susfs_commit_android16-6-12: ""
 
 此範例補充：
 
-- SukiSU driver 固定為 builtin `b16e899a5` / manager `v4.3.0`。
+- SukiSU driver 固定為 builtin `b16e899a5` / manager `v4.3.0-r2`（versionCode `41150`）。
 - `susfs_commit_*` 留空時使用 `.github/config/commits.json` 的分支 pin；`android13-5.10` 目前使用 `cfa82d53`。
 - 只會編譯 `android13-5.10` + `2023-09` 這一組。
 
@@ -365,9 +368,9 @@ susfs_commit_android16-6-12: ""
 
 ## ✨ 主要功能
 
-- 🔐 **SukiSU Ultra**：請用 Manager **[v4.3.0](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.3.0)** + builtin driver `b16e899a5`（built-in 模式）
+- 🔐 **SukiSU Ultra**：請用 Manager **[v4.3.0-r2](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.3.0-r2)**（versionCode `41150`）+ builtin driver `b16e899a5`（built-in 模式）
 - 🧩 **KPM**：**v0.14.0**（`CONFIG_KPM=y`，Image 內嵌 `kptools-linux` + `kpimg`）
-- 🛡️ **SUSFS**：kernel 端補丁 + [SUSFS-FOR-KERNELSU](https://github.com/sidex15/susfs4ksu-module) 使用者空間模組
+- 🛡️ **Kernel SuSFS**：v2.3.0 補丁編進映像，由 [ReSuSFS v26.10.23](https://github.com/ahmed-alnassif/ReSuSFS/releases/tag/v26.10.23) 設定
 
 ---
 
@@ -378,7 +381,7 @@ susfs_commit_android16-6-12: ""
 - ✨ **Magic-KSU**：由 [5ec1cff](https://github.com/5ec1cff/KernelSU) 開發
 - 🛡️ **SUSFS**：由 [simonpunk](https://gitlab.com/simonpunk/susfs4ksu.git) 開發
 - 🛡️ **Baseband-guard (BBG)**：由 [vc-teahouse](https://github.com/vc-teahouse/Baseband-guard) 開發
-- 📦 **SUSFS Module**：由 [sidex15](https://github.com/sidex15) 開發
+- 📦 **ReSuSFS**：使用者空間 SuSFS 模組，由 [ahmed-alnassif](https://github.com/ahmed-alnassif/ReSuSFS) 開發
 - 👑 **Sultan Kernels**：由 [kerneltoast](https://github.com/kerneltoast) 開發
 - 🔧 **Device Boot Fix**：參考 [Boot fix commit](https://github.com/Anything-at-25-00/android_kernel_common_android12-5.10/commit/2476d262b597fe8af82cfb7aaf96676f51c6b4ed)
 
@@ -424,7 +427,8 @@ susfs_commit_android16-6-12: ""
 | 貢獻者 | 貢獻 |
 |-------------|-------------|
 | 🛡️ [simonpunk](https://gitlab.com/simonpunk/susfs4ksu.git) | 建立 SUSFS |
-| 📦 [sidex15](https://github.com/sidex15) | 製作模組 |
+| 📦 [ahmed-alnassif](https://github.com/ahmed-alnassif/ReSuSFS) | ReSuSFS 使用者空間模組 |
+| 📦 [sidex15](https://github.com/sidex15) | 先前的 SUSFS 模組 |
 | 🩹 [backslashxx](https://github.com/backslashxx) | 協助 patches |
 | 🔧 [Teemo](https://github.com/liqideqq) | 協助 patches |
 | 💝 [幕落](https://github.com/MuLuo688) | 捐助 |

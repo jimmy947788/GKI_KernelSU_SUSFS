@@ -20,12 +20,12 @@ Join the telegram here: https://t.me/WildKernelsTG
 
 ## [SukiSU Ultra](https://github.com/SukiSU-Ultra/SukiSU-Ultra) {#sukisu-ultra}
 
-Kernel-based root for Android GKI devices. This release pins the **builtin** driver at commit `b16e899a5` with manager tag **v4.3.0** (KPM + kernel-side SUSFS). android13-5.10 SUSFS is `cfa82d53` (v2.3.0 with the priority uid filter and post-execveat hook).
+Kernel-based root for Android GKI devices. This release pins the **builtin** driver at commit `b16e899a5` with manager tag **v4.3.0-r2** (versionCode `41150`, KPM + kernel-side SUSFS). android13-5.10 SUSFS is `cfa82d53` (v2.3.0 with the priority uid filter and post-execveat hook).
 
 Manager: {{KSU_MANAGER}}
 
 > [!IMPORTANT]
-> Use SukiSU Ultra Manager **v4.3.0** (versionCode `41100`). This driver is builtin `b16e899a5`, not the `v4.3.0` tag on `main`.
+> Use SukiSU Ultra Manager **v4.3.0-r2** (versionCode `41150`). This driver is builtin `b16e899a5`, not the `v4.3.0-r2` tag on `main`.
 
 **Version**  
 `{{KSU_VERSION}}`
@@ -43,7 +43,7 @@ Manager: {{KSU_MANAGER}}
 
 A SukiSU Ultra addon for hiding root using kernel patches and a userspace module!
 
-Reccomended Module: [susfs4ksu-module by sidex15](https://github.com/sidex15/susfs4ksu-module)
+Recommended module: [ReSuSFS v26.10.23](https://github.com/ahmed-alnassif/ReSuSFS/releases/tag/v26.10.23). Kernel SuSFS stays built in. ReSuSFS only configures it; its stock-GKI `susfs_guard_lkm` will not load on this image.
 
 - SUS_PATH - Hide suspicious paths
 - SUS_MOUNT - Hide mount points (no CLI support)
