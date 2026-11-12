@@ -539,8 +539,9 @@ jobs:
         SUKISU_SRC="b16e899a5"
         SUKISU_VER="v4.3.0-r2"
 
-        git clone --filter=blob:none --no-checkout "$SUKISU_REPO" /tmp/sukisu
-        cd /tmp/sukisu
+        rm -rf "$RUNNER_TEMP/sukisu"
+        git clone --filter=blob:none --no-checkout "$SUKISU_REPO" "$RUNNER_TEMP/sukisu"
+        cd "$RUNNER_TEMP/sukisu"
         git fetch origin "$SUKISU_SRC" builtin 2>/dev/null || git fetch origin "$SUKISU_SRC"
         git checkout --detach "$SUKISU_SRC"
         KSU_COMMIT=$(git rev-parse --short HEAD)

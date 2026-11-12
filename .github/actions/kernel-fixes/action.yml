@@ -89,7 +89,7 @@ runs:
     - name: 'Final Kernel Fixes Summary'
       shell: bash
       run: |
-        SUMMARY_FILE="/tmp/kernel-fixes-summary.md"
+        SUMMARY_FILE="$RUNNER_TEMP/kernel-fixes-summary.md"
         echo "## Final Kernel Fixes Summary" >> "$SUMMARY_FILE"
         echo "" >> "$SUMMARY_FILE"
         echo "**Kernel Version:** ${{ inputs.android_version }} + ${{ inputs.kernel_version }} (sublevel ${{ inputs.sublevel }})" >> "$SUMMARY_FILE"

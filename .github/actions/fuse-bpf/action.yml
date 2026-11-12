@@ -143,10 +143,10 @@ runs:
       run: |
         set -euo pipefail
 
-        mkdir -p /tmp/fuse-bpf-minimal
+        mkdir -p $RUNNER_TEMP/fuse-bpf-minimal
 
         # Create a minimal standalone FUSE-BPF checker daemon using base64 to avoid YAML heredoc issues
-        echo 'I2luY2x1ZGUgPHN0ZGlvLmg+CiNpbmNsdWRlIDxzdGRsaWIuaD4KI2luY2x1ZGUgPHN0cmluZy5oPgojaW5jbHVkZSA8ZmNudGwuaD4KI2luY2x1ZGUgPHVuaXN0ZC5oPgojaW5jbHVkZSA8c3lzL3N0YXQuaD4KCiNkZWZpbmUgRlVTRV9ERVYgIi9kZXYvZnVzZSIKCi8qIE1pbmltYWwgRlVTRS1CUEYgY2hlY2tlciAtIHZlcmlmaWVzIEZVU0UtQlBGIHN1cHBvcnQgKi8KaW50IG1haW4oaW50IGFyZ2MsIGNoYXIgKmFyZ3ZbXSkgewogICAgcHJpbnRmKCJGVVNFLUJQRiBVc2Vyc3BhY2UgQ2hlY2tlclxuIik7CiAgICBwcmludGYoIj09PT09PT09PT09PT09PT09PT09PT09PT09XG5cbiIpOwoKICAgIC8qIENoZWNrIGlmIC9kZXYvZnVzZSBleGlzdHMgKi8KICAgIGlmIChzdGF0KEZVU0VfREVWLCAoc3RydWN0IHN0YXQpezB9KSAhPSAwKSB7CiAgICAgICAgcHJpbnRmKCJFUlJPUjogJXMgbm90IGZvdW5kXG4iLCBGVVNFX0RFVik7CiAgICAgICAgcHJpbnRmKCJDcmVhdGUgaXQgd2l0aDogbWtub2QgL2Rldi9mdXNlIGMgMTAgMjI5XG4iKTsKICAgICAgICByZXR1cm4gMTsKICAgIH0KCiAgICBwcmludGYoIltPS10gJXMgZXhpc3RzXG4iLCBGVVNFX0RFVik7CiAgICBwcmludGYoIltPS10gRlVTRS1CUEYga2VybmVsIHN1cHBvcnQgaXMgZW5hYmxlZCAoQ09ORklHX0ZVU0VfQlBGPXkpXG4iKTsKICAgIHByaW50ZigiXG5Vc2FnZTogTW91bnQgYSBGVVNFIGZpbGVzeXN0ZW0gd2l0aCBCUEYgYmFja2luZyBwcm9ncmFtXG4iKTsKICAgIHByaW50ZigiICBtb3VudCAtdCBmdXNlLmJwZiAvcGF0aC90by9icGYvcHJvZ3JhbSAvbW91bnQvcG9pbnRcbiIpOwoKICAgIHJldHVybiAwOwp9Cg==' | base64 -d > /tmp/fuse-bpf-minimal/fuse_bpf_daemon.c
+        echo 'I2luY2x1ZGUgPHN0ZGlvLmg+CiNpbmNsdWRlIDxzdGRsaWIuaD4KI2luY2x1ZGUgPHN0cmluZy5oPgojaW5jbHVkZSA8ZmNudGwuaD4KI2luY2x1ZGUgPHVuaXN0ZC5oPgojaW5jbHVkZSA8c3lzL3N0YXQuaD4KCiNkZWZpbmUgRlVTRV9ERVYgIi9kZXYvZnVzZSIKCi8qIE1pbmltYWwgRlVTRS1CUEYgY2hlY2tlciAtIHZlcmlmaWVzIEZVU0UtQlBGIHN1cHBvcnQgKi8KaW50IG1haW4oaW50IGFyZ2MsIGNoYXIgKmFyZ3ZbXSkgewogICAgcHJpbnRmKCJGVVNFLUJQRiBVc2Vyc3BhY2UgQ2hlY2tlclxuIik7CiAgICBwcmludGYoIj09PT09PT09PT09PT09PT09PT09PT09PT09XG5cbiIpOwoKICAgIC8qIENoZWNrIGlmIC9kZXYvZnVzZSBleGlzdHMgKi8KICAgIGlmIChzdGF0KEZVU0VfREVWLCAoc3RydWN0IHN0YXQpezB9KSAhPSAwKSB7CiAgICAgICAgcHJpbnRmKCJFUlJPUjogJXMgbm90IGZvdW5kXG4iLCBGVVNFX0RFVik7CiAgICAgICAgcHJpbnRmKCJDcmVhdGUgaXQgd2l0aDogbWtub2QgL2Rldi9mdXNlIGMgMTAgMjI5XG4iKTsKICAgICAgICByZXR1cm4gMTsKICAgIH0KCiAgICBwcmludGYoIltPS10gJXMgZXhpc3RzXG4iLCBGVVNFX0RFVik7CiAgICBwcmludGYoIltPS10gRlVTRS1CUEYga2VybmVsIHN1cHBvcnQgaXMgZW5hYmxlZCAoQ09ORklHX0ZVU0VfQlBGPXkpXG4iKTsKICAgIHByaW50ZigiXG5Vc2FnZTogTW91bnQgYSBGVVNFIGZpbGVzeXN0ZW0gd2l0aCBCUEYgYmFja2luZyBwcm9ncmFtXG4iKTsKICAgIHByaW50ZigiICBtb3VudCAtdCBmdXNlLmJwZiAvcGF0aC90by9icGYvcHJvZ3JhbSAvbW91bnQvcG9pbnRcbiIpOwoKICAgIHJldHVybiAwOwp9Cg==' | base64 -d > $RUNNER_TEMP/fuse-bpf-minimal/fuse_bpf_daemon.c
 
         # Setup cross-compiler for arm64
         if command -v aarch64-linux-android34-clang &>/dev/null; then
@@ -160,14 +160,14 @@ runs:
         fi
 
         echo "Building minimal FUSE-BPF checker daemon..."
-        $CC -o /tmp/fuse-bpf-minimal/fuse-bpf \
-          /tmp/fuse-bpf-minimal/fuse_bpf_daemon.c \
+        $CC -o $RUNNER_TEMP/fuse-bpf-minimal/fuse-bpf \
+          $RUNNER_TEMP/fuse-bpf-minimal/fuse_bpf_daemon.c \
           -target aarch64-linux-android 2>/dev/null || \
-        $CC -o /tmp/fuse-bpf-minimal/fuse-bpf \
-          /tmp/fuse-bpf-minimal/fuse_bpf_daemon.c || true
+        $CC -o $RUNNER_TEMP/fuse-bpf-minimal/fuse-bpf \
+          $RUNNER_TEMP/fuse-bpf-minimal/fuse_bpf_daemon.c || true
 
         echo "Minimal daemon built:"
-        ls -la /tmp/fuse-bpf-minimal/fuse-bpf 2>/dev/null || echo "Failed to build minimal daemon"
+        ls -la $RUNNER_TEMP/fuse-bpf-minimal/fuse-bpf 2>/dev/null || echo "Failed to build minimal daemon"
 
     - name: Copy FUSE-BPF Artifacts
       shell: bash
@@ -191,8 +191,8 @@ runs:
         fi
 
         # Copy minimal daemon as fallback
-        if [ -f "/tmp/fuse-bpf-minimal/fuse-bpf" ]; then
-          cp /tmp/fuse-bpf-minimal/fuse-bpf \
+        if [ -f "$RUNNER_TEMP/fuse-bpf-minimal/fuse-bpf" ]; then
+          cp $RUNNER_TEMP/fuse-bpf-minimal/fuse-bpf \
             "${{ github.workspace }}/artifacts/fuse-bpf/fuse-bpf-checker"
           echo "Copied minimal FUSE-BPF checker"
         fi

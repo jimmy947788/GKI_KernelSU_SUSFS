@@ -487,14 +487,14 @@ jobs:
 
           ikconfig_checked=1
           echo "Checking IKCONFIG in $image_file"
-          if ! "$extract_script" "$image_file" > /tmp/ikconfig.txt 2>/dev/null; then
+          if ! "$extract_script" "$image_file" > "$RUNNER_TEMP/ikconfig.txt" 2>/dev/null; then
             echo "WARNING: could not extract IKCONFIG from $image_file"
             continue
           fi
 
           cfg_missing=0
           for cfg in "${required_cfgs[@]}"; do
-            if ! grep -q "^${cfg}=y$" /tmp/ikconfig.txt; then
+            if ! grep -q "^${cfg}=y$" "$RUNNER_TEMP/ikconfig.txt"; then
               echo "Missing ${cfg}=y in IKCONFIG from $image_file"
               cfg_missing=1
             fi
@@ -504,7 +504,7 @@ jobs:
             ikconfig_ok=1
             image_for_strings="$image_file"
             echo "IKCONFIG confirms SUSFS options enabled in $image_file"
-            if grep -q '^CONFIG_KSU_SUSFS_HIDE_KSU_SUSFS_SYMBOLS=y$' /tmp/ikconfig.txt; then
+            if grep -q '^CONFIG_KSU_SUSFS_HIDE_KSU_SUSFS_SYMBOLS=y$' "$RUNNER_TEMP/ikconfig.txt"; then
               hide_symbols=1
               echo "CONFIG_KSU_SUSFS_HIDE_KSU_SUSFS_SYMBOLS=y (System.map susfs_* check skipped)"
             fi
@@ -610,7 +610,7 @@ jobs:
       if: ${{ always() }}
       shell: bash
       run: |
-        SUMMARY_FILE="/tmp/build-summary-${{ steps.extract.outputs.file_name }}.md"
+        SUMMARY_FILE="$RUNNER_TEMP/build-summary-${{ steps.extract.outputs.file_name }}.md"
         
         # Determine build status
         if [ "${{ job.status }}" = "success" ]; then
@@ -669,9 +669,9 @@ jobs:
           echo
           
           # Kernel Fixes
-          if [ -f /tmp/kernel-fixes-summary.md ]; then
+          if [ -f "$RUNNER_TEMP/kernel-fixes-summary.md" ]; then
             echo "### 🔧 Kernel Fixes"
-            cat /tmp/kernel-fixes-summary.md
+            cat "$RUNNER_TEMP/kernel-fixes-summary.md"
             echo
           fi
         } > "$SUMMARY_FILE"
@@ -681,7 +681,7 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
         name: ${{ steps.extract.outputs.file_name }}-Summary
-        path: /tmp/build-summary-${{ steps.extract.outputs.file_name }}.md
+        path: ${{ runner.temp }}/build-summary-${{ steps.extract.outputs.file_name }}.md
         if-no-files-found: ignore
         compression-level: 9
 
