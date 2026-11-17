@@ -9,7 +9,7 @@ Join the telegram here: https://t.me/WildKernelsTG
 
 # Features
 - [SukiSU Nova](#sukisu-nova)
-- [SUSFS v2.3.0](#susfs-v220)
+- [SUSFS v2.4.0](#susfs-v220)
 - [Baseband Guard (BBG)](#baseband-guard-bbg)
 - [DroidSpaces-OSS](#droidspaces-oss)
 - [Networking Improvements](#networking-improvements)
@@ -20,7 +20,7 @@ Join the telegram here: https://t.me/WildKernelsTG
 
 ## [SukiSU Nova](https://github.com/SukiSU-Nova/SukiSU-Nova) {#sukisu-nova}
 
-Kernel-based root for Android GKI devices. This release pins the **builtin** driver at commit `4bec532dd` with manager tag **v3.0.0** (versionCode `30000`, KPM + kernel-side SUSFS). android13-5.10 SUSFS is `cfa82d53` (v2.3.0 with the priority uid filter and post-execveat hook).
+Kernel-based root for Android GKI devices. This release pins the **builtin** driver at commit `4bec532dd` with manager tag **v3.0.0** (versionCode `30000`, KPM + kernel-side SUSFS). android13-5.10 SUSFS is `d480b312` (v2.4.0, required by Nova builtin sepolicy hooks).
 
 Manager: {{KSU_MANAGER}}
 
@@ -39,7 +39,7 @@ Manager: {{KSU_MANAGER}}
 **Commit**  
 `{{KSUN_COMMIT}}`
 
-## [SUSFS v2.3.0](https://gitlab.com/simonpunk/susfs4ksu) {#susfs-v220}
+## [SUSFS v2.4.0](https://gitlab.com/simonpunk/susfs4ksu) {#susfs-v220}
 
 A SukiSU Nova addon for hiding root using kernel patches and a userspace module!
 

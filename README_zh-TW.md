@@ -76,14 +76,14 @@ GKI 刷機概念與管理器設定可參考：
 | 🔐 **SukiSU Nova 管理器** | **v3.0.0**（versionCode `30000`） | [SukiSU-Nova v3.0.0](https://github.com/SukiSU-Nova/SukiSU-Nova/releases/tag/v3.0.0) |
 | 🧠 **SukiSU kernel driver** | **builtin** `4bec532dd`（與管理器 v3.0.0 同一組 handshake） | 已編進此核心 |
 | 🧩 **KPM**（KernelPatch） | （`kptools-linux` + `kpimg`） | [SukiSU_KernelPatch_patch](https://github.com/SukiSU-Nova/SukiSU_KernelPatch_patch) |
-| 🛡️ **Kernel SuSFS** | **v2.3.0**（`android13-5.10` 為 `cfa82d53`），編進核心 | [susfs4ksu](https://gitlab.com/simonpunk/susfs4ksu) |
+| 🛡️ **Kernel SuSFS** | **v2.4.0**（`android13-5.10` 為 `d480b312`），編進核心 | [susfs4ksu](https://gitlab.com/simonpunk/susfs4ksu) |
 | 📦 **ReSuSFS** | **v26.10.23**（設定內建 SuSFS 的使用者空間模組） | [ReSuSFS v26.10.23](https://github.com/ahmed-alnassif/ReSuSFS/releases/tag/v26.10.23) |
 
 這顆核心請配 Manager **v3.0.0**。KPM 工具已放在 repo [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/)，編譯時寫入 `Image`。Kernel SuSFS 仍編進映像。ReSuSFS 只負責設定這個介面；它附的原廠 GKI `susfs_guard_lkm` 載不進這顆核心。預設 SUSFS pin 集中在 `.github/config/commits.json`；**android13-5.10** 是這條分支第一個驗證目標。
 
 ### 目前支援（已驗證）
 
-此分支的目標是 **android13-5.10** 上的 **SukiSU Nova v3.0.0**、內建 **SUSFS v2.3.0** 與 **ReSuSFS v26.10.23**。
+此分支的目標是 **android13-5.10** 上的 **SukiSU Nova v3.0.0**、內建 **SUSFS v2.4.0** 與 **ReSuSFS v26.10.23**。
 
 **Pixel 6 Pro**（`raven` / `TQ3A.230901.001`）刷入後 `uname -r` 範例：`5.10.186-android13-Wild-r36.1`。
 
@@ -294,7 +294,7 @@ Actions 選單中各選項意義：
 
 - 固定走 SukiSU Nova **builtin** `4bec532dd` + manager **v3.0.0**（versionCode `30000`，無 workflow branch 變數）。
 - 開啟 `CONFIG_KPM=y`，編譯後使用 repo 內 [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/) 的 `kptools-linux` + `kpimg`（v0.14.0）。
-- `gki-android13-5.10` 的 susfs4ksu 釘 `cfa82d53`（SUSFS v2.3.0，含 priority uid filter 與 post-execveat hook）。其他 GKI 預設值來自 `.github/config/commits.json`。不再套用第三方 KSU 共存 patch。
+- `gki-android13-5.10` 的 susfs4ksu 釘 `d480b312`（SUSFS v2.4.0；Nova builtin 需要它的 SELinux sus_type hook）。其他 GKI 預設值來自 `.github/config/commits.json`。不再套用第三方 KSU 共存 patch。
 
 ### GitHub Actions `quick_mode`（快速編譯）
 
@@ -357,7 +357,7 @@ susfs_commit_android16-6-12: ""
 此範例補充：
 
 - SukiSU Nova driver 固定為 builtin `4bec532dd` / manager `v3.0.0`（versionCode `30000`）。
-- `susfs_commit_*` 留空時使用 `.github/config/commits.json` 的分支 pin；`android13-5.10` 目前使用 `cfa82d53`。
+- `susfs_commit_*` 留空時使用 `.github/config/commits.json` 的分支 pin；`android13-5.10` 目前使用 `d480b312`。
 - 只會編譯 `android13-5.10` + `2023-09` 這一組。
 
 若你已經配置好 self-hosted runner，可改成：
@@ -370,7 +370,7 @@ susfs_commit_android16-6-12: ""
 
 - 🔐 **SukiSU Nova**：請用 Manager **[v3.0.0](https://github.com/SukiSU-Nova/SukiSU-Nova/releases/tag/v3.0.0)**（versionCode `30000`）+ builtin driver `4bec532dd`（built-in 模式）
 - 🧩 **KPM**：**v0.14.0**（`CONFIG_KPM=y`，Image 內嵌 `kptools-linux` + `kpimg`）
-- 🛡️ **Kernel SuSFS**：v2.3.0 補丁編進映像，由 [ReSuSFS v26.10.23](https://github.com/ahmed-alnassif/ReSuSFS/releases/tag/v26.10.23) 設定
+- 🛡️ **Kernel SuSFS**：v2.4.0 補丁編進映像，由 [ReSuSFS v26.10.23](https://github.com/ahmed-alnassif/ReSuSFS/releases/tag/v26.10.23) 設定
 
 ---
 

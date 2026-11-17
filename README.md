@@ -76,14 +76,14 @@ For GKI flashing concepts and manager setup, see:
 | 🔐 **SukiSU Nova manager** | **v3.0.0** (versionCode `30000`) | [SukiSU-Nova v3.0.0](https://github.com/SukiSU-Nova/SukiSU-Nova/releases/tag/v3.0.0) |
 | 🧠 **SukiSU kernel driver** | **builtin** `4bec532dd` (same handshake as manager v3.0.0) | Built into this kernel |
 | 🧩 **KPM** (KernelPatch) | (`kptools-linux` + `kpimg`) | [SukiSU_KernelPatch_patch](https://github.com/SukiSU-Nova/SukiSU_KernelPatch_patch) |
-| 🛡️ **Kernel SuSFS** | **v2.3.0** (`cfa82d53` on `android13-5.10`), built in | [susfs4ksu](https://gitlab.com/simonpunk/susfs4ksu) |
+| 🛡️ **Kernel SuSFS** | **v2.4.0** (`d480b312` on `android13-5.10`), built in | [susfs4ksu](https://gitlab.com/simonpunk/susfs4ksu) |
 | 📦 **ReSuSFS** | **v26.10.23** (userspace module for the built-in SuSFS) | [ReSuSFS v26.10.23](https://github.com/ahmed-alnassif/ReSuSFS/releases/tag/v26.10.23) |
 
 Use Manager **v3.0.0** with this kernel. KPM tools already live in [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/) and are embedded into `Image` at build time. Kernel SuSFS stays in the image. ReSuSFS configures that interface; its prebuilt `susfs_guard_lkm` is for stock GKI and will not load on this kernel. Default SUSFS pins are tracked in `.github/config/commits.json`; **android13-5.10** is the first verified target for this branch.
 
 ### What this build supports (verified)
 
-This kernel targets **SukiSU Nova v3.0.0** on **android13-5.10**, plus **KPM**, built-in **SUSFS v2.3.0**, and **ReSuSFS v26.10.23**.
+This kernel targets **SukiSU Nova v3.0.0** on **android13-5.10**, plus **KPM**, built-in **SUSFS v2.4.0**, and **ReSuSFS v26.10.23**.
 
 Verified on **Pixel 6 Pro** (`raven` / `TQ3A.230901.001`) after flash: `uname -r` → `5.10.186-android13-Wild-r36.1`.
 
@@ -258,7 +258,7 @@ Current `KSUN+SUSFS` behavior:
 
 - Uses SukiSU Nova **builtin** `4bec532dd` with manager tag **v3.0.0** (versionCode `30000`; fixed — no workflow branch input).
 - Enables `CONFIG_KPM=y` and runs `kptools-linux` + `kpimg` from the repo-local [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/) directory.
-- Pins `gki-android13-5.10` susfs4ksu to `cfa82d53` (SUSFS v2.3.0 with the priority uid filter and post-execveat hook). Other GKI defaults come from `.github/config/commits.json`. No third-party KSU coexistence patches are applied.
+- Pins `gki-android13-5.10` susfs4ksu to `d480b312` (SUSFS v2.4.0; Nova builtin needs its SELinux sus_type hooks). Other GKI defaults come from `.github/config/commits.json`. No third-party KSU coexistence patches are applied.
 
 Old zip files built before the SukiSU integration change will still behave like the old build and may boot successfully while the SukiSU app still reports that root is unavailable.
 
@@ -379,7 +379,7 @@ susfs_commit_android16-6-12: ""
 Notes for this example:
 
 - SukiSU Nova driver is always pinned to builtin `4bec532dd` / manager `v3.0.0` (versionCode `30000`).
-- Empty `susfs_commit_*` values use the branch pins in `.github/config/commits.json`; `android13-5.10` currently uses `cfa82d53`.
+- Empty `susfs_commit_*` values use the branch pins in `.github/config/commits.json`; `android13-5.10` currently uses `d480b312`.
 - Only `android13-5.10` + `2023-09` is built.
 
 If you already have a self-hosted runner, set:
@@ -392,7 +392,7 @@ If you already have a self-hosted runner, set:
 
 - 🔐 **SukiSU Nova**: builtin driver (`4bec532dd`) with Manager **[v3.0.0](https://github.com/SukiSU-Nova/SukiSU-Nova/releases/tag/v3.0.0)** (versionCode `30000`, built-in mode)
 - 🧩 **KPM**: (`CONFIG_KPM=y`, `kptools-linux` + `kpimg` embedded in `Image`)
-- 🛡️ **Kernel SuSFS**: v2.3.0 patches built into the image, configured by [ReSuSFS v26.10.23](https://github.com/ahmed-alnassif/ReSuSFS/releases/tag/v26.10.23)
+- 🛡️ **Kernel SuSFS**: v2.4.0 patches built into the image, configured by [ReSuSFS v26.10.23](https://github.com/ahmed-alnassif/ReSuSFS/releases/tag/v26.10.23)
 
 ---
 
