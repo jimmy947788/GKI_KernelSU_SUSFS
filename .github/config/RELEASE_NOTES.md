@@ -8,7 +8,7 @@
 Join the telegram here: https://t.me/WildKernelsTG
 
 # Features
-- [SukiSU Ultra](#sukisu-ultra)
+- [SukiSU Nova](#sukisu-nova)
 - [SUSFS v2.3.0](#susfs-v220)
 - [Baseband Guard (BBG)](#baseband-guard-bbg)
 - [DroidSpaces-OSS](#droidspaces-oss)
@@ -18,14 +18,14 @@ Join the telegram here: https://t.me/WildKernelsTG
 
 <!-- NOTE: Anchor links above must match the heading IDs below. GitHub Flavored Markdown auto-generates anchors from heading text, but since these headings contain links, we use explicit IDs for reliable navigation. -->
 
-## [SukiSU Ultra](https://github.com/SukiSU-Ultra/SukiSU-Ultra) {#sukisu-ultra}
+## [SukiSU Nova](https://github.com/SukiSU-Nova/SukiSU-Nova) {#sukisu-nova}
 
-Kernel-based root for Android GKI devices. This release pins the **builtin** driver at commit `b16e899a5` with manager tag **v4.3.0-r2** (versionCode `41150`, KPM + kernel-side SUSFS). android13-5.10 SUSFS is `cfa82d53` (v2.3.0 with the priority uid filter and post-execveat hook).
+Kernel-based root for Android GKI devices. This release pins the **builtin** driver at commit `4bec532dd` with manager tag **v3.0.0** (versionCode `30000`, KPM + kernel-side SUSFS). android13-5.10 SUSFS is `cfa82d53` (v2.3.0 with the priority uid filter and post-execveat hook).
 
 Manager: {{KSU_MANAGER}}
 
 > [!IMPORTANT]
-> Use SukiSU Ultra Manager **v4.3.0-r2** (versionCode `41150`). This driver is builtin `b16e899a5`, not the `v4.3.0-r2` tag on `main`.
+> Use SukiSU Nova Manager **v3.0.0** (versionCode `30000`). This driver is builtin `4bec532dd`.
 
 **Version**  
 `{{KSU_VERSION}}`
@@ -41,7 +41,7 @@ Manager: {{KSU_MANAGER}}
 
 ## [SUSFS v2.3.0](https://gitlab.com/simonpunk/susfs4ksu) {#susfs-v220}
 
-A SukiSU Ultra addon for hiding root using kernel patches and a userspace module!
+A SukiSU Nova addon for hiding root using kernel patches and a userspace module!
 
 Recommended module: [ReSuSFS v26.10.23](https://github.com/ahmed-alnassif/ReSuSFS/releases/tag/v26.10.23). Kernel SuSFS stays built in. ReSuSFS only configures it; its stock-GKI `susfs_guard_lkm` will not load on this image.
 
@@ -124,8 +124,8 @@ b. KSU LKM (boot/init_boot/vendor_boot‑patched): Flash back the stock boot/ini
 c. KSU GKI: if you are 100% sure you already flashed stock init_boot/boot/vendor_boot, no action is needed; otherwise, follow the same steps as KSU LKM.
 d. APatch: remove /data/adb contents to avoid leftover root conflicts after flashing the AnyKernel3 ZIP.
 Flash the ZIP to the active slot using Kernel Flasher.
-Install the **SukiSU Ultra Manager** APK at the version pinned in this release (see SukiSU Ultra section above).
-Open the SukiSU Ultra app and confirm built-in + KPM status.
+Install the **SukiSU Nova Manager** APK at the version pinned in this release (see SukiSU Nova section above).
+Open the SukiSU Nova app and confirm built-in + KPM status.
 Reboot the device if you performed any cleanup in step 2
 
 ## Force Load Kernel Modules (Bypass) — flashing with `Bypass-Image`

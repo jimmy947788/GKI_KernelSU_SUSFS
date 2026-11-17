@@ -2,11 +2,11 @@
 
 # 🔥 SukiSU (Wild) GKI Kernels for Android
 
-**GKI 2.0 kernel builds with SukiSU Ultra (built-in root), KPM, and SUSFS — for Pixel 6 Pro, Pixel 6a, and other GKI devices.**
+**GKI 2.0 kernel builds with SukiSU Nova (built-in root), KPM, and SUSFS — for Pixel 6 Pro, Pixel 6a, and other GKI devices.**
 
 [![GKI 2.0](https://img.shields.io/badge/GKI-2.0-green)](https://source.android.com/docs/core/architecture/kernel/gki)
-[![SukiSU Ultra](https://img.shields.io/badge/SukiSU_Ultra-v4.3.0--r2-blue)](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.3.0-r2)
-[![KPM](https://img.shields.io/badge/KPM-v0.14.0-purple)](https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch/releases/tag/0.14.0)
+[![SukiSU Nova](https://img.shields.io/badge/SukiSU_Nova-v3.0.0-blue)](https://github.com/SukiSU-Nova/SukiSU-Nova/releases/tag/v3.0.0)
+[![KPM](https://img.shields.io/badge/KPM-Integrated-purple)](https://github.com/SukiSU-Nova/SukiSU_KernelPatch_patch)
 [![SUSFS](https://img.shields.io/badge/SUSFS-Integrated-orange)](https://gitlab.com/simonpunk/susfs4ksu)
 
 </div>
@@ -20,13 +20,13 @@
 
 This repository automates **Generic Kernel Image (GKI 2.0)** builds for Android 12+ (kernel 5.10 and newer). Each release integrates:
 
-- **SukiSU Ultra** — built-in root driver (not LKM/module mode)
+- **SukiSU Nova** — built-in root driver (not LKM/module mode)
 - **KPM** (KernelPatch) — `kptools-linux` + `kpimg` embedded into `Image` at build time
 - **SUSFS** — kernel patches plus the matching userspace module
 
-The primary goal is to let **Google Pixel 6 Pro** (`raven`) and **Pixel 6a** (`bluejay`) stay on a flashable GKI kernel that works with the pinned **SukiSU Ultra v4.3.0-r2** manager, KPM modules, and ReSuSFS — without relying on stock/vendor kernels or outdated root stacks.
+The primary goal is to let **Google Pixel 6 Pro** (`raven`) and **Pixel 6a** (`bluejay`) stay on a flashable GKI kernel that works with the pinned **SukiSU Nova v3.0.0** manager, KPM modules, and ReSuSFS — without relying on stock/vendor kernels or outdated root stacks.
 
-> **Note:** Workflow token `KSUN` is a legacy name from the KernelSU era; in this repo it always means **SukiSU Ultra** integration.
+> **Note:** Workflow token `KSUN` is a legacy name from the KernelSU era; in this repo it always means **SukiSU Nova** integration.
 
 ## ⚠️ Your warranty is no longer valid!
 
@@ -46,11 +46,11 @@ By flashing this kernel, **YOU** are choosing to make these modifications. If so
 
 | Build line | Repository | Status |
 |------------|------------|--------|
-| 🏗️ **GKI** (this repo) | [GKI_KernelSU_SUSFS](https://github.com/WildKernels/GKI_KernelSU_SUSFS) | ✅ Active — SukiSU Ultra + KPM + SUSFS |
+| 🏗️ **GKI** (this repo) | [GKI_KernelSU_SUSFS](https://github.com/WildKernels/GKI_KernelSU_SUSFS) | ✅ Active — SukiSU Nova + KPM + SUSFS |
 | 👑 **Sultan** | [Sultan_KernelSU_SUSFS](https://github.com/WildKernels/Sultan_KernelSU_SUSFS) | ✅ Active |
 | 📱 **OnePlus** | [OnePlus_KernelSU_SUSFS](https://github.com/WildKernels/OnePlus_KernelSU_SUSFS) | ✅ Active |
 
-Repository names still contain `KernelSU` for historical reasons; **this GKI line targets SukiSU Ultra**, not the original KernelSU manager or LKM workflow.
+Repository names still contain `KernelSU` for historical reasons; **this GKI line targets SukiSU Nova**, not the original KernelSU manager or LKM workflow.
 
 ---
 
@@ -67,23 +67,23 @@ Repository names still contain `KernelSU` for historical reasons; **this GKI lin
 
 For GKI flashing concepts and manager setup, see:
 
-📖 **[SukiSU Ultra Installation Guide](https://sukisu.org/guide/installation)** (GKI / AnyKernel3 method)
+📖 **[SukiSU Nova Installation Guide](https://github.com/SukiSU-Nova/SukiSU-Nova/releases/tag/v3.0.0)** (GKI / AnyKernel3 method)
 
 ### Supported versions (match these; do not mix)
 
 | Component | Version | Download |
 |----------|---------|----------|
-| 🔐 **SukiSU Ultra manager** | **v4.3.0-r2** (versionCode `41150`) | [SukiSU-Ultra v4.3.0-r2](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.3.0-r2) |
-| 🧠 **SukiSU kernel driver** | **builtin** `b16e899a5` (UAPI 6, same handshake as manager v4.3.0-r2) | Built into this kernel |
-| 🧩 **KPM** (KernelPatch) | **v0.14.0** (`kptools-linux` + `kpimg`) | [SukiSU_KernelPatch_patch 0.14.0](https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch/releases/tag/0.14.0) |
+| 🔐 **SukiSU Nova manager** | **v3.0.0** (versionCode `30000`) | [SukiSU-Nova v3.0.0](https://github.com/SukiSU-Nova/SukiSU-Nova/releases/tag/v3.0.0) |
+| 🧠 **SukiSU kernel driver** | **builtin** `4bec532dd` (same handshake as manager v3.0.0) | Built into this kernel |
+| 🧩 **KPM** (KernelPatch) | (`kptools-linux` + `kpimg`) | [SukiSU_KernelPatch_patch](https://github.com/SukiSU-Nova/SukiSU_KernelPatch_patch) |
 | 🛡️ **Kernel SuSFS** | **v2.3.0** (`cfa82d53` on `android13-5.10`), built in | [susfs4ksu](https://gitlab.com/simonpunk/susfs4ksu) |
 | 📦 **ReSuSFS** | **v26.10.23** (userspace module for the built-in SuSFS) | [ReSuSFS v26.10.23](https://github.com/ahmed-alnassif/ReSuSFS/releases/tag/v26.10.23) |
 
-Use Manager **v4.3.0-r2** with this kernel. Do not pin the driver to tag `v4.3.0-r2` on `main`: that tree drops kernel-side susfs. Do not swap in a different KPM release. KPM tools already live in [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/) and are embedded into `Image` at build time. Kernel SuSFS stays in the image. ReSuSFS configures that interface; its prebuilt `susfs_guard_lkm` is for stock GKI and will not load on this kernel. Default SUSFS pins are tracked in `.github/config/commits.json`; **android13-5.10** is the first verified target for this branch.
+Use Manager **v3.0.0** with this kernel. KPM tools already live in [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/) and are embedded into `Image` at build time. Kernel SuSFS stays in the image. ReSuSFS configures that interface; its prebuilt `susfs_guard_lkm` is for stock GKI and will not load on this kernel. Default SUSFS pins are tracked in `.github/config/commits.json`; **android13-5.10** is the first verified target for this branch.
 
 ### What this build supports (verified)
 
-This kernel targets **SukiSU Ultra v4.3.0-r2** on **android13-5.10**, plus **KPM v0.14.0**, built-in **SUSFS v2.3.0**, and **ReSuSFS v26.10.23**. On-device checks below are from the previous v4.1.3 pairing and still need a re-flash with this pin.
+This kernel targets **SukiSU Nova v3.0.0** on **android13-5.10**, plus **KPM**, built-in **SUSFS v2.3.0**, and **ReSuSFS v26.10.23**.
 
 Verified on **Pixel 6 Pro** (`raven` / `TQ3A.230901.001`) after flash: `uname -r` → `5.10.186-android13-Wild-r36.1`.
 
@@ -109,7 +109,7 @@ Prerequisites:
 
 Steps:
 
-1. Install `HorizonKernelFlasher-v1.3.apk` and grant it root in **SukiSU Ultra** (or your current root manager).
+1. Install `HorizonKernelFlasher-v1.3.apk` and grant it root in **SukiSU Nova** (or your current root manager).
 2. Open Horizon and select `*-AnyKernel3-normal.zip` (for example `5.10.186-android13-2023-09-r36.1-AnyKernel3-normal.zip`).
 3. Flash the active slot, then reboot.
 4. Confirm the kernel:
@@ -135,15 +135,15 @@ ReSuSFS talks to the SuSFS already built into this kernel. Do not rely on its LK
 
 ### Recommended Root Manager
 
-Use **[SukiSU Ultra Manager v4.3.0-r2](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.3.0-r2)** (versionCode `41150`). The kernel driver is pinned to SukiSU **builtin** commit `b16e899a5` (not the `v4.3.0-r2` tag on `main`), and KPM is **v0.14.0**.
+Use **[SukiSU Nova Manager v3.0.0](https://github.com/SukiSU-Nova/SukiSU-Nova/releases/tag/v3.0.0)** (versionCode `30000`). The kernel driver is pinned to SukiSU Nova **builtin** commit `4bec532dd`.
 
 ### Verified working state (Pixel 6 Pro / 6a)
 
-On Pixel 6 Pro (`raven` / `TQ3A.230901.001`) after flashing `5.10.186-android13-Wild-r36.1`: SukiSU Ultra **v4.1.3** shows Working \<Built-in\> and SuSFS v2.1.0; Settings lists **KPM** and **SuSFS Configuration**; the SUSFS WebUI can read the kernel uname. Pixel 6a (`bluejay`) follows the same manager/module stack once the matching `android13-5.10` + patch-level zip is flashed.
+On Pixel 6 Pro (`raven` / `TQ3A.230901.001`) after flashing `5.10.186-android13-Wild-r36.1`: SukiSU Nova shows Working \<Built-in\>; Settings lists **KPM** and **SuSFS Configuration**; the SUSFS WebUI can read the kernel uname. Pixel 6a (`bluejay`) follows the same manager/module stack once the matching `android13-5.10` + patch-level zip is flashed.
 
 | Home (Built-in + SuSFS) | Settings (KPM / SuSFS) | SUSFS WebUI |
 |--------------------------|-------------------------|-------------|
-| ![SukiSU Ultra Home: Working Built-in, Pixel 6 Pro, 5.10.186-android13-Wild-r36.1](docs/images/Screenshot_20260829-021904.png) | ![Settings: KPM and SuSFS Configuration](docs/images/Screenshot_20260829-021913.png) | ![SUSFS WebUI: SUS paths and kernel uname](docs/images/Screenshot_20260829-021927.png) |
+| ![SukiSU Nova Home: Working Built-in, Pixel 6 Pro, 5.10.186-android13-Wild-r36.1](docs/images/Screenshot_20260829-021904.png) | ![Settings: KPM and SuSFS Configuration](docs/images/Screenshot_20260829-021913.png) | ![SUSFS WebUI: SUS paths and kernel uname](docs/images/Screenshot_20260829-021927.png) |
 
 ---
 
@@ -200,7 +200,7 @@ Quick one-liner:
 adb shell 'echo "android=$(getprop ro.build.version.release) kernel=$(uname -r) patch=$(getprop ro.build.version.security_patch)"'
 ```
 
-SukiSU Ultra + SUSFS + KPM (default):
+SukiSU Nova + SUSFS + KPM (default):
 
 ```yaml
 release_type: Action
@@ -214,8 +214,8 @@ use_kpm: "true"
 
 How to read the SukiSU app result:
 
-- The SukiSU Ultra v4.3.0-r2 app should detect built-in mode **and** KPM.
-- The workflow always uses SukiSU builtin `b16e899a5` — there is no branch override input.
+- The SukiSU Nova v3.0.0 app should detect built-in mode **and** KPM.
+- The workflow always uses SukiSU Nova builtin `4bec532dd` — there is no branch override input.
 
 ### Valid values for `os_patch_level_filter` (Action input)
 
@@ -256,8 +256,8 @@ If you change the workflow to enable or adjust SukiSU integration, previously bu
 
 Current `KSUN+SUSFS` behavior:
 
-- Uses SukiSU Ultra **builtin** `b16e899a5` with manager tag **v4.3.0-r2** (versionCode `41150`; fixed — no workflow branch input).
-- Enables `CONFIG_KPM=y` and runs `kptools-linux` + `kpimg` from the repo-local [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/) directory (v0.14.0).
+- Uses SukiSU Nova **builtin** `4bec532dd` with manager tag **v3.0.0** (versionCode `30000`; fixed — no workflow branch input).
+- Enables `CONFIG_KPM=y` and runs `kptools-linux` + `kpimg` from the repo-local [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/) directory.
 - Pins `gki-android13-5.10` susfs4ksu to `cfa82d53` (SUSFS v2.3.0 with the priority uid filter and post-execveat hook). Other GKI defaults come from `.github/config/commits.json`. No third-party KSU coexistence patches are applied.
 
 Old zip files built before the SukiSU integration change will still behave like the old build and may boot successfully while the SukiSU app still reports that root is unavailable.
@@ -268,7 +268,7 @@ In the `Build Kernels` workflow, `feature_set` controls optional patch groups.
 
 Token meaning:
 
-- `KSUN`: Enable pinned **SukiSU Ultra** setup (builtin `b16e899a5`; legacy token name)
+- `KSUN`: Enable pinned **SukiSU Nova** setup (builtin `4bec532dd`; legacy token name)
 - `SUSFS`: Enable SUSFS setup/patches
 - `BBG`: Enable Baseband Guard patches
 - `NET`: Enable networking patch set
@@ -300,14 +300,14 @@ Available options in the action menu:
 
 - `KSUN+SUSFS+BBG+NET`: Everything except DS (**workflow default**, no VINTF warning at boot)
 - `KSUN+SUSFS+BBG+NET+DS`: Enable all five optional groups
-- `KSUN+SUSFS+BBG`: Enable SukiSU Ultra + SUSFS + Baseband Guard
-- `KSUN+SUSFS+NET`: Enable SukiSU Ultra + SUSFS + networking
-- `KSUN+SUSFS+DS`: Enable SukiSU Ultra + SUSFS + DroidSpaces
-- `KSUN+SUSFS`: Enable SukiSU Ultra + SUSFS (**recommended default**)
-- `KSUN+BBG`: Enable SukiSU Ultra + Baseband Guard
-- `KSUN+NET`: Enable SukiSU Ultra + networking
-- `KSUN+DS`: Enable SukiSU Ultra + DroidSpaces
-- `KSUN`: Enable SukiSU Ultra only
+- `KSUN+SUSFS+BBG`: Enable SukiSU Nova + SUSFS + Baseband Guard
+- `KSUN+SUSFS+NET`: Enable SukiSU Nova + SUSFS + networking
+- `KSUN+SUSFS+DS`: Enable SukiSU Nova + SUSFS + DroidSpaces
+- `KSUN+SUSFS`: Enable SukiSU Nova + SUSFS (**recommended default**)
+- `KSUN+BBG`: Enable SukiSU Nova + Baseband Guard
+- `KSUN+NET`: Enable SukiSU Nova + networking
+- `KSUN+DS`: Enable SukiSU Nova + DroidSpaces
+- `KSUN`: Enable SukiSU Nova only
 - `NONE`: Disable all five optional groups above
 - `FULL`: Alias for enabling all optional groups (same effective behavior as `KSUN+SUSFS+BBG+NET+DS`)
 
@@ -378,7 +378,7 @@ susfs_commit_android16-6-12: ""
 
 Notes for this example:
 
-- SukiSU driver is always pinned to builtin `b16e899a5` / manager `v4.3.0-r2` (versionCode `41150`).
+- SukiSU Nova driver is always pinned to builtin `4bec532dd` / manager `v3.0.0` (versionCode `30000`).
 - Empty `susfs_commit_*` values use the branch pins in `.github/config/commits.json`; `android13-5.10` currently uses `cfa82d53`.
 - Only `android13-5.10` + `2023-09` is built.
 
@@ -390,8 +390,8 @@ If you already have a self-hosted runner, set:
 
 ## ✨ Features
 
-- 🔐 **SukiSU Ultra**: builtin driver (`b16e899a5`) with Manager **[v4.3.0-r2](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.3.0-r2)** (versionCode `41150`, built-in mode)
-- 🧩 **KPM**: **v0.14.0** (`CONFIG_KPM=y`, `kptools-linux` + `kpimg` embedded in `Image`)
+- 🔐 **SukiSU Nova**: builtin driver (`4bec532dd`) with Manager **[v3.0.0](https://github.com/SukiSU-Nova/SukiSU-Nova/releases/tag/v3.0.0)** (versionCode `30000`, built-in mode)
+- 🧩 **KPM**: (`CONFIG_KPM=y`, `kptools-linux` + `kpimg` embedded in `Image`)
 - 🛡️ **Kernel SuSFS**: v2.3.0 patches built into the image, configured by [ReSuSFS v26.10.23](https://github.com/ahmed-alnassif/ReSuSFS/releases/tag/v26.10.23)
 
 ---
@@ -399,7 +399,7 @@ If you already have a self-hosted runner, set:
 ## 🏆 Credits
 
 - 🔐 **KernelSU**: Developed by [tiann](https://github.com/tiann/KernelSU)
-- 🚀 **SukiSU Ultra**: [SukiSU-Ultra](https://github.com/SukiSU-Ultra/SukiSU-Ultra) (pinned builtin `b16e899a5`)
+- 🚀 **SukiSU Nova**: [SukiSU-Nova](https://github.com/SukiSU-Nova/SukiSU-Nova) (pinned builtin `4bec532dd`)
 - ✨ **Magic-KSU**: Developed by [5ec1cff](https://github.com/5ec1cff/KernelSU)
 - 🛡️ **SUSFS**: Developed by [simonpunk](https://gitlab.com/simonpunk/susfs4ksu.git)
 - 🛡️ **Baseband-guard (BBG)**: Developed by [vc-teahouse](https://github.com/vc-teahouse/Baseband-guard)
