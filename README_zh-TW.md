@@ -6,7 +6,7 @@
 
 [![GKI 2.0](https://img.shields.io/badge/GKI-2.0-green)](https://source.android.com/docs/core/architecture/kernel/gki)
 [![SukiSU Nova](https://img.shields.io/badge/SukiSU_Nova-v3.0.0-blue)](https://github.com/SukiSU-Nova/SukiSU-Nova/releases/tag/v3.0.0)
-[![KPM](https://img.shields.io/badge/KPM-Integrated-purple)](https://github.com/SukiSU-Nova/SukiSU_KernelPatch_patch)
+[![KPM](https://img.shields.io/badge/KPM-Integrated-purple)](https://github.com/KernelSU-Next/KPatch-Next)
 [![SUSFS](https://img.shields.io/badge/SUSFS-Integrated-orange)](https://gitlab.com/simonpunk/susfs4ksu)
 
 </div>
@@ -21,7 +21,7 @@
 本倉庫自動化建置 **GKI 2.0**（Generic Kernel Image）核心，適用 Android 12+（kernel 5.10 起）。每次編譯會整合：
 
 - **SukiSU Nova** — 內建 root driver（built-in 模式，非 LKM 模組刷入）
-- **KPM**（KernelPatch）— 編譯後以 `kptools-linux` + `kpimg` 寫入 `Image`
+- **KPM**（[KPatch-Next](https://github.com/KernelSU-Next/KPatch-Next) 0.13.5-2）— 編譯後以 `kptools-linux` + `kpimg-linux` 寫入 `Image`
 - **SUSFS** — kernel 端補丁 + 對應的使用者空間模組
 
 主要目標是讓 **Google Pixel 6 Pro**（`raven`）與 **Pixel 6a**（`bluejay`）能在自訂 GKI 核心上，繼續使用釘住的 **SukiSU Nova v3.0.0** 管理器、KPM 模組與 ReSuSFS，而不必依賴原廠/vendor 核心或過時的 root 方案。
@@ -75,11 +75,11 @@ GKI 刷機概念與管理器設定可參考：
 |------|----------|------|
 | 🔐 **SukiSU Nova 管理器** | **v3.0.0**（versionCode `30000`） | [SukiSU-Nova v3.0.0](https://github.com/SukiSU-Nova/SukiSU-Nova/releases/tag/v3.0.0) |
 | 🧠 **SukiSU kernel driver** | **builtin** `4bec532dd`（與管理器 v3.0.0 同一組 handshake） | 已編進此核心 |
-| 🧩 **KPM**（KernelPatch） | （`kptools-linux` + `kpimg`） | [SukiSU_KernelPatch_patch](https://github.com/SukiSU-Nova/SukiSU_KernelPatch_patch) |
+| 🧩 **KPM**（KPatch-Next 0.13.5-2） | （`kptools-linux` + `kpimg-linux`） | [KPatch-Next](https://github.com/KernelSU-Next/KPatch-Next) |
 | 🛡️ **Kernel SuSFS** | **v2.4.0**（`android13-5.10` 為 `d480b312`），編進核心 | [susfs4ksu](https://gitlab.com/simonpunk/susfs4ksu) |
 | 📦 **ReSuSFS** | **v26.10.23**（設定內建 SuSFS 的使用者空間模組） | [ReSuSFS v26.10.23](https://github.com/ahmed-alnassif/ReSuSFS/releases/tag/v26.10.23) |
 
-這顆核心請配 Manager **v3.0.0**。KPM 工具已放在 repo [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/)，編譯時寫入 `Image`。Kernel SuSFS 仍編進映像。ReSuSFS 只負責設定這個介面；它附的原廠 GKI `susfs_guard_lkm` 載不進這顆核心。預設 SUSFS pin 集中在 `.github/config/commits.json`；**android13-5.10** 是這條分支第一個驗證目標。
+這顆核心請配 Manager **v3.0.0**。KPM 工具（[KPatch-Next](https://github.com/KernelSU-Next/KPatch-Next) 0.13.5-2）放在 repo [`KPatch-Next/`](KPatch-Next/readme.md)，編譯時寫入 `Image`。已改掉 SukiSU_KernelPatch_patch 0.14.0：它在 Pixel 6 Pro 上大多數開機會在 Linux 啟動前卡死（見 `KPatch-Next/readme.md`）。因此 Nova 管理器會顯示 **KPM：Unsupported**，KPM 請用 KPatch-Next-Module 管理。Kernel SuSFS 仍編進映像。ReSuSFS 只負責設定這個介面；它附的原廠 GKI `susfs_guard_lkm` 載不進這顆核心。預設 SUSFS pin 集中在 `.github/config/commits.json`；**android13-5.10** 是這條分支第一個驗證目標。
 
 ### 目前支援（已驗證）
 
@@ -125,7 +125,7 @@ adb shell uname -a
 
 ### 建議安裝模組（KPM + ReSuSFS）
 
-刷完核心、SukiSU 顯示 built-in + KPM 後，在管理器安裝以下三個模組：
+刷完核心、SukiSU 顯示 built-in 後（Nova 的 KPM 會顯示 Unsupported，這是正常的），在管理器安裝以下三個模組：
 
 - [Zygisk Next](https://github.com/Dr-TSNG/ZygiskNext)
 - [KPatch-Next Module](https://github.com/KernelSU-Next/KPatch-Next-Module)
@@ -243,7 +243,7 @@ use_kpm: "true"
 
 SukiSU app 畫面判讀方式：
 
-- SukiSU Nova v3.0.0 app 應該會判斷成 built-in 模式，且 KPM 為啟用。
+- SukiSU Nova v3.0.0 app 應該會判斷成 built-in 模式。KPM 在 Nova 裡會顯示 Unsupported；請用 `su -c "dmesg | grep 'KP KernelPatch Version'"`（應為 `d05`）或 KPatch-Next-Module 的狀態列確認。
 - workflow 固定使用 SukiSU Nova builtin `4bec532dd`，沒有 branch 覆寫輸入。
 
 ### 編譯產物
@@ -293,7 +293,7 @@ Actions 選單中各選項意義：
 目前 `KSUN+SUSFS` 的行為：
 
 - 固定走 SukiSU Nova **builtin** `4bec532dd` + manager **v3.0.0**（versionCode `30000`，無 workflow branch 變數）。
-- 開啟 `CONFIG_KPM=y`，編譯後使用 repo 內 [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/) 的 `kptools-linux` + `kpimg`（v0.14.0）。
+- 開啟 `CONFIG_KPM=y`，編譯後使用 repo 內 [`KPatch-Next/`](KPatch-Next/readme.md) 的 KPatch-Next `kptools-linux` + `kpimg-linux`（0.13.5-2，沒有 superkey）。
 - `gki-android13-5.10` 的 susfs4ksu 釘 `d480b312`（SUSFS v2.4.0；Nova builtin 需要它的 SELinux sus_type hook）。其他 GKI 預設值來自 `.github/config/commits.json`。不再套用第三方 KSU 共存 patch。
 
 ### GitHub Actions `quick_mode`（快速編譯）
@@ -369,7 +369,7 @@ susfs_commit_android16-6-12: ""
 ## ✨ 主要功能
 
 - 🔐 **SukiSU Nova**：請用 Manager **[v3.0.0](https://github.com/SukiSU-Nova/SukiSU-Nova/releases/tag/v3.0.0)**（versionCode `30000`）+ builtin driver `4bec532dd`（built-in 模式）
-- 🧩 **KPM**：**v0.14.0**（`CONFIG_KPM=y`，Image 內嵌 `kptools-linux` + `kpimg`）
+- 🧩 **KPM**：**KPatch-Next 0.13.5-2**（`CONFIG_KPM=y`，Image 內嵌 `kptools-linux` + `kpimg-linux`）
 - 🛡️ **Kernel SuSFS**：v2.4.0 補丁編進映像，由 [ReSuSFS v26.10.23](https://github.com/ahmed-alnassif/ReSuSFS/releases/tag/v26.10.23) 設定
 
 ---

@@ -1,5 +1,5 @@
 name: Patch kernel Image with KPM
-description: Embed KernelPatch (kpimg) into a built Image using repo-local SukiSU_KernelPatch_patch
+description: Embed KPatch-Next (kpimg) into a built Image using the repo-local KPatch-Next/ tools
 inputs:
   image_path:
     description: 'Path to the kernel Image (or Bypass-Image) to patch in place'
@@ -14,9 +14,9 @@ runs:
         set -euo pipefail
 
         IMAGE_PATH="${{ inputs.image_path }}"
-        KPM_DIR="${{ github.workspace }}/SukiSU_KernelPatch_patch"
+        KPM_DIR="${{ github.workspace }}/KPatch-Next"
         KPTOOLS="$KPM_DIR/kptools-linux"
-        KPIMG="$KPM_DIR/kpimg"
+        KPIMG="$KPM_DIR/kpimg-linux"
 
         if [ ! -f "$IMAGE_PATH" ]; then
           echo "ERROR: kernel image not found at $IMAGE_PATH"
@@ -24,9 +24,9 @@ runs:
         fi
 
         if [ ! -f "$KPTOOLS" ] || [ ! -f "$KPIMG" ]; then
-          echo "ERROR: kptools-linux or kpimg not found in $KPM_DIR"
-          echo "Place kptools-linux + kpimg from SukiSU_KernelPatch_patch release into:"
-          echo "  $KPM_DIR/"
+          echo "ERROR: kptools-linux or kpimg-linux not found in $KPM_DIR"
+          echo "Place kptools-linux + kpimg-linux from the KPatch-Next release into:"
+          echo "  $KPM_DIR/ (see KPatch-Next/readme.md)"
           exit 1
         fi
 
@@ -39,16 +39,22 @@ runs:
         cp "$KPIMG" "$WORK/kpimg"
         cp "$IMAGE_PATH" "$WORK/Image"
 
-        # Do not use the 0.14.0 patch_linux wrapper: its embedded kpimg is a
-        # single byte, it ignores the kpimg file, and it always exits 0.
+        # KPatch-Next has no superkey (kptools has no -s); the kernel only accepts
+        # supercalls from uid 0.
         (
           cd "$WORK"
-          ./kptools-linux -p -s 123 -i Image -k kpimg -o oImage
+          ./kptools-linux -p -i Image -k kpimg -o oImage
           if [ ! -f oImage ]; then
             echo "ERROR: kptools did not produce oImage"
             exit 1
           fi
+          INFO=$(./kptools-linux -l -i oImage)
+          echo "$INFO" | grep -qx 'patched=true' || { echo "ERROR: oImage is not marked patched"; echo "$INFO"; exit 1; }
+          KPVER=$(echo "$INFO" | sed -n 's/^version=//p' | head -1)
+          echo "kpimg version in oImage: ${KPVER:-unknown}"
+          echo "$KPVER" > kpver
         )
+        KPVER=$(cat "$WORK/kpver")
 
         mv -f "$WORK/oImage" "$IMAGE_PATH"
         rm -rf "$WORK"
@@ -59,6 +65,6 @@ runs:
           exit 1
         fi
 
-        echo "KPM embedded in $IMAGE_BASE ($KPM_HITS KernelPatch strings, $KPTOOLS)"
-        echo "KPM_PATCH_SOURCE=$KPTOOLS" >> "$GITHUB_ENV"
+        echo "KPM embedded in $IMAGE_BASE (KPatch-Next $KPVER, $KPM_HITS KernelPatch strings)"
+        echo "KPM_PATCH_SOURCE=KPatch-Next $KPVER" >> "$GITHUB_ENV"
         echo "KPM_ENABLED=true" >> "$GITHUB_ENV"

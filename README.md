@@ -6,7 +6,7 @@
 
 [![GKI 2.0](https://img.shields.io/badge/GKI-2.0-green)](https://source.android.com/docs/core/architecture/kernel/gki)
 [![SukiSU Nova](https://img.shields.io/badge/SukiSU_Nova-v3.0.0-blue)](https://github.com/SukiSU-Nova/SukiSU-Nova/releases/tag/v3.0.0)
-[![KPM](https://img.shields.io/badge/KPM-Integrated-purple)](https://github.com/SukiSU-Nova/SukiSU_KernelPatch_patch)
+[![KPM](https://img.shields.io/badge/KPM-Integrated-purple)](https://github.com/KernelSU-Next/KPatch-Next)
 [![SUSFS](https://img.shields.io/badge/SUSFS-Integrated-orange)](https://gitlab.com/simonpunk/susfs4ksu)
 
 </div>
@@ -21,7 +21,7 @@
 This repository automates **Generic Kernel Image (GKI 2.0)** builds for Android 12+ (kernel 5.10 and newer). Each release integrates:
 
 - **SukiSU Nova** — built-in root driver (not LKM/module mode)
-- **KPM** (KernelPatch) — `kptools-linux` + `kpimg` embedded into `Image` at build time
+- **KPM** ([KPatch-Next](https://github.com/KernelSU-Next/KPatch-Next) 0.13.5-2) — `kptools-linux` + `kpimg-linux` embedded into `Image` at build time
 - **SUSFS** — kernel patches plus the matching userspace module
 
 The primary goal is to let **Google Pixel 6 Pro** (`raven`) and **Pixel 6a** (`bluejay`) stay on a flashable GKI kernel that works with the pinned **SukiSU Nova v3.0.0** manager, KPM modules, and ReSuSFS — without relying on stock/vendor kernels or outdated root stacks.
@@ -75,11 +75,11 @@ For GKI flashing concepts and manager setup, see:
 |----------|---------|----------|
 | 🔐 **SukiSU Nova manager** | **v3.0.0** (versionCode `30000`) | [SukiSU-Nova v3.0.0](https://github.com/SukiSU-Nova/SukiSU-Nova/releases/tag/v3.0.0) |
 | 🧠 **SukiSU kernel driver** | **builtin** `4bec532dd` (same handshake as manager v3.0.0) | Built into this kernel |
-| 🧩 **KPM** (KernelPatch) | (`kptools-linux` + `kpimg`) | [SukiSU_KernelPatch_patch](https://github.com/SukiSU-Nova/SukiSU_KernelPatch_patch) |
+| 🧩 **KPM** (KPatch-Next 0.13.5-2) | (`kptools-linux` + `kpimg-linux`) | [KPatch-Next](https://github.com/KernelSU-Next/KPatch-Next) |
 | 🛡️ **Kernel SuSFS** | **v2.4.0** (`d480b312` on `android13-5.10`), built in | [susfs4ksu](https://gitlab.com/simonpunk/susfs4ksu) |
 | 📦 **ReSuSFS** | **v26.10.23** (userspace module for the built-in SuSFS) | [ReSuSFS v26.10.23](https://github.com/ahmed-alnassif/ReSuSFS/releases/tag/v26.10.23) |
 
-Use Manager **v3.0.0** with this kernel. KPM tools already live in [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/) and are embedded into `Image` at build time. Kernel SuSFS stays in the image. ReSuSFS configures that interface; its prebuilt `susfs_guard_lkm` is for stock GKI and will not load on this kernel. Default SUSFS pins are tracked in `.github/config/commits.json`; **android13-5.10** is the first verified target for this branch.
+Use Manager **v3.0.0** with this kernel. KPM tools ([KPatch-Next](https://github.com/KernelSU-Next/KPatch-Next) 0.13.5-2) live in [`KPatch-Next/`](KPatch-Next/readme.md) and are embedded into `Image` at build time. SukiSU_KernelPatch_patch 0.14.0 was dropped: on Pixel 6 Pro it hangs before Linux starts on most boots (see `KPatch-Next/readme.md`). The Nova manager therefore shows **KPM: Unsupported**; manage KPM with KPatch-Next-Module. Kernel SuSFS stays in the image. ReSuSFS configures that interface; its prebuilt `susfs_guard_lkm` is for stock GKI and will not load on this kernel. Default SUSFS pins are tracked in `.github/config/commits.json`; **android13-5.10** is the first verified target for this branch.
 
 ### What this build supports (verified)
 
@@ -125,7 +125,7 @@ Alternative: [Kernel Flasher](https://github.com/fatalcoder524/KernelFlasher) ca
 
 ### Recommended Modules (KPM + ReSuSFS)
 
-After the kernel boots and SukiSU shows built-in + KPM, install these three modules in the manager:
+After the kernel boots and SukiSU shows built-in (KPM shows Unsupported in Nova; that is expected), install these three modules in the manager:
 
 - [Zygisk Next](https://github.com/Dr-TSNG/ZygiskNext)
 - [KPatch-Next Module](https://github.com/KernelSU-Next/KPatch-Next-Module)
@@ -214,7 +214,7 @@ use_kpm: "true"
 
 How to read the SukiSU app result:
 
-- The SukiSU Nova v3.0.0 app should detect built-in mode **and** KPM.
+- The SukiSU Nova v3.0.0 app should detect built-in mode. KPM shows Unsupported there; check KPatch-Next with `su -c "dmesg | grep 'KP KernelPatch Version'"` (expect `d05`) or the KPatch-Next-Module status line.
 - The workflow always uses SukiSU Nova builtin `4bec532dd` — there is no branch override input.
 
 ### Valid values for `os_patch_level_filter` (Action input)
@@ -257,7 +257,7 @@ If you change the workflow to enable or adjust SukiSU integration, previously bu
 Current `KSUN+SUSFS` behavior:
 
 - Uses SukiSU Nova **builtin** `4bec532dd` with manager tag **v3.0.0** (versionCode `30000`; fixed — no workflow branch input).
-- Enables `CONFIG_KPM=y` and runs `kptools-linux` + `kpimg` from the repo-local [`SukiSU_KernelPatch_patch/`](SukiSU_KernelPatch_patch/) directory.
+- Enables `CONFIG_KPM=y` and runs KPatch-Next `kptools-linux` + `kpimg-linux` from the repo-local [`KPatch-Next/`](KPatch-Next/readme.md) directory (no superkey).
 - Pins `gki-android13-5.10` susfs4ksu to `d480b312` (SUSFS v2.4.0; Nova builtin needs its SELinux sus_type hooks). Other GKI defaults come from `.github/config/commits.json`. No third-party KSU coexistence patches are applied.
 
 Old zip files built before the SukiSU integration change will still behave like the old build and may boot successfully while the SukiSU app still reports that root is unavailable.
@@ -391,7 +391,7 @@ If you already have a self-hosted runner, set:
 ## ✨ Features
 
 - 🔐 **SukiSU Nova**: builtin driver (`4bec532dd`) with Manager **[v3.0.0](https://github.com/SukiSU-Nova/SukiSU-Nova/releases/tag/v3.0.0)** (versionCode `30000`, built-in mode)
-- 🧩 **KPM**: (`CONFIG_KPM=y`, `kptools-linux` + `kpimg` embedded in `Image`)
+- 🧩 **KPM**: KPatch-Next 0.13.5-2 (`CONFIG_KPM=y`, `kptools-linux` + `kpimg-linux` embedded in `Image`)
 - 🛡️ **Kernel SuSFS**: v2.4.0 patches built into the image, configured by [ReSuSFS v26.10.23](https://github.com/ahmed-alnassif/ReSuSFS/releases/tag/v26.10.23)
 
 ---

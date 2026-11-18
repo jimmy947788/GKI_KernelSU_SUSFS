@@ -63,7 +63,7 @@ on:
           - "true"
         default: "false"
       use_kpm:
-        description: "Enable KPM (CONFIG_KPM + kptools-linux from repo SukiSU_KernelPatch_patch/). Requires SukiSU driver."
+        description: "Enable KPM (CONFIG_KPM + KPatch-Next kptools-linux/kpimg-linux from repo KPatch-Next/). Requires SukiSU driver."
         type: choice
         options:
           - "true"
@@ -352,7 +352,7 @@ jobs:
           echo
           echo "**Feature Set:** ${{ inputs.feature_set }}"
           echo "**SukiSU Driver:** 4bec532dd (builtin, v3.0.0)"
-          echo "**KPM:** ${{ inputs.use_kpm }} (repo SukiSU_KernelPatch_patch/)"
+          echo "**KPM:** ${{ inputs.use_kpm }} (KPatch-Next 0.13.5-2, repo KPatch-Next/)"
           echo
           
           # Count successes and failures

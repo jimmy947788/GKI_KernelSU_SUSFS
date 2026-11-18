@@ -20,7 +20,7 @@ Join the telegram here: https://t.me/WildKernelsTG
 
 ## [SukiSU Nova](https://github.com/SukiSU-Nova/SukiSU-Nova) {#sukisu-nova}
 
-Kernel-based root for Android GKI devices. This release pins the **builtin** driver at commit `4bec532dd` with manager tag **v3.0.0** (versionCode `30000`, KPM + kernel-side SUSFS). android13-5.10 SUSFS is `d480b312` (v2.4.0, required by Nova builtin sepolicy hooks).
+Kernel-based root for Android GKI devices. This release pins the **builtin** driver at commit `4bec532dd` with manager tag **v3.0.0** (versionCode `30000`, kernel-side SUSFS). KPM is provided by [KPatch-Next](https://github.com/KernelSU-Next/KPatch-Next) 0.13.5-2 embedded in `Image`. android13-5.10 SUSFS is `d480b312` (v2.4.0, required by Nova builtin sepolicy hooks).
 
 Manager: {{KSU_MANAGER}}
 
@@ -125,7 +125,7 @@ c. KSU GKI: if you are 100% sure you already flashed stock init_boot/boot/vendor
 d. APatch: remove /data/adb contents to avoid leftover root conflicts after flashing the AnyKernel3 ZIP.
 Flash the ZIP to the active slot using Kernel Flasher.
 Install the **SukiSU Nova Manager** APK at the version pinned in this release (see SukiSU Nova section above).
-Open the SukiSU Nova app and confirm built-in + KPM status.
+Open the SukiSU Nova app and confirm built-in status. Nova shows **KPM: Unsupported** with this kernel (its KPM page only speaks the SukiSU 0.14 bridge); load `.kpm` files with [KPatch-Next-Module](https://github.com/KernelSU-Next/KPatch-Next-Module) instead.
 Reboot the device if you performed any cleanup in step 2
 
 ## Force Load Kernel Modules (Bypass) — flashing with `Bypass-Image`
