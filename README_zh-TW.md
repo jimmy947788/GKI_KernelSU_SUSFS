@@ -85,7 +85,7 @@ GKI 刷機概念與管理器設定可參考：
 
 此分支的目標是 **android13-5.10** 上的 **SukiSU Nova v3.0.0**、內建 **SUSFS v2.4.0** 與 **ReSuSFS v26.10.23**。
 
-**Pixel 6 Pro**（`raven` / `TQ3A.230901.001`）刷入後 `uname -r` 範例：`5.10.186-android13-Wild-r36.1`。
+**Pixel 6 Pro**（`raven` / `TQ3A.230901.001`）刷入後 `uname -r` 範例：`5.10.186-android13-Wild-r57.1`。
 
 **Pixel 6a**（`bluejay`）使用相同 GKI 組合（`android13-5.10` + 對應 OS patch level）。請依 firmware 的 security patch 月份選 build `date`，規則與下方 Pixel 6 Pro 相同。
 
@@ -93,7 +93,7 @@ GKI 刷機概念與管理器設定可參考：
 
 workflow 成功後**只會上傳一個**可刷產物，例如：
 
-`5.10.186-android13-2023-09-r36.1-AnyKernel3-normal.zip`
+`5.10.186-android13-2023-09-r57.1-AnyKernel3-normal.zip`
 
 下載後直接丟給 Horizon，不必再解一層包裝。不再產出 `*-bypass` 或沒有 `-normal` 後綴的 `*-AnyKernel3`。
 
@@ -110,13 +110,13 @@ workflow 成功後**只會上傳一個**可刷產物，例如：
 步驟：
 
 1. 安裝 `HorizonKernelFlasher-v1.3.apk`，在 **SukiSU Nova**（或你目前的 root 管理器）裡允許它 root。
-2. 打開 Horizon → 選取 `*-AnyKernel3-normal.zip`（例如 `5.10.186-android13-2023-09-r36.1-AnyKernel3-normal.zip`）。
+2. 打開 Horizon → 選取 `*-AnyKernel3-normal.zip`（例如 `5.10.186-android13-2023-09-r57.1-AnyKernel3-normal.zip`）。
 3. 刷入目前 active slot，完成後重開機。
 4. 確認核心版本：
 
 ```bash
 adb shell uname -a
-# 應類似：Linux localhost 5.10.186-android13-Wild-r36.1 #1 SMP PREEMPT ... aarch64 Toybox
+# 應類似：Linux localhost 5.10.186-android13-Wild-r57.1 #1 SMP PREEMPT ... aarch64 Toybox
 ```
 
 若你目前是 LKM root（原廠 kernel + 可載入模組），建議刷 GKI 前先備份目前 `boot`。Pixel 6 / 6 Pro / 6a 沒有獨立 `init_boot`，動的是 `boot`。
@@ -133,17 +133,33 @@ adb shell uname -a
 
 ReSuSFS 用的是這顆核心裡已經編進去的 SuSFS。不要走它下載 LKM 的那條路。
 
+ReSuSFS 注意事項（在 r57.1 上驗證）：
+
+- **安裝後要重開機一次。** 介面雖然說不用重開，但實測要到下次開機，設定才會寫進 kernel。
+- **它每次開機都會關掉 adb。** UserHub 裡的 **Spoof settings** 腳本（`ReSuSFS_apply-settings.sh`）會設定 `adb_enabled=0`，並關閉開發者選項。還需要用 adb 時，請在 UserHub 關掉這個腳本，或從 `/data/adb/ReSuSFS/scripts_bootcompleted.txt` 刪掉它那一行。
+- 它會把 KernelSU 的 `kernel_umount` 功能設成 `0`。實測設 `0` 或 `1` 隱藏效果都一樣。
+- ReSuSFS 和舊的 `susfs4ksu` 模組**二選一**，不要同時開。susfs4ksu 預設清單是空的，所以 WebUI 計數器都是 `0`，在原廠 Pixel 上等於什麼都沒藏。在 adb 都開著的情況下，某個銀行 app 在 susfs4ksu 下判定有 root，換成 ReSuSFS 就能正常開啟。
+- 不要載入自己 hook syscall 或 `/proc/*/maps`、`mountinfo` 的 KPM（例如給 APatch 用的 `xiaojia-hide`）。曾經在啟用 ReSuSFS 時，載入這類 KPM 讓手機當機。
+
 ### 建議使用的 Root 管理工具
 
 請用 **[SukiSU Nova Manager v3.0.0](https://github.com/SukiSU-Nova/SukiSU-Nova/releases/tag/v3.0.0)**（versionCode `30000`）。核心 driver 固定釘在 SukiSU Nova **builtin** commit `4bec532dd`。
 
 ### 驗證成功畫面（Pixel 6 Pro / 6a）
 
-Pixel 6 Pro（`raven` / `TQ3A.230901.001`）刷入 `5.10.186-android13-Wild-r36.1` 後：SukiSU Nova 顯示 Working \<Built-in\>；設定頁可見 **KPM** 與 **SuSFS Configuration**；SUSFS WebUI 可讀取核心 uname。Pixel 6a（`bluejay`）刷入對應的 `android13-5.10` + patch level zip 後，管理器與模組堆疊相同。
+2026-11-17/18 在 Pixel 6 Pro（`raven` / `TQ3A.230901.001`）上用 `5.10.186-android13-Wild-r57.1` 驗證：
+
+- SukiSU Nova 管理器顯示 Working \<Built-in\> 與 **SuSFS Supported**。KPM 顯示 **Unsupported**，這是正常的（原因見上方）。
+- KPatch-Next（`d05`）開機 5 次全部成功。
+- 啟用 ReSuSFS 後，一般 app（uid 10263）看不到被隱藏的路徑，讀到的 `/system/etc/hosts` 的 `stat` 是偽裝值，`uname` 也是偽裝過的。
+
+Pixel 6a（`bluejay`）刷入對應的 `android13-5.10` + patch level zip 後，管理器與模組組合相同。
+
+下方截圖是舊版 r36.1（SukiSU Ultra）時拍的，還沒有用 Nova 重拍。
 
 | 首頁（Built-in + SuSFS） | 設定（KPM / SuSFS） | SUSFS WebUI |
 |--------------------------|---------------------|-------------|
-| ![SukiSU Nova 首頁：Working Built-in、Pixel 6 Pro、5.10.186-android13-Wild-r36.1](docs/images/Screenshot_20260829-021904.png) | ![設定頁：KPM 與 SuSFS Configuration](docs/images/Screenshot_20260829-021913.png) | ![SUSFS WebUI：SUS 路徑與核心 uname](docs/images/Screenshot_20260829-021927.png) |
+| ![SukiSU Ultra 首頁（舊版 r36.1）：Working Built-in、Pixel 6 Pro](docs/images/Screenshot_20260829-021904.png) | ![設定頁：KPM 與 SuSFS Configuration](docs/images/Screenshot_20260829-021913.png) | ![SUSFS WebUI：SUS 路徑與核心 uname](docs/images/Screenshot_20260829-021927.png) |
 
 ### 疑難排解：WebUI 顯示全 0、按鈕沒反應、自動隱藏為空
 
@@ -171,7 +187,9 @@ adb shell su -c 'ls -al /data/adb/susfs 2>/dev/null'
 3. 同時安裝並啟用 `Zygisk Next` 與 `KPatch-Next Module`，安裝後完整重開機。
 4. 進入模組頁面執行一次動作（例如重建/套用規則）再回 WebUI 檢查計數。
 
-補充：`自動隱藏設定` 的內容來自 SUSFS 模組與其規則檔，不是 kernel 內建固定清單。若該區塊是空白，優先排查模組初始化與權限，而不是只重編 kernel。
+補充：如果用的是 `susfs4ksu`、而且規則檔都沒填，計數器是 `0` 是正常的。原廠 Pixel 本來就沒有 gapps、lineage 這類路徑，Nova 也沒有掛載系統檔案的模組，所以沒有東西可藏。要有實際隱藏效果，建議改用 ReSuSFS（見上方「建議安裝模組」）。
+
+`自動隱藏設定` 的內容來自 SUSFS 模組與其規則檔，不是 kernel 內建固定清單。若該區塊是空白，優先排查模組初始化與權限，而不是只重編 kernel。
 
 ---
 

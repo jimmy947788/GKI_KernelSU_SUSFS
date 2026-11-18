@@ -85,7 +85,7 @@ Use Manager **v3.0.0** with this kernel. KPM tools ([KPatch-Next](https://github
 
 This kernel targets **SukiSU Nova v3.0.0** on **android13-5.10**, plus **KPM**, built-in **SUSFS v2.4.0**, and **ReSuSFS v26.10.23**.
 
-Verified on **Pixel 6 Pro** (`raven` / `TQ3A.230901.001`) after flash: `uname -r` → `5.10.186-android13-Wild-r36.1`.
+Verified on **Pixel 6 Pro** (`raven` / `TQ3A.230901.001`) after flash: `uname -r` → `5.10.186-android13-Wild-r57.1`.
 
 **Pixel 6a** (`bluejay`) uses the same GKI stack (`android13-5.10` + matching OS patch level). Pick the build whose `date` matches your firmware security patch — same rules as Pixel 6 Pro below.
 
@@ -93,7 +93,7 @@ Verified on **Pixel 6 Pro** (`raven` / `TQ3A.230901.001`) after flash: `uname -r
 
 A successful workflow run uploads **one** flashable artifact, for example:
 
-`5.10.186-android13-2023-09-r36.1-AnyKernel3-normal.zip`
+`5.10.186-android13-2023-09-r57.1-AnyKernel3-normal.zip`
 
 Download it and flash it in Horizon. There is no extra wrapper zip, no `*-bypass`, and no raw `*-AnyKernel3` tree.
 
@@ -110,13 +110,13 @@ Prerequisites:
 Steps:
 
 1. Install `HorizonKernelFlasher-v1.3.apk` and grant it root in **SukiSU Nova** (or your current root manager).
-2. Open Horizon and select `*-AnyKernel3-normal.zip` (for example `5.10.186-android13-2023-09-r36.1-AnyKernel3-normal.zip`).
+2. Open Horizon and select `*-AnyKernel3-normal.zip` (for example `5.10.186-android13-2023-09-r57.1-AnyKernel3-normal.zip`).
 3. Flash the active slot, then reboot.
 4. Confirm the kernel:
 
 ```bash
 adb shell uname -a
-# Expect something like: Linux localhost 5.10.186-android13-Wild-r36.1 #1 SMP PREEMPT ... aarch64 Toybox
+# Expect something like: Linux localhost 5.10.186-android13-Wild-r57.1 #1 SMP PREEMPT ... aarch64 Toybox
 ```
 
 If you are currently on LKM root (stock kernel + loadable module), back up `boot` before flashing GKI. Pixel 6 / 6 Pro / 6a have no separate `init_boot`; the kernel lives in `boot`.
@@ -133,17 +133,33 @@ After the kernel boots and SukiSU shows built-in (KPM shows Unsupported in Nova;
 
 ReSuSFS talks to the SuSFS already built into this kernel. Do not rely on its LKM download path.
 
+ReSuSFS notes (checked on r57.1):
+
+- **Reboot once after installing it.** Its settings did not reach the kernel until the next boot, even though the UI says no reboot is needed.
+- **It turns off adb at every boot.** The UserHub script **Spoof settings** (`ReSuSFS_apply-settings.sh`) sets `adb_enabled=0` and turns off Developer options. While you still need adb, turn that script off in UserHub or remove its line from `/data/adb/ReSuSFS/scripts_bootcompleted.txt`.
+- It sets the KernelSU feature `kernel_umount` to `0`. In testing, hiding worked the same with `0` or `1`.
+- Use ReSuSFS **or** the older `susfs4ksu` module, not both. Out of the box, susfs4ksu has empty lists, so its WebUI counters stay at `0` and it hides nothing on a stock Pixel. With adb on in both cases, a banking app reported root under susfs4ksu but opened normally under ReSuSFS.
+- Do not load KPMs that hook syscalls or `/proc/*/maps` and `mountinfo` themselves (for example the APatch-oriented `xiaojia-hide`). With ReSuSFS enabled, one of them crashed the phone.
+
 ### Recommended Root Manager
 
 Use **[SukiSU Nova Manager v3.0.0](https://github.com/SukiSU-Nova/SukiSU-Nova/releases/tag/v3.0.0)** (versionCode `30000`). The kernel driver is pinned to SukiSU Nova **builtin** commit `4bec532dd`.
 
 ### Verified working state (Pixel 6 Pro / 6a)
 
-On Pixel 6 Pro (`raven` / `TQ3A.230901.001`) after flashing `5.10.186-android13-Wild-r36.1`: SukiSU Nova shows Working \<Built-in\>; Settings lists **KPM** and **SuSFS Configuration**; the SUSFS WebUI can read the kernel uname. Pixel 6a (`bluejay`) follows the same manager/module stack once the matching `android13-5.10` + patch-level zip is flashed.
+Checked on Pixel 6 Pro (`raven` / `TQ3A.230901.001`) on 2026-11-17/18 with `5.10.186-android13-Wild-r57.1`:
+
+- The SukiSU Nova manager shows Working \<Built-in\> and **SuSFS Supported**. KPM shows **Unsupported**, which is expected (see above).
+- KPatch-Next (`d05`) booted 5 out of 5 times.
+- With ReSuSFS enabled, a normal app (uid 10263) could not see the hidden paths, got spoofed `stat` values for `/system/etc/hosts`, and saw a spoofed `uname`.
+
+Pixel 6a (`bluejay`) uses the same manager and module stack once the matching `android13-5.10` + patch-level zip is flashed.
+
+The screenshots below are from the earlier r36.1 build (SukiSU Ultra) and have not been retaken for Nova yet.
 
 | Home (Built-in + SuSFS) | Settings (KPM / SuSFS) | SUSFS WebUI |
 |--------------------------|-------------------------|-------------|
-| ![SukiSU Nova Home: Working Built-in, Pixel 6 Pro, 5.10.186-android13-Wild-r36.1](docs/images/Screenshot_20260829-021904.png) | ![Settings: KPM and SuSFS Configuration](docs/images/Screenshot_20260829-021913.png) | ![SUSFS WebUI: SUS paths and kernel uname](docs/images/Screenshot_20260829-021927.png) |
+| ![SukiSU Ultra Home (earlier r36.1 build): Working Built-in, Pixel 6 Pro](docs/images/Screenshot_20260829-021904.png) | ![Settings: KPM and SuSFS Configuration](docs/images/Screenshot_20260829-021913.png) | ![SUSFS WebUI: SUS paths and kernel uname](docs/images/Screenshot_20260829-021927.png) |
 
 ---
 
