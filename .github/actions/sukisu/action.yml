@@ -39,9 +39,14 @@ runs:
           exit 1
         fi
 
-        git -C KernelSU fetch -q --tags --unshallow origin 2>/dev/null \
-          || git -C KernelSU fetch -q --tags origin 2>/dev/null || true
-        git -C KernelSU fetch -q origin builtin 2>/dev/null || true
+        # setup.sh clones the zako mirror. That remote's builtin tip is not
+        # the GitHub pin, so a short-SHA checkout there fails as a pathspec.
+        git -C KernelSU fetch -q https://github.com/SukiSU-Nova/SukiSU-Nova.git \
+          +refs/heads/builtin:refs/remotes/nova/builtin
+        if ! git -C KernelSU cat-file -e "${SUKISU_INPUT}^{commit}" 2>/dev/null; then
+          echo "ERROR: pinned SukiSU commit $SUKISU_INPUT is not reachable from GitHub builtin"
+          exit 1
+        fi
         git -C KernelSU checkout -q --detach "$SUKISU_INPUT"
 
         KSU_HEAD=$(git -C KernelSU rev-parse HEAD)
